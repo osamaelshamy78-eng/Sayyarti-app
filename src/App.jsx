@@ -42,56 +42,56 @@ const CATEGORIES = [
     icon: Gauge,
     en: "Engine",
     ar: "المحرك",
-    issues: ["checkEngine", "overheating"],
+    issues: ["checkEngine", "overheating", "noStart"],
   },
   {
     id: "battery",
     icon: BatteryWarning,
     en: "Battery & Electrical",
     ar: "البطارية والكهرباء",
-    issues: ["deadBattery"],
+    issues: ["deadBattery", "altWarning"],
   },
   {
     id: "brakes",
     icon: Disc,
     en: "Brakes",
     ar: "الفرامل",
-    issues: ["brakeNoise"],
+    issues: ["brakeNoise", "softPedal"],
   },
   {
     id: "ac",
     icon: Wind,
     en: "AC & Cooling",
     ar: "التكييف والتبريد",
-    issues: ["acWarm"],
+    issues: ["acWarm", "acSmell"],
   },
   {
     id: "tires",
     icon: CircleDot,
     en: "Tires",
     ar: "الإطارات",
-    issues: ["tirePressure"],
+    issues: ["tirePressure", "unevenWear"],
   },
   {
     id: "oil",
     icon: Droplet,
     en: "Oil & Fluids",
     ar: "الزيت والسوائل",
-    issues: ["oilWarning"],
+    issues: ["oilWarning", "oilLeak"],
   },
   {
     id: "transmission",
     icon: Settings2,
     en: "Transmission",
     ar: "ناقل الحركة",
-    issues: ["transSlip"],
+    issues: ["transSlip", "noShift"],
   },
   {
     id: "suspension",
     icon: CarFront,
     en: "Steering & Suspension",
     ar: "التوجيه والتعليق",
-    issues: ["steeringVibration"],
+    issues: ["steeringVibration", "clunkBumps"],
   },
 ];
 
@@ -474,6 +474,344 @@ const ISSUES = {
         "تجنب القيادة بسرعة عالية حتى يتم التشخيص",
       ],
       video: "سبب اهتزاز السيارة في عجلة القيادة",
+    },
+  },
+  noStart: {
+    en: {
+      title: "Engine Cranks But Won't Start",
+      symptoms: [
+        "Engine turns over but doesn't fire up",
+        "Smell of fuel without the engine starting",
+        "Repeated clicking or a single click, then silence",
+      ],
+      causes: [
+        "Empty or near-empty fuel tank",
+        "Faulty fuel pump or clogged fuel filter",
+        "Weak spark from worn spark plugs or a failing ignition coil",
+        "Immobilizer/security system fault (common on newer cars)",
+      ],
+      steps: [
+        "Check the fuel gauge — an empty tank is the most common cause",
+        "Listen for the fuel pump priming (a brief hum) when you turn the key to 'on'",
+        "If no hum, the fuel pump or its relay may need testing",
+        "If it's a repeated issue, get a full diagnostic scan rather than guessing at parts",
+      ],
+      video: "car cranks but won't start no fuel",
+    },
+    ar: {
+      title: "المحرك يدور ولا يشتغل",
+      symptoms: [
+        "المحرك يدور لكنه لا يشتغل",
+        "رائحة وقود بدون أن يشتغل المحرك",
+        "صوت طقطقة متكرر أو طقة واحدة ثم صمت",
+      ],
+      causes: [
+        "خزان وقود فارغ أو شبه فارغ",
+        "عطل في طرمبة الوقود أو انسداد فلتر الوقود",
+        "شرارة ضعيفة بسبب شمعات إشعال تالفة أو كويل إشعال معطل",
+        "عطل في نظام الإيموبيلايزر/الحماية (شائع في السيارات الحديثة)",
+      ],
+      steps: [
+        "افحص مؤشر الوقود، فالخزان الفارغ هو السبب الأكثر شيوعًا",
+        "استمع لصوت طرمبة الوقود (طنين بسيط) عند إدارة المفتاح لوضع التشغيل",
+        "إذا لم تسمع الطنين، قد تحتاج طرمبة الوقود أو الريلاي الخاص بها للفحص",
+        "إذا تكررت المشكلة، اطلب فحصًا كاملًا بجهاز تشخيص بدل تخمين القطعة التالفة",
+      ],
+      video: "المحرك يدور ولا يشتغل السبب",
+    },
+  },
+  altWarning: {
+    en: {
+      title: "Battery Warning Light While Driving",
+      symptoms: [
+        "Battery-shaped icon lit on the dashboard while the engine is running",
+        "Dimming headlights or flickering interior lights",
+        "Electronics (radio, windows) acting up while driving",
+      ],
+      causes: [
+        "Failing alternator not charging the battery properly",
+        "Loose, worn, or broken alternator drive belt",
+        "Corroded or loose battery/alternator connections",
+      ],
+      steps: [
+        "Turn off non-essential electronics (AC, radio) to reduce load",
+        "Try to reach a garage rather than stopping on a highway shoulder if possible",
+        "Have the alternator output tested — most auto electric shops do this quickly",
+        "Replace the alternator or belt as needed; don't ignore it, as the battery will eventually die while driving",
+      ],
+      video: "alternator warning light while driving",
+    },
+    ar: {
+      title: "لمبة تحذير البطارية أثناء القيادة",
+      symptoms: [
+        "أيقونة البطارية مضاءة في لوحة القيادة والمحرك يعمل",
+        "خفوت المصابيح الأمامية أو وميض الإضاءة الداخلية",
+        "أعطال بالأجهزة الكهربائية (الراديو، الزجاج) أثناء القيادة",
+      ],
+      causes: [
+        "تعطل الدينامو وعدم شحنه للبطارية بشكل صحيح",
+        "سير الدينامو مرتخي أو تالف أو مقطوع",
+        "وصلات البطارية أو الدينامو متآكلة أو غير محكمة",
+      ],
+      steps: [
+        "أطفئ الأجهزة الكهربائية غير الضرورية (المكيف، الراديو) لتقليل الحمل",
+        "حاول الوصول لورشة بدل التوقف على كتف الطريق السريع إن أمكن",
+        "اطلب فحص خرج الدينامو، معظم ورش الكهرباء تفحصه بسرعة",
+        "استبدل الدينامو أو السير حسب الحاجة، ولا تتجاهل الأمر لأن البطارية ستفرغ أثناء القيادة في النهاية",
+      ],
+      video: "سبب اضاءة لمبة البطارية اثناء القيادة",
+    },
+  },
+  softPedal: {
+    en: {
+      title: "Brake Pedal Feels Soft or Spongy",
+      symptoms: [
+        "Pedal sinks closer to the floor than usual",
+        "Need to pump the pedal to get full braking power",
+        "Longer stopping distance than normal",
+      ],
+      causes: [
+        "Air trapped in the brake lines",
+        "Low brake fluid or a fluid leak",
+        "Worn brake master cylinder",
+      ],
+      steps: [
+        "Check the brake fluid reservoir level and top up if low",
+        "Look under the car and around the wheels for signs of fluid leaks",
+        "This usually needs the brake lines to be bled by a mechanic — don't rely on topping up fluid alone",
+        "Avoid driving if the pedal goes all the way to the floor — have it towed instead",
+      ],
+      video: "spongy soft brake pedal causes",
+    },
+    ar: {
+      title: "دواسة الفرامل طرية أو غائرة",
+      symptoms: [
+        "الدواسة تغوص لأسفل أكثر من المعتاد",
+        "تحتاج تضغط على الدواسة أكثر من مرة للحصول على فرملة كاملة",
+        "مسافة توقف أطول من المعتاد",
+      ],
+      causes: [
+        "هواء محبوس في خطوط الفرامل",
+        "نقص زيت الفرامل أو تسربه",
+        "تآكل مضخة الفرامل الرئيسية (الماستر سلندر)",
+      ],
+      steps: [
+        "افحص مستوى زيت الفرامل في الخزان وأضف إذا كان منخفضًا",
+        "افحص أسفل السيارة وحول العجلات بحثًا عن علامات تسرب",
+        "غالبًا يحتاج الأمر تنفيس خطوط الفرامل عند الميكانيكي، لا تعتمد على إضافة الزيت فقط",
+        "تجنب القيادة إذا وصلت الدواسة لأرضية السيارة تمامًا، واطلب سطحة بدلاً من ذلك",
+      ],
+      video: "سبب دواسة الفرامل طرية",
+    },
+  },
+  acSmell: {
+    en: {
+      title: "AC Making Noise or Bad Smell",
+      symptoms: [
+        "Musty or moldy smell when the AC turns on",
+        "Rattling, squealing, or clicking noise from the AC",
+        "Weak airflow along with the smell or noise",
+      ],
+      causes: [
+        "Mold or bacteria buildup in the evaporator or ducts",
+        "Dirty or clogged cabin air filter",
+        "Worn AC compressor clutch or bearing",
+      ],
+      steps: [
+        "Replace the cabin air filter — this alone often fixes the smell",
+        "Run the AC on fan-only (no cooling) for a few minutes before turning off the car to help dry out the system",
+        "Have the evaporator cleaned or treated with an anti-bacterial spray if the smell persists",
+        "If the noise is mechanical (grinding, squealing), have the compressor inspected before it fails completely",
+      ],
+      video: "car AC bad smell noise fix",
+    },
+    ar: {
+      title: "المكيف يصدر صوتًا أو رائحة كريهة",
+      symptoms: [
+        "رائحة عفن أو رطوبة عند تشغيل المكيف",
+        "صوت خشخشة أو صرير أو طقطقة من المكيف",
+        "هواء ضعيف مصحوب بالرائحة أو الصوت",
+      ],
+      causes: [
+        "تراكم عفن أو بكتيريا في المبخر أو المجاري الهوائية",
+        "فلتر هواء داخلي متسخ أو مسدود",
+        "تآكل كلتش أو بلي كمبروسر المكيف",
+      ],
+      steps: [
+        "استبدل فلتر الهواء الداخلي، غالبًا هذا وحده يحل مشكلة الرائحة",
+        "شغّل المروحة فقط (بدون تبريد) لبضع دقائق قبل إطفاء السيارة لتجفيف النظام",
+        "نظّف المبخر أو عالجه برذاذ مضاد للبكتيريا إذا استمرت الرائحة",
+        "إذا كان الصوت ميكانيكيًا (احتكاك، صرير)، افحص الكمبروسر قبل أن يتعطل بالكامل",
+      ],
+      video: "سبب رائحة وصوت مكيف السيارة",
+    },
+  },
+  unevenWear: {
+    en: {
+      title: "Uneven or Rapid Tire Wear",
+      symptoms: [
+        "One tire wears faster than the others",
+        "Wear concentrated on the inner or outer edge only",
+        "Bald patches or cupping (scalloped wear pattern)",
+      ],
+      causes: [
+        "Wheel misalignment",
+        "Incorrect tire pressure (too high or too low)",
+        "Worn suspension components affecting wheel angle",
+      ],
+      steps: [
+        "Check and correct tire pressure first — it's the simplest fix",
+        "Get a wheel alignment done, especially after hitting a pothole or curb",
+        "Rotate tires regularly (every 8,000–10,000 km) to even out wear",
+        "If wear is severe on one tire, have suspension components checked too",
+      ],
+      video: "uneven tire wear causes alignment",
+    },
+    ar: {
+      title: "تآكل غير منتظم أو سريع في الإطارات",
+      symptoms: [
+        "إطار واحد يتآكل أسرع من الباقي",
+        "تآكل مركّز على الحافة الداخلية أو الخارجية فقط",
+        "بقع صلعاء أو تآكل متموج (نمط تآكل غير منتظم)",
+      ],
+      causes: [
+        "عدم محاذاة الإطارات",
+        "ضغط هواء غير صحيح (مرتفع جدًا أو منخفض جدًا)",
+        "تآكل أجزاء التعليق مما يؤثر على زاوية العجلة",
+      ],
+      steps: [
+        "افحص وصحح ضغط الإطارات أولاً، فهو الحل الأبسط",
+        "اطلب محاذاة الإطارات، خاصة بعد الدخول في حفرة أو الاصطدام برصيف",
+        "دوّر الإطارات بانتظام (كل ٨٠٠٠-١٠٠٠٠ كم) لتوزيع التآكل",
+        "إذا كان التآكل شديدًا في إطار واحد، افحص أجزاء التعليق أيضًا",
+      ],
+      video: "سبب تآكل الاطارات غير المنتظم",
+    },
+  },
+  oilLeak: {
+    en: {
+      title: "Oil Leak Under the Car",
+      symptoms: [
+        "Dark spots or puddles under the car after parking",
+        "Burning oil smell, especially after driving",
+        "Low oil level on the dipstick despite recent top-ups",
+      ],
+      causes: [
+        "Worn oil pan gasket or valve cover gasket",
+        "Damaged oil drain plug or loose oil filter",
+        "Worn engine seals (more common in older or high-mileage cars)",
+      ],
+      steps: [
+        "Place a piece of cardboard under the car overnight to locate the exact leak point",
+        "Check the oil level regularly until the leak is fixed to avoid running low",
+        "Have a mechanic inspect the pan gasket, drain plug, and filter first — these are the cheapest fixes",
+        "Don't ignore a persistent leak — running low on oil can cause serious engine damage",
+      ],
+      video: "car oil leak under engine causes",
+    },
+    ar: {
+      title: "تسرب زيت أسفل السيارة",
+      symptoms: [
+        "بقع داكنة أو بركة زيت أسفل السيارة بعد ركنها",
+        "رائحة زيت محروق، خاصة بعد القيادة",
+        "مستوى زيت منخفض رغم الإضافة الأخيرة",
+      ],
+      causes: [
+        "تآكل جوان علبة الزيت أو جوان غطاء الصمامات",
+        "تلف مسمار تصريف الزيت أو ارتخاء فلتر الزيت",
+        "تآكل سيلات المحرك (أكثر شيوعًا في السيارات القديمة أو عالية الكيلومترات)",
+      ],
+      steps: [
+        "ضع قطعة كرتون أسفل السيارة طوال الليل لتحديد مكان التسرب بالضبط",
+        "افحص مستوى الزيت بانتظام حتى يتم إصلاح التسرب لتجنب نقصه",
+        "اطلب من الميكانيكي فحص جوان العلبة ومسمار التصريف والفلتر أولاً، فهي الأرخص إصلاحًا",
+        "لا تتجاهل التسرب المستمر، فنقص الزيت قد يسبب تلفًا خطيرًا للمحرك",
+      ],
+      video: "سبب تسرب الزيت اسفل السيارة",
+    },
+  },
+  noShift: {
+    en: {
+      title: "Transmission Won't Shift Into Gear",
+      symptoms: [
+        "Car doesn't move when shifted into Drive or Reverse",
+        "Engine revs but the car stays still",
+        "Grinding noise when trying to shift (manual transmission)",
+      ],
+      causes: [
+        "Very low or contaminated transmission fluid",
+        "Worn clutch (manual) or torque converter issue (automatic)",
+        "Faulty shift solenoid or transmission control module",
+      ],
+      steps: [
+        "Check the transmission fluid level first — this is the most common and cheapest cause",
+        "Don't force the gear shift lever if it's resisting — this can cause more damage",
+        "Have the car towed to a transmission specialist rather than driving it in this state",
+        "Avoid repeated attempts to shift, as this can worsen internal damage",
+      ],
+      video: "transmission not shifting into gear",
+    },
+    ar: {
+      title: "ناقل الحركة لا يدخل في السرعة",
+      symptoms: [
+        "السيارة لا تتحرك عند اختيار وضع القيادة (Drive) أو الرجوع للخلف",
+        "دورات المحرك ترتفع لكن السيارة تبقى ثابتة",
+        "صوت احتكاك عند محاولة تغيير السرعة (ناقل حركة عادي)",
+      ],
+      causes: [
+        "زيت ناقل الحركة منخفض جدًا أو ملوّث",
+        "تآكل الدبرياج (عادي) أو مشكلة في المحول العزمي (أوتوماتيك)",
+        "عطل في السولينويد أو وحدة تحكم ناقل الحركة",
+      ],
+      steps: [
+        "افحص مستوى زيت الفتيس أولاً، فهو السبب الأكثر شيوعًا والأرخص إصلاحًا",
+        "لا تجبر ذراع تغيير السرعة إذا كان يقاوم، فهذا قد يسبب ضررًا أكبر",
+        "اطلب سطحة توصل السيارة لمتخصص فتيس بدل قيادتها بهذه الحالة",
+        "تجنب المحاولات المتكررة لتغيير السرعة، لأنها قد تزيد الضرر الداخلي سوءًا",
+      ],
+      video: "سبب عدم دخول الفتيس في السرعة",
+    },
+  },
+  clunkBumps: {
+    en: {
+      title: "Clunking Noise Over Bumps",
+      symptoms: [
+        "A knocking or clunking sound when driving over bumps or potholes",
+        "Noise more noticeable at low speeds",
+        "Slightly looser or less stable steering feel",
+      ],
+      causes: [
+        "Worn sway bar links or bushings",
+        "Worn shock absorbers or struts",
+        "Loose or worn suspension mounts",
+      ],
+      steps: [
+        "Note whether the noise comes from the front, back, left, or right — this helps the mechanic pinpoint it",
+        "Have the sway bar links and bushings inspected first, as they're a common and cheap cause",
+        "Check shocks/struts for visible oil leaks or bouncing after pressing down on the car's corner",
+        "Don't ignore it for too long — worn suspension parts affect handling and tire wear",
+      ],
+      video: "clunking noise over bumps suspension",
+    },
+    ar: {
+      title: "صوت طرق عند المرور فوق المطبات",
+      symptoms: [
+        "صوت طرق أو خبط عند المرور فوق المطبات أو الحفر",
+        "الصوت أوضح عند السرعات المنخفضة",
+        "إحساس بتوجيه أقل ثباتًا قليلاً",
+      ],
+      causes: [
+        "تآكل وصلات أو بوش عصا موازنة الجنزير (سواي بار)",
+        "تآكل المساعدات (الكاتم) أو المكبس (سترَت)",
+        "قواعد تعليق مرتخية أو متآكلة",
+      ],
+      steps: [
+        "لاحظ مصدر الصوت (أمامي، خلفي، يمين، يسار) فهذا يساعد الميكانيكي على تحديده بسرعة",
+        "افحص وصلات وبوش عصا الموازنة أولاً، فهي سبب شائع ورخيص الإصلاح",
+        "افحص المساعدات بحثًا عن تسرب زيت ظاهر أو ارتداد بعد الضغط على زاوية السيارة",
+        "لا تتجاهله لفترة طويلة، فتآكل أجزاء التعليق يؤثر على التحكم بالسيارة وتآكل الإطارات",
+      ],
+      video: "سبب صوت الطرق عند المطبات",
     },
   },
 };
