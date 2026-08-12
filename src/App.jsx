@@ -1119,6 +1119,10 @@ const T = {
     carPhone: "WhatsApp / Phone Number",
     carDescription: "Description",
     carPhotoUrl: "Photo Link (optional)",
+    carAddPhoto: "Add Photo",
+    carChangePhoto: "Change Photo",
+    carUploading: "Uploading...",
+    carPhotoError: "Couldn't upload photo. Try a smaller image.",
     carSubmit: "Submit Listing",
     carCancel: "Cancel",
     carSubmitted: "Thanks! Your listing was submitted and will appear once reviewed.",
@@ -1171,6 +1175,10 @@ const T = {
     carPhone: "رقم واتساب / التواصل",
     carDescription: "الوصف",
     carPhotoUrl: "رابط صورة (اختياري)",
+    carAddPhoto: "أضف صورة",
+    carChangePhoto: "غيّر الصورة",
+    carUploading: "جاري رفع الصورة...",
+    carPhotoError: "تعذر رفع الصورة، جرب صورة أصغر حجمًا.",
     carSubmit: "إرسال الإعلان",
     carCancel: "إلغاء",
     carSubmitted: "شكرًا! تم إرسال إعلانك وسيظهر بعد المراجعة.",
@@ -1773,8 +1781,29 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  async function handlePhotoSelect(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !supabase) return;
+    setUploading(true);
+    setError("");
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from("car-photos")
+      .upload(fileName, file);
+    if (uploadError) {
+      setUploading(false);
+      setError(t.carPhotoError);
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("car-photos").getPublicUrl(fileName);
+    setForm((f) => ({ ...f, photo_url: urlData.publicUrl }));
+    setUploading(false);
+  }
 
   const fieldStyle = {
     width: "100%",
@@ -1877,6 +1906,46 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
         style={fieldStyle}
       />
 
+      {form.photo_url && (
+        <img
+          src={form.photo_url}
+          alt=""
+          style={{
+            width: "100%",
+            height: 140,
+            objectFit: "cover",
+            borderRadius: 10,
+            marginBottom: 10,
+          }}
+          onError={(e) => (e.target.style.display = "none")}
+        />
+      )}
+
+      <label
+        className="flex items-center justify-center gap-2 mb-3"
+        style={{
+          width: "100%",
+          background: C.panel,
+          border: `1px dashed ${C.amberDim}`,
+          borderRadius: 10,
+          padding: "12px 14px",
+          cursor: "pointer",
+          display: "flex",
+        }}
+      >
+        <Plus size={16} color={C.amber} />
+        <span style={{ color: C.amber, fontSize: 13, fontWeight: 600 }}>
+          {uploading ? t.carUploading : form.photo_url ? t.carChangePhoto : t.carAddPhoto}
+        </span>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handlePhotoSelect}
+          disabled={uploading}
+          style={{ display: "none" }}
+        />
+      </label>
+
       {error && (
         <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{error}</p>
       )}
@@ -1900,7 +1969,7 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
         </button>
         <button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || uploading}
           style={{
             flex: 2,
             background: C.amber,
