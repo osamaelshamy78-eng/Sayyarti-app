@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Gauge,
   ChevronLeft,
@@ -8,7 +8,11 @@ import {
   Wrench,
   Info,
   Megaphone,
+  Car,
+  Plus,
+  MessageCircle,
 } from "lucide-react";
+import { supabase } from "./supabaseClient";
 
 /* ---------------------------------------------------------------
    Design tokens
@@ -1101,6 +1105,28 @@ const T = {
     ],
     advertiseCTA: "Get in touch",
     advertiseNote: "Tap below to email us your advertising inquiry.",
+    navCars: "Sell Your Car",
+    carsHeading: "Sell Your Car",
+    carsSub: "Browse listings or post your own car",
+    addCarBtn: "+ List Your Car",
+    carModel: "Make & Model",
+    carYear: "Year",
+    carPrice: "Price",
+    carMileage: "Mileage (km)",
+    carChassis: "Chassis Number (VIN)",
+    carCity: "City",
+    carCountry: "Country",
+    carPhone: "WhatsApp / Phone Number",
+    carDescription: "Description",
+    carPhotoUrl: "Photo Link (optional)",
+    carSubmit: "Submit Listing",
+    carCancel: "Cancel",
+    carSubmitted: "Thanks! Your listing was submitted and will appear once reviewed.",
+    carEmpty: "No cars listed yet. Be the first!",
+    carLoading: "Loading listings...",
+    carContact: "Contact Seller",
+    carNoDb:
+      "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
   },
   ar: {
     wordmark: "سيارتي",
@@ -1131,6 +1157,27 @@ const T = {
     ],
     advertiseCTA: "تواصل معنا",
     advertiseNote: "اضغط بالأسفل لإرسال استفسار الإعلان عبر البريد الإلكتروني.",
+    navCars: "بيع سيارتك",
+    carsHeading: "بيع سيارتك",
+    carsSub: "تصفح السيارات المعروضة أو اعرض سيارتك",
+    addCarBtn: "+ اعرض سيارتك",
+    carModel: "الماركة والموديل",
+    carYear: "سنة الصنع",
+    carPrice: "السعر",
+    carMileage: "الكيلومترات",
+    carChassis: "رقم الشاصية",
+    carCity: "المدينة",
+    carCountry: "الدولة",
+    carPhone: "رقم واتساب / التواصل",
+    carDescription: "الوصف",
+    carPhotoUrl: "رابط صورة (اختياري)",
+    carSubmit: "إرسال الإعلان",
+    carCancel: "إلغاء",
+    carSubmitted: "شكرًا! تم إرسال إعلانك وسيظهر بعد المراجعة.",
+    carEmpty: "لا توجد سيارات معروضة حاليًا. كن أول من يعرض سيارته!",
+    carLoading: "جاري تحميل الإعلانات...",
+    carContact: "تواصل مع البائع",
+    carNoDb: "سوق السيارات لسه مش متصل بقاعدة البيانات. بعد إعداد Supabase هتظهر الإعلانات هنا.",
   },
 };
 
@@ -1206,6 +1253,7 @@ function BottomNav({ lang, t, view, setView }) {
   const items = [
     { id: "home", label: t.navIssues, icon: Gauge },
     { id: "garages", label: t.navGarages, icon: MapPin },
+    { id: "cars", label: t.navCars, icon: Car },
     { id: "advertise", label: t.navAdvertise, icon: Megaphone },
   ];
   return (
@@ -1702,6 +1750,373 @@ function AdvertiseView({ lang, t, isRTL }) {
 }
 
 /* ---------------------------------------------------------------
+   Cars for Sale (Supabase-backed marketplace)
+--------------------------------------------------------------- */
+const CAR_COUNTRIES = [
+  { code: "uae", en: "UAE", ar: "الإمارات" },
+  { code: "ksa", en: "Saudi Arabia", ar: "السعودية" },
+  { code: "egypt", en: "Egypt", ar: "مصر" },
+];
+
+function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
+  const [form, setForm] = useState({
+    make_model: "",
+    year: "",
+    price: "",
+    mileage: "",
+    chassis_number: "",
+    city: "",
+    country: "uae",
+    phone: "",
+    description: "",
+    photo_url: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const fieldStyle = {
+    width: "100%",
+    background: C.asphalt,
+    border: `1px solid ${C.panelLine}`,
+    borderRadius: 10,
+    padding: "10px 12px",
+    color: C.cream,
+    fontSize: 13,
+    marginBottom: 10,
+    fontFamily: "inherit",
+    textAlign: isRTL ? "right" : "left",
+  };
+
+  async function handleSubmit() {
+    if (!supabase) {
+      setError(t.carNoDb);
+      return;
+    }
+    if (!form.make_model || !form.price || !form.phone || !form.chassis_number) return;
+    setSubmitting(true);
+    setError("");
+    const { error: insertError } = await supabase
+      .from("car_listings")
+      .insert([{ ...form, status: "pending" }]);
+    setSubmitting(false);
+    if (insertError) {
+      setError(insertError.message);
+      return;
+    }
+    onSubmitted();
+  }
+
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <input
+        placeholder={t.carModel}
+        value={form.make_model}
+        onChange={set("make_model")}
+        style={fieldStyle}
+      />
+      <div className="flex gap-2">
+        <input
+          placeholder={t.carYear}
+          value={form.year}
+          onChange={set("year")}
+          style={{ ...fieldStyle, flex: 1 }}
+        />
+        <input
+          placeholder={t.carPrice}
+          value={form.price}
+          onChange={set("price")}
+          style={{ ...fieldStyle, flex: 1 }}
+        />
+      </div>
+      <input
+        placeholder={t.carMileage}
+        value={form.mileage}
+        onChange={set("mileage")}
+        style={fieldStyle}
+      />
+      <input
+        placeholder={t.carChassis}
+        value={form.chassis_number}
+        onChange={set("chassis_number")}
+        style={fieldStyle}
+      />
+      <div className="flex gap-2">
+        <input
+          placeholder={t.carCity}
+          value={form.city}
+          onChange={set("city")}
+          style={{ ...fieldStyle, flex: 1 }}
+        />
+        <select value={form.country} onChange={set("country")} style={{ ...fieldStyle, flex: 1 }}>
+          {CAR_COUNTRIES.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c[lang]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <input
+        placeholder={t.carPhone}
+        value={form.phone}
+        onChange={set("phone")}
+        style={fieldStyle}
+      />
+      <textarea
+        placeholder={t.carDescription}
+        value={form.description}
+        onChange={set("description")}
+        rows={3}
+        style={{ ...fieldStyle, resize: "none" }}
+      />
+      <input
+        placeholder={t.carPhotoUrl}
+        value={form.photo_url}
+        onChange={set("photo_url")}
+        style={fieldStyle}
+      />
+
+      {error && (
+        <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{error}</p>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          onClick={onClose}
+          style={{
+            flex: 1,
+            background: C.panel,
+            border: `1px solid ${C.panelLine}`,
+            borderRadius: 12,
+            padding: "12px 14px",
+            color: C.creamDim,
+            fontSize: 13,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          {t.carCancel}
+        </button>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          style={{
+            flex: 2,
+            background: C.amber,
+            border: "none",
+            borderRadius: 12,
+            padding: "12px 14px",
+            color: C.asphalt,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+            opacity: submitting ? 0.7 : 1,
+          }}
+        >
+          {t.carSubmit}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function CarsView({ lang, t, isRTL }) {
+  const [mode, setMode] = useState("browse"); // browse | add | submitted
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      if (!supabase) {
+        setLoading(false);
+        return;
+      }
+      const { data } = await supabase
+        .from("car_listings")
+        .select("*")
+        .eq("status", "approved")
+        .order("created_at", { ascending: false });
+      if (active) {
+        setListings(data || []);
+        setLoading(false);
+      }
+    }
+    load();
+    return () => {
+      active = false;
+    };
+  }, [mode]);
+
+  if (mode === "add") {
+    return (
+      <CarForm
+        lang={lang}
+        t={t}
+        isRTL={isRTL}
+        onClose={() => setMode("browse")}
+        onSubmitted={() => setMode("submitted")}
+      />
+    );
+  }
+
+  if (mode === "submitted") {
+    return (
+      <div className="px-5 pt-8 pb-6 text-center">
+        <div
+          className="flex items-center justify-center rounded-full mb-4"
+          style={{
+            width: 60,
+            height: 60,
+            background: `${C.amber}18`,
+            border: `1px solid ${C.amberDim}`,
+            margin: "0 auto 16px",
+          }}
+        >
+          <Car size={26} color={C.amber} />
+        </div>
+        <p style={{ color: C.cream, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+          {t.carSubmitted}
+        </p>
+        <button
+          onClick={() => setMode("browse")}
+          style={{
+            background: C.amber,
+            border: "none",
+            borderRadius: 12,
+            padding: "12px 20px",
+            color: C.asphalt,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {t.navCars}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <div className="flex items-center justify-between mb-1">
+        <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
+          {t.carsHeading}
+        </h1>
+      </div>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>
+        {t.carsSub}
+      </p>
+
+      <button
+        onClick={() => setMode("add")}
+        className="w-full flex items-center justify-center gap-2 mb-5"
+        style={{
+          background: C.amber,
+          border: "none",
+          borderRadius: 12,
+          padding: "12px 16px",
+          cursor: "pointer",
+        }}
+      >
+        <Plus size={16} color={C.asphalt} strokeWidth={2.5} />
+        <span style={{ color: C.asphalt, fontSize: 13.5, fontWeight: 700 }}>{t.addCarBtn}</span>
+      </button>
+
+      {!supabase ? (
+        <div
+          className="flex items-start gap-2"
+          style={{
+            background: `${C.blue}14`,
+            border: `1px solid ${C.blue}44`,
+            borderRadius: 10,
+            padding: "10px 12px",
+          }}
+        >
+          <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
+          <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.carNoDb}</span>
+        </div>
+      ) : loading ? (
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
+          {t.carLoading}
+        </p>
+      ) : listings.length === 0 ? (
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
+          {t.carEmpty}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {listings.map((c) => (
+            <div
+              key={c.id}
+              style={{
+                background: C.panel,
+                border: `1px solid ${C.panelLine}`,
+                borderRadius: 14,
+                overflow: "hidden",
+              }}
+            >
+              {c.photo_url && (
+                <img
+                  src={c.photo_url}
+                  alt={c.make_model}
+                  style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
+                  onError={(e) => (e.target.style.display = "none")}
+                />
+              )}
+              <div style={{ padding: "12px 14px" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <span style={{ color: C.cream, fontSize: 14.5, fontWeight: 700 }}>
+                    {c.make_model} {c.year ? `· ${c.year}` : ""}
+                  </span>
+                  <span style={{ color: C.amber, fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                    {c.price}
+                  </span>
+                </div>
+                <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>
+                  {[c.city, CAR_COUNTRIES.find((x) => x.code === c.country)?.[lang]]
+                    .filter(Boolean)
+                    .join(" · ")}
+                  {c.mileage ? ` · ${c.mileage} km` : ""}
+                </div>
+                {c.description && (
+                  <p style={{ color: C.creamDim, fontSize: 12.5, marginTop: 6, lineHeight: 1.5 }}>
+                    {c.description}
+                  </p>
+                )}
+                <button
+                  onClick={() =>
+                    window.open(
+                      `https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`,
+                      "_blank"
+                    )
+                  }
+                  className="flex items-center justify-center gap-2 mt-3"
+                  style={{
+                    width: "100%",
+                    background: "transparent",
+                    border: `1px solid ${C.amberDim}`,
+                    borderRadius: 10,
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <MessageCircle size={14} color={C.amber} />
+                  <span style={{ color: C.amber, fontSize: 12.5, fontWeight: 600 }}>
+                    {t.carContact}
+                  </span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------
    App
 --------------------------------------------------------------- */
 export default function App() {
@@ -1792,6 +2207,7 @@ export default function App() {
             <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
           )}
           {view === "advertise" && <AdvertiseView lang={lang} t={t} isRTL={isRTL} />}
+          {view === "cars" && <CarsView lang={lang} t={t} isRTL={isRTL} />}
         </div>
 
         <BottomNav lang={lang} t={t} view={view} setView={setNav} />
