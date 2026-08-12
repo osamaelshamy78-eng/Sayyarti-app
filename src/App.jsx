@@ -1110,12 +1110,17 @@ const T = {
     carsSub: "Browse listings or post your own car",
     addCarBtn: "+ List Your Car",
     carModel: "Make & Model",
+    carMake: "Make",
+    carModelType: "Model",
     carYear: "Year",
     carPrice: "Price",
     carMileage: "Mileage (km)",
     carChassis: "Chassis Number (VIN)",
     carCity: "City",
     carCountry: "Country",
+    carSpecs: "Specs",
+    carSpecsGulf: "GCC Specs",
+    carSpecsAmerican: "American Specs",
     carPhone: "WhatsApp / Phone Number",
     carDescription: "Description",
     carPhotoUrl: "Photo Link (optional)",
@@ -1166,12 +1171,17 @@ const T = {
     carsSub: "تصفح السيارات المعروضة أو اعرض سيارتك",
     addCarBtn: "+ اعرض سيارتك",
     carModel: "الماركة والموديل",
+    carMake: "الماركة",
+    carModelType: "الموديل",
     carYear: "سنة الصنع",
     carPrice: "السعر",
     carMileage: "الكيلومترات",
     carChassis: "رقم الشاصية",
     carCity: "المدينة",
     carCountry: "الدولة",
+    carSpecs: "الفئة",
+    carSpecsGulf: "خليجي",
+    carSpecsAmerican: "أمريكي",
     carPhone: "رقم واتساب / التواصل",
     carDescription: "الوصف",
     carPhotoUrl: "رابط صورة (اختياري)",
@@ -1766,18 +1776,216 @@ const CAR_COUNTRIES = [
   { code: "egypt", en: "Egypt", ar: "مصر" },
 ];
 
+const UAE_EMIRATES = [
+  { en: "Abu Dhabi", ar: "أبوظبي" },
+  { en: "Dubai", ar: "دبي" },
+  { en: "Sharjah", ar: "الشارقة" },
+  { en: "Ajman", ar: "عجمان" },
+  { en: "Umm Al Quwain", ar: "أم القيوين" },
+  { en: "Ras Al Khaimah", ar: "رأس الخيمة" },
+  { en: "Fujairah", ar: "الفجيرة" },
+];
+
+const CAR_MAKES = [
+  {
+    code: "toyota",
+    en: "Toyota",
+    ar: "تويوتا",
+    models: [
+      { en: "Corolla", ar: "كورولا" },
+      { en: "Camry", ar: "كامري" },
+      { en: "Land Cruiser", ar: "لاند كروزر" },
+      { en: "Yaris", ar: "يارس" },
+      { en: "Hilux", ar: "هايلوكس" },
+    ],
+  },
+  {
+    code: "hyundai",
+    en: "Hyundai",
+    ar: "هيونداي",
+    models: [
+      { en: "Elantra", ar: "النترا" },
+      { en: "Sonata", ar: "سوناتا" },
+      { en: "Tucson", ar: "توسان" },
+      { en: "Accent", ar: "أكسنت" },
+      { en: "Santa Fe", ar: "سنتافي" },
+    ],
+  },
+  {
+    code: "nissan",
+    en: "Nissan",
+    ar: "نيسان",
+    models: [
+      { en: "Sunny", ar: "صني" },
+      { en: "Altima", ar: "التيما" },
+      { en: "Patrol", ar: "باترول" },
+      { en: "X-Trail", ar: "إكستريل" },
+      { en: "Sentra", ar: "سنترا" },
+    ],
+  },
+  {
+    code: "kia",
+    en: "Kia",
+    ar: "كيا",
+    models: [
+      { en: "Cerato", ar: "سيراتو" },
+      { en: "Sportage", ar: "سبورتاج" },
+      { en: "Sorento", ar: "سورينتو" },
+      { en: "Picanto", ar: "بيكانتو" },
+      { en: "Rio", ar: "ريو" },
+    ],
+  },
+  {
+    code: "honda",
+    en: "Honda",
+    ar: "هوندا",
+    models: [
+      { en: "Civic", ar: "سيفيك" },
+      { en: "Accord", ar: "أكورد" },
+      { en: "CR-V", ar: "سي آر في" },
+      { en: "City", ar: "سيتي" },
+      { en: "Pilot", ar: "بايلوت" },
+    ],
+  },
+  {
+    code: "chevrolet",
+    en: "Chevrolet",
+    ar: "شيفروليه",
+    models: [
+      { en: "Malibu", ar: "ماليبو" },
+      { en: "Cruze", ar: "كروز" },
+      { en: "Tahoe", ar: "تاهو" },
+      { en: "Captiva", ar: "كابتيفا" },
+      { en: "Spark", ar: "سبارك" },
+    ],
+  },
+  {
+    code: "ford",
+    en: "Ford",
+    ar: "فورد",
+    models: [
+      { en: "Fusion", ar: "فيوجن" },
+      { en: "Explorer", ar: "إكسبلورر" },
+      { en: "F-150", ar: "إف 150" },
+      { en: "EcoSport", ar: "إيكوسبورت" },
+      { en: "Edge", ar: "إيدج" },
+    ],
+  },
+  {
+    code: "bmw",
+    en: "BMW",
+    ar: "بي إم دبليو",
+    models: [
+      { en: "3 Series", ar: "الفئة الثالثة" },
+      { en: "5 Series", ar: "الفئة الخامسة" },
+      { en: "X5", ar: "إكس 5" },
+      { en: "X3", ar: "إكس 3" },
+      { en: "7 Series", ar: "الفئة السابعة" },
+    ],
+  },
+  {
+    code: "mercedes",
+    en: "Mercedes-Benz",
+    ar: "مرسيدس بنز",
+    models: [
+      { en: "C-Class", ar: "سي كلاس" },
+      { en: "E-Class", ar: "إي كلاس" },
+      { en: "S-Class", ar: "إس كلاس" },
+      { en: "GLE", ar: "جي إل إي" },
+      { en: "GLC", ar: "جي إل سي" },
+    ],
+  },
+  {
+    code: "lexus",
+    en: "Lexus",
+    ar: "لكزس",
+    models: [
+      { en: "ES", ar: "إي إس" },
+      { en: "RX", ar: "آر إكس" },
+      { en: "LX", ar: "إل إكس" },
+      { en: "NX", ar: "إن إكس" },
+      { en: "GX", ar: "جي إكس" },
+    ],
+  },
+  {
+    code: "mitsubishi",
+    en: "Mitsubishi",
+    ar: "ميتسوبيشي",
+    models: [
+      { en: "Lancer", ar: "لانسر" },
+      { en: "Pajero", ar: "باجيرو" },
+      { en: "Outlander", ar: "أوتلاندر" },
+      { en: "ASX", ar: "إيه إس إكس" },
+      { en: "Attrage", ar: "أتراج" },
+    ],
+  },
+  {
+    code: "jeep",
+    en: "Jeep",
+    ar: "جيب",
+    models: [
+      { en: "Wrangler", ar: "رانجلر" },
+      { en: "Grand Cherokee", ar: "جراند شيروكي" },
+      { en: "Cherokee", ar: "شيروكي" },
+      { en: "Compass", ar: "كومباس" },
+      { en: "Renegade", ar: "رينيجيد" },
+    ],
+  },
+  {
+    code: "renault",
+    en: "Renault",
+    ar: "رينو",
+    models: [
+      { en: "Duster", ar: "داستر" },
+      { en: "Logan", ar: "لوجان" },
+      { en: "Koleos", ar: "كوليوس" },
+      { en: "Kadjar", ar: "كادجار" },
+      { en: "Symbol", ar: "سيمبول" },
+    ],
+  },
+  {
+    code: "mg",
+    en: "MG",
+    ar: "إم جي",
+    models: [
+      { en: "MG5", ar: "إم جي 5" },
+      { en: "MG6", ar: "إم جي 6" },
+      { en: "ZS", ar: "زد إس" },
+      { en: "HS", ar: "إتش إس" },
+      { en: "RX5", ar: "آر إكس 5" },
+    ],
+  },
+  {
+    code: "landrover",
+    en: "Land Rover",
+    ar: "لاند روفر",
+    models: [
+      { en: "Range Rover", ar: "رنج روفر" },
+      { en: "Discovery", ar: "ديسكفري" },
+      { en: "Defender", ar: "ديفندر" },
+      { en: "Evoque", ar: "إيفوك" },
+      { en: "Sport", ar: "سبورت" },
+    ],
+  },
+  { code: "other", en: "Other", ar: "أخرى", models: [] },
+];
+
 function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
   const [form, setForm] = useState({
-    make_model: "",
+    car_make: "",
+    car_model: "",
+    custom_make: "",
+    custom_model: "",
     year: "",
     price: "",
     mileage: "",
     chassis_number: "",
     city: "",
     country: "uae",
+    specs: "",
     phone: "",
     description: "",
-    photo_url: "",
+    photo_urls: [],
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -1785,24 +1993,38 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
+  const selectedMake = CAR_MAKES.find((m) => m.code === form.car_make);
+
+  function handleMakeChange(e) {
+    const code = e.target.value;
+    setForm((f) => ({ ...f, car_make: code, car_model: "", custom_model: "" }));
+  }
+
   async function handlePhotoSelect(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file || !supabase) return;
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    if (!files.length || !supabase) return;
     setUploading(true);
     setError("");
-    const ext = file.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("car-photos")
-      .upload(fileName, file);
-    if (uploadError) {
-      setUploading(false);
-      setError(t.carPhotoError);
-      return;
+    const newUrls = [];
+    for (const file of files) {
+      const ext = file.name.split(".").pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("car-photos")
+        .upload(fileName, file);
+      if (uploadError) {
+        setError(t.carPhotoError);
+        continue;
+      }
+      const { data: urlData } = supabase.storage.from("car-photos").getPublicUrl(fileName);
+      newUrls.push(urlData.publicUrl);
     }
-    const { data: urlData } = supabase.storage.from("car-photos").getPublicUrl(fileName);
-    setForm((f) => ({ ...f, photo_url: urlData.publicUrl }));
+    setForm((f) => ({ ...f, photo_urls: [...f.photo_urls, ...newUrls] }));
     setUploading(false);
+  }
+
+  function removePhoto(url) {
+    setForm((f) => ({ ...f, photo_urls: f.photo_urls.filter((u) => u !== url) }));
   }
 
   const fieldStyle = {
@@ -1823,12 +2045,32 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
       setError(t.carNoDb);
       return;
     }
-    if (!form.make_model || !form.price || !form.phone || !form.chassis_number) return;
+    const makeLabel =
+      form.car_make === "other" ? form.custom_make : selectedMake ? selectedMake[lang] : "";
+    const modelLabel =
+      form.car_make === "other" || form.car_model === "other"
+        ? form.custom_model
+        : selectedMake?.models.find((m) => m.en === form.car_model)?.[lang] || form.car_model;
+    if (!makeLabel || !modelLabel || !form.price || !form.phone || !form.chassis_number) return;
     setSubmitting(true);
     setError("");
-    const { error: insertError } = await supabase
-      .from("car_listings")
-      .insert([{ ...form, status: "pending" }]);
+    const { error: insertError } = await supabase.from("car_listings").insert([
+      {
+        make_model: `${makeLabel} ${modelLabel}`,
+        year: form.year,
+        price: form.price,
+        mileage: form.mileage,
+        chassis_number: form.chassis_number,
+        city: form.city,
+        country: form.country,
+        specs: form.country === "uae" ? form.specs : null,
+        phone: form.phone,
+        description: form.description,
+        photo_url: form.photo_urls[0] || null,
+        photo_urls: form.photo_urls,
+        status: "pending",
+      },
+    ]);
     setSubmitting(false);
     if (insertError) {
       setError(insertError.message);
@@ -1839,12 +2081,49 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
 
   return (
     <div className="px-5 pt-5 pb-6">
-      <input
-        placeholder={t.carModel}
-        value={form.make_model}
-        onChange={set("make_model")}
-        style={fieldStyle}
-      />
+      <select value={form.car_make} onChange={handleMakeChange} style={fieldStyle}>
+        <option value="" disabled>
+          {t.carMake}
+        </option>
+        {CAR_MAKES.map((m) => (
+          <option key={m.code} value={m.code}>
+            {m[lang]}
+          </option>
+        ))}
+      </select>
+
+      {form.car_make === "other" && (
+        <input
+          placeholder={t.carMake}
+          value={form.custom_make}
+          onChange={set("custom_make")}
+          style={fieldStyle}
+        />
+      )}
+
+      {form.car_make && form.car_make !== "other" && (
+        <select value={form.car_model} onChange={set("car_model")} style={fieldStyle}>
+          <option value="" disabled>
+            {t.carModelType}
+          </option>
+          {selectedMake?.models.map((mo) => (
+            <option key={mo.en} value={mo.en}>
+              {mo[lang]}
+            </option>
+          ))}
+          <option value="other">{lang === "ar" ? "أخرى" : "Other"}</option>
+        </select>
+      )}
+
+      {form.car_make && form.car_make !== "other" && form.car_model === "other" && (
+        <input
+          placeholder={t.carModelType}
+          value={form.custom_model}
+          onChange={set("custom_model")}
+          style={fieldStyle}
+        />
+      )}
+
       <div className="flex gap-2">
         <input
           placeholder={t.carYear}
@@ -1872,13 +2151,34 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
         style={fieldStyle}
       />
       <div className="flex gap-2">
-        <input
-          placeholder={t.carCity}
-          value={form.city}
-          onChange={set("city")}
+        {form.country === "uae" ? (
+          <select
+            value={form.city}
+            onChange={set("city")}
+            style={{ ...fieldStyle, flex: 1 }}
+          >
+            <option value="" disabled>
+              {t.carCity}
+            </option>
+            {UAE_EMIRATES.map((e) => (
+              <option key={e.en} value={e.en}>
+                {e[lang]}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            placeholder={t.carCity}
+            value={form.city}
+            onChange={set("city")}
+            style={{ ...fieldStyle, flex: 1 }}
+          />
+        )}
+        <select
+          value={form.country}
+          onChange={(e) => setForm((f) => ({ ...f, country: e.target.value, city: "" }))}
           style={{ ...fieldStyle, flex: 1 }}
-        />
-        <select value={form.country} onChange={set("country")} style={{ ...fieldStyle, flex: 1 }}>
+        >
           {CAR_COUNTRIES.map((c) => (
             <option key={c.code} value={c.code}>
               {c[lang]}
@@ -1886,6 +2186,17 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
           ))}
         </select>
       </div>
+
+      {form.country === "uae" && (
+        <select value={form.specs} onChange={set("specs")} style={fieldStyle}>
+          <option value="" disabled>
+            {t.carSpecs}
+          </option>
+          <option value="gulf">{t.carSpecsGulf}</option>
+          <option value="american">{t.carSpecsAmerican}</option>
+        </select>
+      )}
+
       <input
         placeholder={t.carPhone}
         value={form.phone}
@@ -1899,26 +2210,45 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
         rows={3}
         style={{ ...fieldStyle, resize: "none" }}
       />
-      <input
-        placeholder={t.carPhotoUrl}
-        value={form.photo_url}
-        onChange={set("photo_url")}
-        style={fieldStyle}
-      />
 
-      {form.photo_url && (
-        <img
-          src={form.photo_url}
-          alt=""
-          style={{
-            width: "100%",
-            height: 140,
-            objectFit: "cover",
-            borderRadius: 10,
-            marginBottom: 10,
-          }}
-          onError={(e) => (e.target.style.display = "none")}
-        />
+      {form.photo_urls.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {form.photo_urls.map((url) => (
+            <div key={url} style={{ position: "relative", width: 78, height: 78 }}>
+              <img
+                src={url}
+                alt=""
+                style={{
+                  width: 78,
+                  height: 78,
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  display: "block",
+                }}
+                onError={(e) => (e.target.style.opacity = 0.3)}
+              />
+              <button
+                onClick={() => removePhoto(url)}
+                style={{
+                  position: "absolute",
+                  top: -6,
+                  right: -6,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  background: C.red,
+                  border: "none",
+                  color: "#fff",
+                  fontSize: 12,
+                  lineHeight: "20px",
+                  cursor: "pointer",
+                }}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
       <label
@@ -1935,11 +2265,12 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
       >
         <Plus size={16} color={C.amber} />
         <span style={{ color: C.amber, fontSize: 13, fontWeight: 600 }}>
-          {uploading ? t.carUploading : form.photo_url ? t.carChangePhoto : t.carAddPhoto}
+          {uploading ? t.carUploading : form.photo_urls.length ? t.carChangePhoto : t.carAddPhoto}
         </span>
         <input
           type="file"
           accept="image/*"
+          multiple
           onChange={handlePhotoSelect}
           disabled={uploading}
           style={{ display: "none" }}
@@ -2126,13 +2457,32 @@ function CarsView({ lang, t, isRTL }) {
                 overflow: "hidden",
               }}
             >
-              {c.photo_url && (
-                <img
-                  src={c.photo_url}
-                  alt={c.make_model}
-                  style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
-                  onError={(e) => (e.target.style.display = "none")}
-                />
+              {(c.photo_url || (c.photo_urls && c.photo_urls[0])) && (
+                <div style={{ position: "relative" }}>
+                  <img
+                    src={c.photo_url || c.photo_urls[0]}
+                    alt={c.make_model}
+                    style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
+                    onError={(e) => (e.target.style.display = "none")}
+                  />
+                  {c.photo_urls && c.photo_urls.length > 1 && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: 8,
+                        insetInlineEnd: 8,
+                        background: "rgba(0,0,0,0.6)",
+                        color: C.cream,
+                        fontSize: 11,
+                        fontWeight: 600,
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                      }}
+                    >
+                      +{c.photo_urls.length - 1}
+                    </span>
+                  )}
+                </div>
               )}
               <div style={{ padding: "12px 14px" }}>
                 <div className="flex items-start justify-between gap-2">
@@ -2148,6 +2498,8 @@ function CarsView({ lang, t, isRTL }) {
                     .filter(Boolean)
                     .join(" · ")}
                   {c.mileage ? ` · ${c.mileage} km` : ""}
+                  {c.specs === "gulf" ? ` · ${t.carSpecsGulf}` : ""}
+                  {c.specs === "american" ? ` · ${t.carSpecsAmerican}` : ""}
                 </div>
                 {c.description && (
                   <p style={{ color: C.creamDim, fontSize: 12.5, marginTop: 6, lineHeight: 1.5 }}>
