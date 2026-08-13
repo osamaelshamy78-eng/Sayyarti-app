@@ -1130,7 +1130,7 @@ const T = {
     carPhotoError: "Couldn't upload photo. Try a smaller image.",
     carSubmit: "Submit Listing",
     carCancel: "Cancel",
-    carSubmitted: "Thanks! Your listing was submitted and will appear once reviewed.",
+    carSubmitted: "Thanks! Your listing is live now.",
     carEmpty: "No cars listed yet. Be the first!",
     carLoading: "Loading listings...",
     carContact: "Contact Seller",
@@ -1191,7 +1191,7 @@ const T = {
     carPhotoError: "تعذر رفع الصورة، جرب صورة أصغر حجمًا.",
     carSubmit: "إرسال الإعلان",
     carCancel: "إلغاء",
-    carSubmitted: "شكرًا! تم إرسال إعلانك وسيظهر بعد المراجعة.",
+    carSubmitted: "شكرًا! إعلانك ظاهر الآن.",
     carEmpty: "لا توجد سيارات معروضة حاليًا. كن أول من يعرض سيارته!",
     carLoading: "جاري تحميل الإعلانات...",
     carContact: "تواصل مع البائع",
@@ -2068,7 +2068,7 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
         description: form.description,
         photo_url: form.photo_urls[0] || null,
         photo_urls: form.photo_urls,
-        status: "pending",
+        status: "approved",
       },
     ]);
     setSubmitting(false);
