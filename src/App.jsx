@@ -2546,6 +2546,16 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeIssueId, setActiveIssueId] = useState(null);
   const [country, setCountry] = useState("uae");
+  const [clock, setClock] = useState(() =>
+    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+  );
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
+    }, 1000 * 30);
+    return () => clearInterval(id);
+  }, []);
 
   const isRTL = lang === "ar";
   const t = T[lang];
@@ -2595,7 +2605,7 @@ export default function App() {
           className="flex items-center justify-between px-6"
           style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600 }}
         >
-          <span>9:41</span>
+          <span>{clock}</span>
           <span style={{ letterSpacing: 1 }}>●●●●</span>
         </div>
 
