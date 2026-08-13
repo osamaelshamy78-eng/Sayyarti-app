@@ -145,6 +145,8 @@ const CATEGORIES = [
     icon: EngineLightIcon,
     en: "Engine",
     ar: "المحرك",
+    guideEn: "Check Engine",
+    guideAr: "افحص المحرك",
     issues: ["checkEngine", "overheating", "noStart"],
 
   },
@@ -153,6 +155,8 @@ const CATEGORIES = [
     icon: BatteryLightIcon,
     en: "Battery & Electrical",
     ar: "البطارية والكهرباء",
+    guideEn: "Battery Charge",
+    guideAr: "شحن البطارية",
     issues: ["deadBattery", "altWarning"],
   },
   {
@@ -160,6 +164,8 @@ const CATEGORIES = [
     icon: BrakeLightIcon,
     en: "Brakes",
     ar: "الفرامل",
+    guideEn: "Brake System",
+    guideAr: "نظام الفرامل",
     issues: ["brakeNoise", "softPedal"],
   },
   {
@@ -167,6 +173,8 @@ const CATEGORIES = [
     icon: TempLightIcon,
     en: "AC & Cooling",
     ar: "التكييف والتبريد",
+    guideEn: "Engine Temperature",
+    guideAr: "حرارة المحرك",
     issues: ["acWarm", "acSmell"],
   },
   {
@@ -174,6 +182,8 @@ const CATEGORIES = [
     icon: TireLightIcon,
     en: "Tires",
     ar: "الإطارات",
+    guideEn: "Tire Pressure",
+    guideAr: "ضغط الإطارات",
     issues: ["tirePressure", "unevenWear"],
   },
   {
@@ -181,6 +191,8 @@ const CATEGORIES = [
     icon: OilLightIcon,
     en: "Oil & Fluids",
     ar: "الزيت والسوائل",
+    guideEn: "Oil Pressure",
+    guideAr: "ضغط الزيت",
     issues: ["oilWarning", "oilLeak"],
   },
   {
@@ -188,6 +200,8 @@ const CATEGORIES = [
     icon: TransmissionLightIcon,
     en: "Transmission",
     ar: "ناقل الحركة",
+    guideEn: "Transmission",
+    guideAr: "ناقل الحركة",
     issues: ["transSlip", "noShift"],
   },
   {
@@ -195,6 +209,8 @@ const CATEGORIES = [
     icon: SteeringLightIcon,
     en: "Steering & Suspension",
     ar: "التوجيه والتعليق",
+    guideEn: "Power Steering",
+    guideAr: "نظام التوجيه",
     issues: ["steeringVibration", "clunkBumps"],
   },
 ];
@@ -1083,6 +1099,9 @@ const T = {
     navGarages: "Garages",
     homeHeading: "What's wrong with your car?",
     homeSub: "Tap a system to see common issues",
+    lightsGuideTile: "Warning Lights Guide",
+    lightsGuideHeading: "Dashboard Warning Lights",
+    lightsGuideSub: "Tap any light to learn what it means and how to fix it",
     issuesCount: "issue",
     issuesCountPlural: "issues",
     symptoms: "Symptoms",
@@ -1144,6 +1163,9 @@ const T = {
     navGarages: "الورش",
     homeHeading: "ما هي مشكلة سيارتك؟",
     homeSub: "اضغط على أحد الأنظمة لرؤية الأعطال الشائعة",
+    lightsGuideTile: "دليل لمبات التحذير",
+    lightsGuideHeading: "لمبات لوحة القيادة",
+    lightsGuideSub: "اضغط على أي لمبة لمعرفة معناها وطريقة حلها",
     issuesCount: "عطل",
     issuesCountPlural: "أعطال",
     symptoms: "الأعراض",
@@ -1284,7 +1306,8 @@ function BottomNav({ lang, t, view, setView }) {
     >
       {items.map((it) => {
         const active =
-          view === it.id || (it.id === "home" && (view === "category" || view === "issue"));
+          view === it.id ||
+          (it.id === "home" && (view === "category" || view === "issue" || view === "guide"));
         const Icon = it.icon;
         return (
           <button
@@ -1363,7 +1386,7 @@ function Dial({ Icon, label, count, unitLabel, onClick }) {
 /* ---------------------------------------------------------------
    Views
 --------------------------------------------------------------- */
-function HomeView({ lang, t, onOpenCategory }) {
+function HomeView({ lang, t, onOpenCategory, onOpenGuide }) {
   return (
     <div className="px-5 pt-5 pb-6">
       <h1
@@ -1377,9 +1400,38 @@ function HomeView({ lang, t, onOpenCategory }) {
       >
         {t.homeHeading}
       </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 20 }}>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
         {t.homeSub}
       </p>
+
+      <button
+        onClick={onOpenGuide}
+        className="w-full flex items-center gap-3 mb-6"
+        style={{
+          background: `${C.blue}14`,
+          border: `1px solid ${C.blue}55`,
+          borderRadius: 14,
+          padding: "13px 16px",
+          cursor: "pointer",
+          textAlign: lang === "ar" ? "right" : "left",
+        }}
+      >
+        <div
+          className="flex items-center justify-center rounded-full"
+          style={{ width: 38, height: 38, background: `${C.blue}22`, flexShrink: 0 }}
+        >
+          <EngineLightIcon size={19} color={C.blue} strokeWidth={1.6} />
+        </div>
+        <span style={{ color: C.cream, fontSize: 13.5, fontWeight: 600, flex: 1 }}>
+          {t.lightsGuideTile}
+        </span>
+        {lang === "ar" ? (
+          <ChevronLeft size={16} color={C.blue} />
+        ) : (
+          <ChevronRight size={16} color={C.blue} />
+        )}
+      </button>
+
       <div className="grid grid-cols-2 gap-y-7 gap-x-3">
         {CATEGORIES.map((cat) => (
           <Dial
@@ -1391,6 +1443,63 @@ function HomeView({ lang, t, onOpenCategory }) {
             onClick={() => onOpenCategory(cat)}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function LightsGuideView({ lang, t, onOpenCategory, onBack, isRTL }) {
+  return (
+    <div className="pb-6">
+      <BackHeader label={t.navIssues} onBack={onBack} isRTL={isRTL} />
+      <div className="px-5">
+        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 4px 0" }}>
+          {t.lightsGuideHeading}
+        </h1>
+        <p style={{ color: C.creamDim, fontSize: 13, marginBottom: 18 }}>{t.lightsGuideSub}</p>
+
+        <div className="grid grid-cols-2 gap-3">
+          {CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => onOpenCategory(cat)}
+                className="flex flex-col items-center gap-2"
+                style={{
+                  background: C.panel,
+                  border: `1px solid ${C.panelLine}`,
+                  borderRadius: 14,
+                  padding: "16px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  className="flex items-center justify-center rounded-full"
+                  style={{
+                    width: 56,
+                    height: 56,
+                    background: `radial-gradient(circle, ${C.amber}22, ${C.amber}08 70%)`,
+                    border: `1px solid ${C.amber}`,
+                  }}
+                >
+                  <Icon size={26} color={C.amber} strokeWidth={1.5} />
+                </div>
+                <span
+                  style={{
+                    color: C.cream,
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    textAlign: "center",
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {lang === "ar" ? cat.guideAr : cat.guideEn}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -2570,6 +2679,9 @@ export default function App() {
     setActiveCategory(cat);
     setView("category");
   }
+  function openGuide() {
+    setView("guide");
+  }
   function openIssue(id) {
     setActiveIssueId(id);
     setView("issue");
@@ -2612,7 +2724,18 @@ export default function App() {
         <TopBar lang={lang} setLang={setLang} t={t} onLogoTap={goHome} />
 
         <div className="flex-1 overflow-y-auto">
-          {view === "home" && <HomeView lang={lang} t={t} onOpenCategory={openCategory} />}
+          {view === "home" && (
+            <HomeView lang={lang} t={t} onOpenCategory={openCategory} onOpenGuide={openGuide} />
+          )}
+          {view === "guide" && (
+            <LightsGuideView
+              lang={lang}
+              t={t}
+              onOpenCategory={openCategory}
+              onBack={goHome}
+              isRTL={isRTL}
+            />
+          )}
           {view === "category" && activeCategory && (
             <CategoryView
               lang={lang}
