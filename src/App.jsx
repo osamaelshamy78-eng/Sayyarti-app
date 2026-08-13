@@ -1077,7 +1077,7 @@ const GARAGES = {
 --------------------------------------------------------------- */
 const T = {
   en: {
-    wordmark: "Sayyarti",
+    wordmark: "Karaji",
     tagline: "Diagnose car issues & find trusted garages",
     navIssues: "Issues",
     navGarages: "Garages",
@@ -1138,7 +1138,7 @@ const T = {
       "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
   },
   ar: {
-    wordmark: "سيارتي",
+    wordmark: "كراجي",
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
     navIssues: "الأعطال",
     navGarages: "الورش",
@@ -1749,7 +1749,7 @@ function AdvertiseView({ lang, t, isRTL }) {
       <button
         onClick={() =>
           (window.location.href =
-            "mailto:osamaelshamy78@gmail.com?subject=" + encodeURIComponent("Advertising Inquiry — Sayyarti"))
+            "mailto:osamaelshamy78@gmail.com?subject=" + encodeURIComponent("Advertising Inquiry — Karaji"))
         }
         className="w-full flex items-center justify-center gap-2"
         style={{
