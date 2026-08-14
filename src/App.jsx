@@ -1113,6 +1113,7 @@ const T = {
     garagesNote:
       "Starter directory from public sources — confirm hours, pricing & contact details before visiting.",
     openInMaps: "Open in Maps →",
+    addGarageBtn: "+ Add Your Garage",
     navAdvertise: "Advertise",
     advertiseHeading: "Advertise With Us",
     advertiseSub: "Reach car owners across the UAE, KSA & Egypt",
@@ -1177,6 +1178,7 @@ const T = {
     garagesNote:
       "دليل أولي من مصادر عامة — يرجى التأكد من مواعيد العمل والأسعار وبيانات التواصل قبل الزيارة.",
     openInMaps: "← افتح في الخرائط",
+    addGarageBtn: "+ أضف جراجك",
     navAdvertise: "أعلن معنا",
     advertiseHeading: "أعلن معنا",
     advertiseSub: "وصّل لأصحاب السيارات في الإمارات والسعودية ومصر",
@@ -1752,6 +1754,25 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
           );
         })}
       </div>
+
+      <button
+        onClick={() =>
+          (window.location.href =
+            "mailto:osamaelshamy78@gmail.com?subject=" +
+            encodeURIComponent("Garage Listing Request — Karaji"))
+        }
+        className="w-full flex items-center justify-center gap-2 mb-4"
+        style={{
+          background: C.amber,
+          border: "none",
+          borderRadius: 12,
+          padding: "12px 16px",
+          cursor: "pointer",
+        }}
+      >
+        <Plus size={16} color={C.asphalt} strokeWidth={2.5} />
+        <span style={{ color: C.asphalt, fontSize: 13.5, fontWeight: 700 }}>{t.addGarageBtn}</span>
+      </button>
 
       <div
         className="flex items-start gap-2 mb-4"
@@ -2430,10 +2451,102 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
   );
 }
 
+function CarDetailView({ lang, t, isRTL, car, onBack }) {
+  const photos =
+    car.photo_urls && car.photo_urls.length
+      ? car.photo_urls
+      : car.photo_url
+      ? [car.photo_url]
+      : [];
+  const countryLabel = CAR_COUNTRIES.find((x) => x.code === car.country)?.[lang];
+
+  return (
+    <div className="pb-6">
+      <BackHeader label={t.navCars} onBack={onBack} isRTL={isRTL} />
+
+      {photos.length > 0 ? (
+        <div
+          className="flex gap-2 px-5 mb-4"
+          style={{ overflowX: "auto", scrollSnapType: "x mandatory" }}
+        >
+          {photos.map((url, i) => (
+            <img
+              key={i}
+              src={url}
+              alt=""
+              style={{
+                width: "85%",
+                height: 220,
+                objectFit: "cover",
+                borderRadius: 14,
+                flexShrink: 0,
+                scrollSnapAlign: "start",
+              }}
+              onError={(e) => (e.target.style.opacity = 0.3)}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      <div className="px-5">
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <h2 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: 0 }}>
+            {car.make_model} {car.year ? `· ${car.year}` : ""}
+          </h2>
+          <span style={{ color: C.amber, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
+            {car.price}
+          </span>
+        </div>
+
+        <div style={{ color: C.creamDim, fontSize: 12.5, marginBottom: 14 }}>
+          {[car.city, countryLabel].filter(Boolean).join(" · ")}
+          {car.mileage ? ` · ${car.mileage} km` : ""}
+          {car.specs === "gulf" ? ` · ${t.carSpecsGulf}` : ""}
+          {car.specs === "american" ? ` · ${t.carSpecsAmerican}` : ""}
+        </div>
+
+        {car.description && (
+          <div
+            style={{
+              background: C.panel,
+              border: `1px solid ${C.panelLine}`,
+              borderRadius: 12,
+              padding: "12px 14px",
+              marginBottom: 16,
+            }}
+          >
+            <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+              {car.description}
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={() =>
+            window.open(`https://wa.me/${car.phone.replace(/[^0-9]/g, "")}`, "_blank")
+          }
+          className="w-full flex items-center justify-center gap-2"
+          style={{
+            background: C.amber,
+            border: "none",
+            borderRadius: 12,
+            padding: "13px 16px",
+            cursor: "pointer",
+          }}
+        >
+          <MessageCircle size={18} color={C.asphalt} />
+          <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.carContact}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CarsView({ lang, t, isRTL }) {
   const [mode, setMode] = useState("browse"); // browse | add | submitted
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -2457,6 +2570,18 @@ function CarsView({ lang, t, isRTL }) {
       active = false;
     };
   }, [mode]);
+
+  if (selected) {
+    return (
+      <CarDetailView
+        lang={lang}
+        t={t}
+        isRTL={isRTL}
+        car={selected}
+        onBack={() => setSelected(null)}
+      />
+    );
+  }
 
   if (mode === "add") {
     return (
@@ -2559,11 +2684,13 @@ function CarsView({ lang, t, isRTL }) {
           {listings.map((c) => (
             <div
               key={c.id}
+              onClick={() => setSelected(c)}
               style={{
                 background: C.panel,
                 border: `1px solid ${C.panelLine}`,
                 borderRadius: 14,
                 overflow: "hidden",
+                cursor: "pointer",
               }}
             >
               {(c.photo_url || (c.photo_urls && c.photo_urls[0])) && (
@@ -2616,12 +2743,10 @@ function CarsView({ lang, t, isRTL }) {
                   </p>
                 )}
                 <button
-                  onClick={() =>
-                    window.open(
-                      `https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`,
-                      "_blank"
-                    )
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`, "_blank");
+                  }}
                   className="flex items-center justify-center gap-2 mt-3"
                   style={{
                     width: "100%",
