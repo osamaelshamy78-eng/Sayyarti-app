@@ -13,6 +13,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
+import GarageListingForm from "./components/GarageListingForm";
 
 /* ---------------------------------------------------------------
    Design tokens
@@ -1590,8 +1591,8 @@ function Section({ label, color, children }) {
     </div>
   );
 }
-
 function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRTL }) {
+  const [showGarageForm, setShowGarageForm] = useState(false);
   const issue = ISSUES[issueId][lang];
   return (
     <div className="pb-6">
@@ -1717,6 +1718,7 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
           <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.watchVideo}</span>
         </button>
       </div>
+    <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
     </div>
   );
 }
@@ -1756,11 +1758,7 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
       </div>
 
       <button
-        onClick={() =>
-          (window.location.href =
-            "mailto:osamaelshamy78@gmail.com?subject=" +
-            encodeURIComponent("Garage Listing Request — Karaji"))
-        }
+        onClick={() => setShowGarageForm(true)}
         className="w-full flex items-center justify-center gap-2 mb-4"
         style={{
           background: C.amber,
