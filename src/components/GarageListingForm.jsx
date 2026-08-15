@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient"; // عدّل المسار ده لو ملف supabase عندك في مكان مختلف
+import { supabase } from "../supabaseClient";
 
 // ===== بيانات الحساب البنكي =====
 const BANK_DETAILS = {
