@@ -2542,11 +2542,9 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
   );
 }
 
-function CarsView({ lang, t, isRTL }) {
-  const [mode, setMode] = useState("browse"); // browse | add | submitted
+function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSelectCar, onBack }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -2573,13 +2571,7 @@ function CarsView({ lang, t, isRTL }) {
 
   if (selected) {
     return (
-      <CarDetailView
-        lang={lang}
-        t={t}
-        isRTL={isRTL}
-        car={selected}
-        onBack={() => setSelected(null)}
-      />
+      <CarDetailView lang={lang} t={t} isRTL={isRTL} car={selected} onBack={onBack} />
     );
   }
 
@@ -2589,8 +2581,8 @@ function CarsView({ lang, t, isRTL }) {
         lang={lang}
         t={t}
         isRTL={isRTL}
-        onClose={() => setMode("browse")}
-        onSubmitted={() => setMode("submitted")}
+        onClose={onBack}
+        onSubmitted={onSubmitted}
       />
     );
   }
@@ -2614,7 +2606,7 @@ function CarsView({ lang, t, isRTL }) {
           {t.carSubmitted}
         </p>
         <button
-          onClick={() => setMode("browse")}
+          onClick={onBack}
           style={{
             background: C.amber,
             border: "none",
@@ -2644,7 +2636,7 @@ function CarsView({ lang, t, isRTL }) {
       </p>
 
       <button
-        onClick={() => setMode("add")}
+        onClick={onOpenAdd}
         className="w-full flex items-center justify-center gap-2 mb-5"
         style={{
           background: C.amber,
@@ -2684,7 +2676,7 @@ function CarsView({ lang, t, isRTL }) {
           {listings.map((c) => (
             <div
               key={c.id}
-              onClick={() => setSelected(c)}
+              onClick={() => onSelectCar(c)}
               style={{
                 background: C.panel,
                 border: `1px solid ${C.panelLine}`,
@@ -2780,6 +2772,8 @@ export default function App() {
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeIssueId, setActiveIssueId] = useState(null);
   const [country, setCountry] = useState("uae");
+  const [carMode, setCarMode] = useState("browse"); // browse | add | submitted
+  const [selectedCar, setSelectedCar] = useState(null);
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
@@ -2790,6 +2784,53 @@ export default function App() {
     }, 1000 * 30);
     return () => clearInterval(id);
   }, []);
+
+  // --- Browser back-button support -------------------------------
+  // Each time the user drills into a deeper screen we push a history
+  // entry. The hardware/browser back button then fires "popstate",
+  // and we step the in-app view back one level instead of leaving
+  // the page entirely.
+  function navPush(replace) {
+    try {
+      if (replace) window.history.replaceState({ t: Date.now() }, "");
+      else window.history.pushState({ t: Date.now() }, "");
+    } catch (e) {}
+  }
+  const goBack = () => {
+    try {
+      window.history.back();
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    function handlePopState() {
+      if (view === "cars" && selectedCar) {
+        setSelectedCar(null);
+        return;
+      }
+      if (view === "cars" && carMode !== "browse") {
+        setCarMode("browse");
+        return;
+      }
+      if (view === "issue") {
+        setView("category");
+        return;
+      }
+      if (view === "category" || view === "guide") {
+        setView("home");
+        setActiveCategory(null);
+        setActiveIssueId(null);
+        return;
+      }
+      if (view !== "home") {
+        setView("home");
+        return;
+      }
+      // already at the top level — let the browser handle it naturally
+    }
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [view, selectedCar, carMode]);
 
   const isRTL = lang === "ar";
   const t = T[lang];
@@ -2803,17 +2844,33 @@ export default function App() {
   function openCategory(cat) {
     setActiveCategory(cat);
     setView("category");
+    navPush();
   }
   function openGuide() {
     setView("guide");
+    navPush();
   }
   function openIssue(id) {
     setActiveIssueId(id);
     setView("issue");
+    navPush();
+  }
+  function openCarAdd() {
+    setCarMode("add");
+    navPush();
+  }
+  function carSubmitted() {
+    setCarMode("submitted");
+    navPush(true);
+  }
+  function selectCar(car) {
+    setSelectedCar(car);
+    navPush();
   }
   function setNav(id) {
     if (id === "home") goHome();
     else setView(id);
+    navPush();
   }
 
   return (
@@ -2857,7 +2914,7 @@ export default function App() {
               lang={lang}
               t={t}
               onOpenCategory={openCategory}
-              onBack={goHome}
+              onBack={goBack}
               isRTL={isRTL}
             />
           )}
@@ -2867,7 +2924,7 @@ export default function App() {
               t={t}
               category={activeCategory}
               onOpenIssue={openIssue}
-              onBack={goHome}
+              onBack={goBack}
               isRTL={isRTL}
             />
           )}
@@ -2876,7 +2933,7 @@ export default function App() {
               lang={lang}
               t={t}
               issueId={activeIssueId}
-              onBack={() => setView("category")}
+              onBack={goBack}
               categoryLabel={activeCategory ? activeCategory[lang] : t.navIssues}
               CategoryIcon={activeCategory ? activeCategory.icon : null}
               isRTL={isRTL}
@@ -2886,7 +2943,19 @@ export default function App() {
             <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
           )}
           {view === "advertise" && <AdvertiseView lang={lang} t={t} isRTL={isRTL} />}
-          {view === "cars" && <CarsView lang={lang} t={t} isRTL={isRTL} />}
+          {view === "cars" && (
+            <CarsView
+              lang={lang}
+              t={t}
+              isRTL={isRTL}
+              mode={carMode}
+              selected={selectedCar}
+              onOpenAdd={openCarAdd}
+              onSubmitted={carSubmitted}
+              onSelectCar={selectCar}
+              onBack={goBack}
+            />
+          )}
         </div>
 
         <BottomNav lang={lang} t={t} view={view} setView={setNav} />
