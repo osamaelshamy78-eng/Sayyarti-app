@@ -936,6 +936,342 @@ const ISSUES = {
       video: "سبب صوت الطرق عند المطبات",
     },
   },
+  squealingBelt: {
+    en: {
+      title: "Squealing or Screeching Belt Noise",
+      symptoms: [
+        "High-pitched squeal on startup or acceleration",
+        "Noise gets louder when AC is on",
+        "Chirping sound while driving",
+      ],
+      causes: [
+        "Worn or loose serpentine/drive belt",
+        "Worn belt tensioner or pulley",
+        "Belt glazed or misaligned",
+      ],
+      steps: [
+        "Check the belt visually for cracks, fraying, or glazing",
+        "Have the tensioner and pulleys checked, not just the belt",
+        "Replace the belt if it's cracked or over 60,000 km old",
+        "Don't ignore it — a snapped belt can cause overheating or loss of power steering",
+      ],
+      video: "squealing belt noise car causes",
+    },
+    ar: {
+      title: "صوت صرير أو صفير من السير (الحزام)",
+      symptoms: [
+        "صوت صفير حاد عند بدء التشغيل أو التسارع",
+        "الصوت يزيد عند تشغيل المكيف",
+        "صوت تغريد أثناء القيادة",
+      ],
+      causes: [
+        "سير المحرك (الترميل) متآكل أو رخو",
+        "تعطل شداد السير أو البكرات",
+        "السير غير محاذي بشكل صحيح",
+      ],
+      steps: [
+        "افحص السير بصريًا بحثًا عن تشققات أو تلف",
+        "اطلب فحص الشداد والبكرات وليس السير فقط",
+        "استبدل السير إذا كان متشققًا أو عمره أكثر من ٦٠ ألف كم",
+        "لا تتجاهل الصوت، فانقطاع السير قد يسبب ارتفاع حرارة المحرك أو فقدان مقود الباور",
+      ],
+      video: "سبب صوت صرير السير في السيارة",
+    },
+  },
+  flatTire: {
+    en: {
+      title: "Flat Tire or Tire Blowout",
+      symptoms: [
+        "Car pulling to one side suddenly",
+        "Thumping sound or vibration",
+        "Visible loss of tire pressure or a burst tire",
+      ],
+      causes: [
+        "Sharp object puncture (nail, glass, debris)",
+        "Under-inflated tire overheating and bursting",
+        "Old or worn-out tire tread",
+      ],
+      steps: [
+        "Hold the wheel firmly, ease off the gas, and pull over slowly — don't brake hard",
+        "Turn on hazard lights and move to a safe area away from traffic",
+        "Replace with the spare tire if you have one and know how, otherwise call roadside assistance",
+        "Get the tire inspected — a repaired puncture is fine, but sidewall damage means replacement",
+      ],
+      video: "how to safely handle a flat tire blowout",
+    },
+    ar: {
+      title: "إطار مفرغ أو انفجار إطار",
+      symptoms: [
+        "انجراف مفاجئ للسيارة ناحية واحدة",
+        "صوت خبط أو اهتزاز واضح",
+        "فقدان واضح في ضغط الإطار أو انفجاره",
+      ],
+      causes: [
+        "ثقب من جسم حاد (مسمار، زجاج، حصى)",
+        "نقص هواء الإطار مما يسبب ارتفاع حرارته وانفجاره",
+        "قدم أو تآكل نقشة الإطار",
+      ],
+      steps: [
+        "امسك المقود بثبات، ارفع قدمك عن البنزين تدريجيًا، وقف السيارة ببطء دون فرملة مفاجئة",
+        "شغّل إشارات الخطر وابتعد عن حركة المرور",
+        "بدّل بالإطار الاحتياطي إذا كان متوفرًا وتعرف الطريقة، أو اتصل بخدمة المساعدة على الطريق",
+        "افحص الإطار بعدها؛ الثقب البسيط يمكن إصلاحه لكن تلف الجدار الجانبي يستوجب تغيير الإطار",
+      ],
+      video: "كيفية التعامل مع انفجار الإطار بأمان",
+    },
+  },
+  fuelSmell: {
+    en: {
+      title: "Smell of Gasoline Inside or Around the Car",
+      symptoms: [
+        "Strong fuel odor while driving or parked",
+        "Smell stronger after refueling",
+        "Visible fuel stain or wet spot under the car",
+      ],
+      causes: [
+        "Loose or damaged fuel cap",
+        "Fuel line or injector leak",
+        "Cracked fuel tank or evaporative system leak",
+      ],
+      steps: [
+        "Check the fuel cap is properly closed first — the most common cause",
+        "Do not start the engine if you see fuel dripping or pooling — fire risk",
+        "Have the fuel system inspected by a mechanic as soon as possible",
+        "Keep the car ventilated and avoid smoking near it in the meantime",
+      ],
+      video: "smell of gasoline in car causes",
+    },
+    ar: {
+      title: "رائحة بنزين داخل السيارة أو حولها",
+      symptoms: [
+        "رائحة بنزين قوية أثناء القيادة أو وقوف السيارة",
+        "الرائحة تزيد بعد التعبئة",
+        "بقعة وقود أو رطوبة ظاهرة تحت السيارة",
+      ],
+      causes: [
+        "غطاء خزان الوقود غير محكم أو تالف",
+        "تسرب في خط الوقود أو البخاخات",
+        "شرخ في خزان الوقود أو تسرب في نظام تبخر الوقود",
+      ],
+      steps: [
+        "تأكد أولًا من إحكام غطاء الخزان، فهو السبب الأكثر شيوعًا",
+        "لا تشغّل المحرك إذا رأيت تسرب وقود أو بركة تحت السيارة لخطورة الحريق",
+        "اطلب فحص نظام الوقود من ميكانيكي في أقرب وقت",
+        "احرص على تهوية السيارة وتجنب التدخين بالقرب منها لحين الفحص",
+      ],
+      video: "سبب رائحة البنزين في السيارة",
+    },
+  },
+  powerWindow: {
+    en: {
+      title: "Power Window Not Working",
+      symptoms: [
+        "Window won't go up or down",
+        "Window moves slowly or gets stuck partway",
+        "Clicking or grinding sound from the door",
+      ],
+      causes: [
+        "Blown fuse for the window motor",
+        "Faulty window switch",
+        "Worn window regulator or motor",
+      ],
+      steps: [
+        "Check if other windows work — if only one fails, it's likely that door's switch or motor",
+        "Check the fuse box for a blown window fuse and replace if needed",
+        "Avoid forcing the window up or down manually, it can damage the regulator further",
+        "Have the door panel opened and the regulator/motor inspected by a mechanic",
+      ],
+      video: "power window not working fix",
+    },
+    ar: {
+      title: "الشباك الكهربائي لا يعمل",
+      symptoms: [
+        "الشباك لا يتحرك للأعلى أو الأسفل",
+        "الشباك يتحرك ببطء أو يتوقف في المنتصف",
+        "صوت طقطقة أو احتكاك من الباب",
+      ],
+      causes: [
+        "فيوز موتور الشباك محروق",
+        "عطل في مفتاح تشغيل الشباك",
+        "تآكل موتور أو مكينة (ريجيولاتور) الشباك",
+      ],
+      steps: [
+        "تأكد هل باقي الشبابيك تعمل، فإذا كان شباك واحد فقط فالمشكلة غالبًا في مفتاحه أو موتوره",
+        "افحص علبة الفيوزات وابحث عن فيوز الشباك المحروق واستبدله إذا لزم",
+        "تجنب تحريك الشباك يدويًا بالقوة لأن ذلك قد يزيد تلف المكينة",
+        "اطلب فتح باب السيارة وفحص المكينة/الموتور من ميكانيكي",
+      ],
+      video: "الشباك الكهربائي لا يعمل السبب والحل",
+    },
+  },
+  keyFobIssue: {
+    en: {
+      title: "Remote Key / Key Fob Not Working",
+      symptoms: [
+        "Car doesn't unlock or lock with the remote",
+        "Push-to-start doesn't recognize the key",
+        "Key works only when very close to the car",
+      ],
+      causes: [
+        "Dead or weak key fob battery",
+        "Key fob out of sync with the car",
+        "Faulty receiver module in the car",
+      ],
+      steps: [
+        "Replace the key fob's small battery first — the most common and cheapest fix",
+        "Try the manual key blade to unlock the door if available",
+        "Check the owner's manual for the key re-sync procedure",
+        "If it still fails, have a dealer or locksmith reprogram or diagnose the key",
+      ],
+      video: "car remote key fob not working fix",
+    },
+    ar: {
+      title: "الريموت (المفتاح) لا يعمل",
+      symptoms: [
+        "السيارة لا تفتح أو تقفل بالريموت",
+        "نظام التشغيل بالضغط لا يتعرف على المفتاح",
+        "المفتاح يعمل فقط عند الاقتراب الشديد من السيارة",
+      ],
+      causes: [
+        "بطارية الريموت ضعيفة أو فارغة",
+        "الريموت غير متزامن مع السيارة",
+        "عطل في وحدة الاستقبال بالسيارة",
+      ],
+      steps: [
+        "غيّر بطارية الريموت الصغيرة أولًا، فهذا الحل الأشيع والأرخص",
+        "استخدم المفتاح اليدوي (السلاح) لفتح الباب إن وجد",
+        "راجع كتيب السيارة لمعرفة طريقة إعادة مزامنة المفتاح",
+        "إذا استمرت المشكلة، توجه للوكيل أو فني مفاتيح لإعادة برمجة أو فحص المفتاح",
+      ],
+      video: "الريموت لا يعمل السبب والحل",
+    },
+  },
+  wiperIssue: {
+    en: {
+      title: "Wipers Not Working Properly",
+      symptoms: [
+        "Wipers don't move at all",
+        "Wipers streak or leave dry spots",
+        "Wipers move but no washer fluid sprays",
+      ],
+      causes: [
+        "Worn-out wiper blades",
+        "Blown wiper fuse or faulty wiper motor",
+        "Empty washer fluid reservoir or clogged nozzle",
+      ],
+      steps: [
+        "Check and top up the washer fluid reservoir first",
+        "Replace worn wiper blades — they should be changed every 6–12 months",
+        "Check the fuse box if the wipers don't move at all",
+        "If the motor is silent even with a good fuse, have it inspected by a mechanic",
+      ],
+      video: "car wipers not working fix",
+    },
+    ar: {
+      title: "المساحات لا تعمل بشكل صحيح",
+      symptoms: [
+        "المساحات لا تتحرك إطلاقًا",
+        "المساحات تترك خطوط أو مناطق جافة على الزجاج",
+        "المساحات تتحرك لكن بدون رشّ سائل الغسيل",
+      ],
+      causes: [
+        "ريش المساحات تالفة",
+        "فيوز المساحات محروق أو موتور المساحات معطل",
+        "خزان سائل الغسيل فارغ أو الفتحة مسدودة",
+      ],
+      steps: [
+        "تحقق من خزان سائل الغسيل وأضف السائل إذا كان فارغًا",
+        "استبدل ريش المساحات التالفة، ويُفضّل تغييرها كل ٦ إلى ١٢ شهرًا",
+        "افحص علبة الفيوزات إذا لم تتحرك المساحات إطلاقًا",
+        "إذا كان الموتور صامتًا رغم سلامة الفيوز، اطلب فحصه من ميكانيكي",
+      ],
+      video: "المساحات لا تعمل السبب والحل",
+    },
+  },
+  clutchSlip: {
+    en: {
+      title: "Clutch Slipping (Manual Transmission)",
+      symptoms: [
+        "Engine revs rise without matching speed increase",
+        "Burning smell while driving",
+        "Loss of power especially going uphill or accelerating",
+      ],
+      causes: [
+        "Worn clutch plate/disc",
+        "Clutch cable or hydraulic system misadjusted",
+        "Oil or fluid contamination on the clutch",
+      ],
+      steps: [
+        "Avoid riding the clutch pedal or resting your foot on it while driving",
+        "Have the clutch free play/hydraulic system checked and adjusted",
+        "If slipping is severe, avoid heavy loads or steep inclines until it's fixed",
+        "Get the clutch disc/pressure plate inspected — it may need replacement",
+      ],
+      video: "clutch slipping symptoms causes manual car",
+    },
+    ar: {
+      title: "انزلاق الدبرياج (كلتش) - جير عادي",
+      symptoms: [
+        "ارتفاع دورة المحرك دون زيادة مماثلة في السرعة",
+        "رائحة احتراق أثناء القيادة",
+        "ضعف واضح في القدرة خاصة عند الصعود أو التسارع",
+      ],
+      causes: [
+        "تآكل قرص الدبرياج",
+        "عدم ضبط سلك أو نظام الدبرياج الهيدروليكي",
+        "تلوث الدبرياج بالزيت أو السائل",
+      ],
+      steps: [
+        "تجنب إبقاء قدمك على دواسة الدبرياج أثناء القيادة",
+        "اطلب فحص وضبط الفراغ الحر لدواسة الدبرياج أو النظام الهيدروليكي",
+        "إذا كان الانزلاق شديدًا، تجنب الأحمال الثقيلة أو الطرق شديدة الانحدار لحين الإصلاح",
+        "افحص قرص وطبلون الدبرياج، فقد يحتاجا للاستبدال",
+      ],
+      video: "سبب انزلاق الدبرياج في السيارة",
+    },
+  },
+  exhaustSmoke: {
+    en: {
+      title: "Smoke Coming From the Exhaust",
+      symptoms: [
+        "Blue smoke — usually oil burning",
+        "White smoke — usually coolant burning or condensation",
+        "Black smoke — usually excess fuel or poor combustion",
+      ],
+      causes: [
+        "Worn piston rings or valve seals (blue smoke)",
+        "Head gasket leak letting coolant into the engine (white smoke)",
+        "Faulty fuel injector or clogged air filter (black smoke)",
+      ],
+      steps: [
+        "Note the smoke color, it strongly narrows down the cause",
+        "White smoke on cold mornings that clears quickly is often just condensation and normal",
+        "Persistent white or blue smoke means stop driving soon and get it checked",
+        "Have a mechanic run a compression test or check the head gasket if smoke continues",
+      ],
+      video: "exhaust smoke color meaning car",
+    },
+    ar: {
+      title: "دخان من العادم",
+      symptoms: [
+        "دخان أزرق: غالبًا حرق زيت",
+        "دخان أبيض: غالبًا حرق سائل تبريد أو تكاثف",
+        "دخان أسود: غالبًا زيادة وقود أو احتراق غير كامل",
+      ],
+      causes: [
+        "تآكل حلقات المكبس أو سدادات الصمامات (دخان أزرق)",
+        "تسرب في جوان الكولاسة يدخل سائل التبريد للمحرك (دخان أبيض)",
+        "عطل في البخاخات أو انسداد فلتر الهواء (دخان أسود)",
+      ],
+      steps: [
+        "لاحظ لون الدخان جيدًا، فهو يحدد السبب المحتمل بدقة",
+        "الدخان الأبيض الخفيف في الصباح البارد الذي يختفي سريعًا غالبًا مجرد تكاثف طبيعي",
+        "الدخان الأبيض أو الأزرق المستمر يعني التوقف عن القيادة قريبًا وطلب الفحص",
+        "اطلب من الميكانيكي عمل اختبار ضغط أو فحص جوان الكولاسة إذا استمر الدخان",
+      ],
+      video: "سبب خروج دخان من العادم حسب اللون",
+    },
+  },
 };
 
 const GARAGES = {
@@ -2243,6 +2579,296 @@ const CAR_MAKES = [
       { en: "Defender", ar: "ديفندر" },
       { en: "Evoque", ar: "إيفوك" },
       { en: "Sport", ar: "سبورت" },
+    ],
+  },
+  {
+    code: "volkswagen",
+    en: "Volkswagen",
+    ar: "فولكس فاجن",
+    models: [
+      { en: "Golf", ar: "جولف" },
+      { en: "Jetta", ar: "جيتا" },
+      { en: "Passat", ar: "باسات" },
+      { en: "Tiguan", ar: "تيجوان" },
+      { en: "Teramont", ar: "تيرامونت" },
+    ],
+  },
+  {
+    code: "audi",
+    en: "Audi",
+    ar: "أودي",
+    models: [
+      { en: "A3", ar: "إيه 3" },
+      { en: "A4", ar: "إيه 4" },
+      { en: "A6", ar: "إيه 6" },
+      { en: "Q5", ar: "كيو 5" },
+      { en: "Q7", ar: "كيو 7" },
+    ],
+  },
+  {
+    code: "suzuki",
+    en: "Suzuki",
+    ar: "سوزوكي",
+    models: [
+      { en: "Swift", ar: "سويفت" },
+      { en: "Vitara", ar: "فيتارا" },
+      { en: "Baleno", ar: "بالينو" },
+      { en: "Ciaz", ar: "سياز" },
+      { en: "Jimny", ar: "جيمني" },
+    ],
+  },
+  {
+    code: "peugeot",
+    en: "Peugeot",
+    ar: "بيجو",
+    models: [
+      { en: "301", ar: "301" },
+      { en: "308", ar: "308" },
+      { en: "3008", ar: "3008" },
+      { en: "5008", ar: "5008" },
+      { en: "2008", ar: "2008" },
+    ],
+  },
+  {
+    code: "mazda",
+    en: "Mazda",
+    ar: "مازدا",
+    models: [
+      { en: "Mazda3", ar: "مازدا 3" },
+      { en: "Mazda6", ar: "مازدا 6" },
+      { en: "CX-5", ar: "سي إكس 5" },
+      { en: "CX-9", ar: "سي إكس 9" },
+      { en: "CX-3", ar: "سي إكس 3" },
+    ],
+  },
+  {
+    code: "gmc",
+    en: "GMC",
+    ar: "جي إم سي",
+    models: [
+      { en: "Yukon", ar: "يوكن" },
+      { en: "Sierra", ar: "سييرا" },
+      { en: "Terrain", ar: "تيرين" },
+      { en: "Acadia", ar: "أكاديا" },
+    ],
+  },
+  {
+    code: "infiniti",
+    en: "Infiniti",
+    ar: "إنفينيتي",
+    models: [
+      { en: "Q50", ar: "كيو 50" },
+      { en: "QX60", ar: "كيو إكس 60" },
+      { en: "QX80", ar: "كيو إكس 80" },
+      { en: "QX50", ar: "كيو إكس 50" },
+    ],
+  },
+  {
+    code: "volvo",
+    en: "Volvo",
+    ar: "فولفو",
+    models: [
+      { en: "S60", ar: "إس 60" },
+      { en: "S90", ar: "إس 90" },
+      { en: "XC60", ar: "إكس سي 60" },
+      { en: "XC90", ar: "إكس سي 90" },
+    ],
+  },
+  {
+    code: "skoda",
+    en: "Skoda",
+    ar: "سكودا",
+    models: [
+      { en: "Octavia", ar: "أوكتافيا" },
+      { en: "Superb", ar: "سوبيرب" },
+      { en: "Kodiaq", ar: "كودياك" },
+      { en: "Karoq", ar: "كاروك" },
+    ],
+  },
+  {
+    code: "chery",
+    en: "Chery",
+    ar: "شيري",
+    models: [
+      { en: "Tiggo 7", ar: "تيجو 7" },
+      { en: "Tiggo 8", ar: "تيجو 8" },
+      { en: "Arrizo 5", ar: "أريزو 5" },
+      { en: "Tiggo 4", ar: "تيجو 4" },
+    ],
+  },
+  {
+    code: "fiat",
+    en: "Fiat",
+    ar: "فيات",
+    models: [
+      { en: "Tipo", ar: "تيبو" },
+      { en: "500", ar: "500" },
+      { en: "Panda", ar: "باندا" },
+      { en: "Doblo", ar: "دوبلو" },
+    ],
+  },
+  {
+    code: "byd",
+    en: "BYD",
+    ar: "بي واي دي",
+    models: [
+      { en: "F3", ar: "إف 3" },
+      { en: "Song Plus", ar: "سونج بلس" },
+      { en: "Atto 3", ar: "أتو 3" },
+      { en: "Han", ar: "هان" },
+    ],
+  },
+  {
+    code: "porsche",
+    en: "Porsche",
+    ar: "بورش",
+    models: [
+      { en: "Cayenne", ar: "كايين" },
+      { en: "Macan", ar: "ماكان" },
+      { en: "Panamera", ar: "باناميرا" },
+      { en: "911", ar: "911" },
+    ],
+  },
+  {
+    code: "genesis",
+    en: "Genesis",
+    ar: "جينيسيس",
+    models: [
+      { en: "G70", ar: "جي 70" },
+      { en: "G80", ar: "جي 80" },
+      { en: "G90", ar: "جي 90" },
+      { en: "GV80", ar: "جي في 80" },
+    ],
+  },
+  {
+    code: "cadillac",
+    en: "Cadillac",
+    ar: "كاديلاك",
+    models: [
+      { en: "Escalade", ar: "إسكاليد" },
+      { en: "XT5", ar: "إكس تي 5" },
+      { en: "XT6", ar: "إكس تي 6" },
+      { en: "CT5", ar: "سي تي 5" },
+    ],
+  },
+  {
+    code: "dodge",
+    en: "Dodge",
+    ar: "دودج",
+    models: [
+      { en: "Charger", ar: "تشارجر" },
+      { en: "Challenger", ar: "تشالنجر" },
+      { en: "Durango", ar: "دورانجو" },
+    ],
+  },
+  {
+    code: "jaguar",
+    en: "Jaguar",
+    ar: "جاكوار",
+    models: [
+      { en: "XE", ar: "إكس إي" },
+      { en: "XF", ar: "إكس إف" },
+      { en: "F-Pace", ar: "إف بيس" },
+      { en: "E-Pace", ar: "إي بيس" },
+    ],
+  },
+  {
+    code: "mini",
+    en: "Mini",
+    ar: "ميني",
+    models: [
+      { en: "Cooper", ar: "كوبر" },
+      { en: "Countryman", ar: "كاونتري مان" },
+      { en: "Clubman", ar: "كلوبمان" },
+    ],
+  },
+  {
+    code: "isuzu",
+    en: "Isuzu",
+    ar: "إيسوزو",
+    models: [
+      { en: "D-Max", ar: "دي ماكس" },
+      { en: "MU-X", ar: "إم يو إكس" },
+    ],
+  },
+  {
+    code: "haval",
+    en: "Haval",
+    ar: "هافال",
+    models: [
+      { en: "H6", ar: "إتش 6" },
+      { en: "Jolion", ar: "جوليون" },
+      { en: "H9", ar: "إتش 9" },
+    ],
+  },
+  {
+    code: "geely",
+    en: "Geely",
+    ar: "جيلي",
+    models: [
+      { en: "Emgrand", ar: "إمجراند" },
+      { en: "Coolray", ar: "كولراي" },
+      { en: "Azkarra", ar: "أزكارا" },
+    ],
+  },
+  {
+    code: "jac",
+    en: "JAC",
+    ar: "جاك",
+    models: [
+      { en: "S3", ar: "إس 3" },
+      { en: "J4", ar: "جيه 4" },
+      { en: "JS4", ar: "جيه إس 4" },
+    ],
+  },
+  {
+    code: "daihatsu",
+    en: "Daihatsu",
+    ar: "دايهاتسو",
+    models: [
+      { en: "Terios", ar: "تيريوس" },
+      { en: "Sirion", ar: "سيريون" },
+    ],
+  },
+  {
+    code: "opel",
+    en: "Opel",
+    ar: "أوبل",
+    models: [
+      { en: "Astra", ar: "أسترا" },
+      { en: "Corsa", ar: "كورسا" },
+      { en: "Grandland", ar: "جراندلاند" },
+    ],
+  },
+  {
+    code: "subaru",
+    en: "Subaru",
+    ar: "سوبارو",
+    models: [
+      { en: "Forester", ar: "فورستر" },
+      { en: "Outback", ar: "أوت باك" },
+      { en: "XV", ar: "إكس في" },
+    ],
+  },
+  {
+    code: "tesla",
+    en: "Tesla",
+    ar: "تسلا",
+    models: [
+      { en: "Model 3", ar: "موديل 3" },
+      { en: "Model Y", ar: "موديل واي" },
+      { en: "Model S", ar: "موديل إس" },
+      { en: "Model X", ar: "موديل إكس" },
+    ],
+  },
+  {
+    code: "changan",
+    en: "Changan",
+    ar: "شانجان",
+    models: [
+      { en: "CS35", ar: "سي إس 35" },
+      { en: "CS55", ar: "سي إس 55" },
+      { en: "Eado", ar: "إيدو" },
     ],
   },
   { code: "other", en: "Other", ar: "أخرى", models: [] },
