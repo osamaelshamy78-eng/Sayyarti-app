@@ -8,6 +8,7 @@ import {
   Wrench,
   Info,
   Megaphone,
+  Settings,
   Car,
   Plus,
   MessageCircle,
@@ -1089,6 +1090,115 @@ const GARAGES = {
   },
 };
 
+const SPARE_PARTS = {
+  uae: {
+    en: "United Arab Emirates",
+    ar: "الإمارات العربية المتحدة",
+    list: [
+      {
+        name: "Al Hammadi Spare Parts",
+        area: { en: "Dubai, Abu Dhabi & Sharjah", ar: "دبي وأبوظبي والشارقة" },
+        note: {
+          en: "Trusted supplier since 1990 — body, engine parts & accessories",
+          ar: "مورّد موثوق منذ ١٩٩٠ — قطع هيكل ومحرك واكسسوارات",
+        },
+      },
+      {
+        name: "Al Zayan Auto Spare Parts",
+        area: { en: "Dubai", ar: "دبي" },
+        note: {
+          en: "Authorised dealer for genuine parts — Rolls Royce, BMW, Porsche & more",
+          ar: "وكيل معتمد لقطع أصلية — رولز رويس وبي إم دبليو وبورش وغيرها",
+        },
+      },
+      {
+        name: "Noorhan Trading",
+        area: { en: "Al Quoz Industrial Area 2, Dubai", ar: "منطقة القوز الصناعية ٢، دبي" },
+        note: {
+          en: "Genuine parts for Toyota, Honda, Nissan, Mazda & more since 1989",
+          ar: "قطع أصلية لتويوتا وهوندا ونيسان ومازدا وغيرها منذ ١٩٨٩",
+        },
+      },
+      {
+        name: "Divya Auto Spare Parts",
+        area: { en: "6 branches across the UAE", ar: "٦ فروع في الإمارات" },
+        note: {
+          en: "50,000+ parts in stock — Japanese & Korean brand specialist",
+          ar: "أكثر من ٥٠،٠٠٠ قطعة بالمخزون — متخصص في الماركات اليابانية والكورية",
+        },
+      },
+      {
+        name: "Best Auto Parts",
+        area: { en: "Dubai", ar: "دبي" },
+        note: {
+          en: "35+ years supplying genuine & aftermarket parts across the UAE",
+          ar: "أكثر من ٣٥ عامًا في توريد قطع أصلية وبديلة في الإمارات",
+        },
+      },
+    ],
+  },
+  ksa: {
+    en: "Saudi Arabia",
+    ar: "السعودية",
+    list: [
+      {
+        name: "Abdul Latif Jameel Parts",
+        area: { en: "Jeddah & branches nationwide", ar: "جدة وفروع بجميع أنحاء المملكة" },
+        note: {
+          en: "Official Toyota-authorised genuine spare parts distributor",
+          ar: "الموزع المعتمد الرسمي لقطع غيار تويوتا الأصلية",
+        },
+      },
+      {
+        name: "Al Shamry Auto Parts",
+        area: { en: "Riyadh", ar: "الرياض" },
+        note: {
+          en: "OEM & aftermarket parts for Japanese, Korean & European brands",
+          ar: "قطع أصلية وبديلة للماركات اليابانية والكورية والأوروبية",
+        },
+      },
+      {
+        name: "Al Hazmi Auto Parts",
+        area: { en: "Jeddah & Riyadh, delivery nationwide", ar: "جدة والرياض، توصيل لكل المملكة" },
+        note: {
+          en: "Wholesale American-brand spare parts, well-established name",
+          ar: "قطع غيار أمريكية بالجملة، اسم راسخ في السوق",
+        },
+      },
+    ],
+  },
+  egypt: {
+    en: "Egypt",
+    ar: "مصر",
+    list: [
+      {
+        name: "Cairo Spare Parts Market — Al Kholafawy",
+        area: { en: "Shubra, Cairo", ar: "شبرا، القاهرة" },
+        note: {
+          en: "Long-established parts market hub with wide brand coverage",
+          ar: "سوق قطع غيار عريق يغطي معظم الماركات",
+        },
+      },
+      {
+        name: "New Cairo Auto Parts — 90th Street",
+        area: { en: "5th Settlement, New Cairo", ar: "التجمع الخامس، القاهرة الجديدة" },
+        note: {
+          en: "Bosch service point, genuine & aftermarket parts",
+          ar: "نقطة خدمة بوش، قطع أصلية وبديلة",
+        },
+      },
+      {
+        name: "Alexandria Auto Parts — Sahara Road",
+        area: { en: "Sahara Road, Alexandria", ar: "طريق مصر إسكندرية الصحراوي" },
+        note: {
+          en: "Major industrial-zone parts supplier for Alexandria",
+          ar: "مورّد قطع غيار رئيسي بالمنطقة الصناعية بالإسكندرية",
+        },
+      },
+    ],
+  },
+};
+
 /* ---------------------------------------------------------------
    UI copy
 --------------------------------------------------------------- */
@@ -1115,6 +1225,11 @@ const T = {
       "Starter directory from public sources — confirm hours, pricing & contact details before visiting.",
     openInMaps: "Open in Maps →",
     addGarageBtn: "+ Add Your Garage",
+    navParts: "Spare Parts",
+    partsHeading: "Spare parts shops",
+    partsSub: "Pick a country to browse trusted spare parts dealers",
+    partsNote:
+      "Starter directory from public sources — confirm stock, pricing & authenticity before visiting. Want your shop listed? Add it via the Garages tab.",
     navAdvertise: "Advertise",
     advertiseHeading: "Advertise With Us",
     advertiseSub: "Reach car owners across the UAE, KSA & Egypt",
@@ -1180,6 +1295,11 @@ const T = {
       "دليل أولي من مصادر عامة — يرجى التأكد من مواعيد العمل والأسعار وبيانات التواصل قبل الزيارة.",
     openInMaps: "← افتح في الخرائط",
     addGarageBtn: "+ أضف جراجك",
+    navParts: "قطع غيار",
+    partsHeading: "محلات قطع الغيار",
+    partsSub: "اختر دولة لتصفح موزعي قطع الغيار الموثوقين",
+    partsNote:
+      "دليل أولي من مصادر عامة — يرجى التأكد من توفر القطعة والسعر والأصالة قبل الزيارة. عايز تضيف محلك؟ ضيفه من تبويب الجراجات.",
     navAdvertise: "أعلن معنا",
     advertiseHeading: "أعلن معنا",
     advertiseSub: "وصّل لأصحاب السيارات في الإمارات والسعودية ومصر",
@@ -1297,7 +1417,7 @@ function BottomNav({ lang, t, view, setView }) {
     { id: "home", label: t.navIssues, icon: Gauge },
     { id: "garages", label: t.navGarages, icon: MapPin },
     { id: "cars", label: t.navCars, icon: Car },
-    { id: "advertise", label: t.navAdvertise, icon: Megaphone },
+    { id: "parts", label: t.navParts, icon: Settings },
   ];
   return (
     <div
@@ -1833,71 +1953,96 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
   );
 }
 
-function AdvertiseView({ lang, t, isRTL }) {
+function SparePartsView({ lang, t, country, setCountry, isRTL }) {
+  const data = SPARE_PARTS[country] || SPARE_PARTS.uae;
+  const partsCountryCode = SPARE_PARTS[country] ? country : "uae";
   return (
     <div className="px-5 pt-5 pb-6">
+      <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
+        {t.partsHeading}
+      </h1>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.partsSub}</p>
+
+      <div className="flex gap-2 mb-4">
+        {Object.keys(SPARE_PARTS).map((code) => {
+          const active = code === partsCountryCode;
+          return (
+            <button
+              key={code}
+              onClick={() => setCountry(code)}
+              style={{
+                flex: 1,
+                border: `1px solid ${active ? C.amber : C.panelLine}`,
+                background: active ? `${C.amber}18` : C.panel,
+                color: active ? C.amber : C.creamDim,
+                borderRadius: 10,
+                padding: "9px 6px",
+                fontSize: 11.5,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {SPARE_PARTS[code][lang]}
+            </button>
+          );
+        })}
+      </div>
+
       <div
-        className="flex items-center justify-center rounded-full mb-4"
+        className="flex items-start gap-2 mb-4"
         style={{
-          width: 52,
-          height: 52,
-          background: `${C.amber}18`,
-          border: `1px solid ${C.amberDim}`,
+          background: `${C.blue}14`,
+          border: `1px solid ${C.blue}44`,
+          borderRadius: 10,
+          padding: "10px 12px",
         }}
       >
-        <Megaphone size={24} color={C.amber} />
+        <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
+        <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.partsNote}</span>
       </div>
-      <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
-        {t.advertiseHeading}
-      </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 18 }}>
-        {t.advertiseSub}
-      </p>
 
-      <div className="flex flex-col gap-2.5 mb-6">
-        {t.advertiseBullets.map((b, i) => (
-          <div
+      <div className="flex flex-col gap-2.5">
+        {data.list.map((p, i) => (
+          <button
             key={i}
+            onClick={() =>
+              window.open(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  `${p.name} ${p.area.en} ${data.en}`
+                )}`,
+                "_blank"
+              )
+            }
+            className="w-full"
             style={{
               background: C.panel,
               border: `1px solid ${C.panelLine}`,
-              borderRadius: 12,
-              padding: "12px 14px",
-              display: "flex",
-              gap: 10,
-              alignItems: "flex-start",
+              borderRadius: 14,
+              padding: "14px 16px",
+              cursor: "pointer",
               textAlign: isRTL ? "right" : "left",
+              display: "block",
             }}
           >
-            <span style={{ color: C.amber, flexShrink: 0 }}>●</span>
-            <span style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.5 }}>{b}</span>
-          </div>
+            <div className="flex items-start justify-between gap-2">
+              <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{p.name}</span>
+              <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
+            </div>
+            <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
+              {p.area[lang]}
+            </div>
+            <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
+              {p.note[lang]}
+            </div>
+            <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 600 }}>
+              {t.openInMaps}
+            </div>
+          </button>
         ))}
       </div>
-
-      <p style={{ color: C.creamDim, fontSize: 12, marginBottom: 10, textAlign: isRTL ? "right" : "left" }}>
-        {t.advertiseNote}
-      </p>
-
-      <button
-        onClick={() =>
-          (window.location.href =
-            "mailto:osamaelshamy78@gmail.com?subject=" + encodeURIComponent("Advertising Inquiry — Karaji"))
-        }
-        className="w-full flex items-center justify-center gap-2"
-        style={{
-          background: C.amber,
-          border: "none",
-          borderRadius: 12,
-          padding: "13px 16px",
-          cursor: "pointer",
-        }}
-      >
-        <Megaphone size={18} color={C.asphalt} />
-        <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.advertiseCTA}</span>
-      </button>
     </div>
   );
+
 }
 
 /* ---------------------------------------------------------------
@@ -2945,7 +3090,9 @@ export default function App() {
           {view === "garages" && (
             <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
           )}
-          {view === "advertise" && <AdvertiseView lang={lang} t={t} isRTL={isRTL} />}
+          {view === "parts" && (
+            <SparePartsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+          )}
           {view === "cars" && (
             <CarsView
               lang={lang}
