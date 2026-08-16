@@ -12,6 +12,7 @@ import {
   Car,
   Plus,
   MessageCircle,
+  HelpCircle,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -149,7 +150,7 @@ const CATEGORIES = [
     ar: "المحرك",
     guideEn: "Check Engine",
     guideAr: "افحص المحرك",
-    issues: ["checkEngine", "overheating", "noStart"],
+    issues: ["checkEngine", "overheating", "noStart", "exhaustSmoke", "fuelSmell", "squealingBelt"],
 
   },
   {
@@ -159,7 +160,7 @@ const CATEGORIES = [
     ar: "البطارية والكهرباء",
     guideEn: "Battery Charge",
     guideAr: "شحن البطارية",
-    issues: ["deadBattery", "altWarning"],
+    issues: ["deadBattery", "altWarning", "keyFobIssue"],
   },
   {
     id: "brakes",
@@ -186,7 +187,7 @@ const CATEGORIES = [
     ar: "الإطارات",
     guideEn: "Tire Pressure",
     guideAr: "ضغط الإطارات",
-    issues: ["tirePressure", "unevenWear"],
+    issues: ["tirePressure", "unevenWear", "flatTire"],
   },
   {
     id: "oil",
@@ -204,7 +205,7 @@ const CATEGORIES = [
     ar: "ناقل الحركة",
     guideEn: "Transmission",
     guideAr: "ناقل الحركة",
-    issues: ["transSlip", "noShift"],
+    issues: ["transSlip", "noShift", "clutchSlip"],
   },
   {
     id: "suspension",
@@ -215,9 +216,60 @@ const CATEGORIES = [
     guideAr: "نظام التوجيه",
     issues: ["steeringVibration", "clunkBumps"],
   },
+  {
+    id: "general",
+    icon: HelpCircle,
+    en: "General / Not Sure What's Wrong",
+    ar: "أعطال عامة / مش عارف العطل فين",
+    guideEn: "Not Sure? Start Here",
+    guideAr: "مش متأكد؟ ابدأ من هنا",
+    issues: ["notSureIssue", "powerWindow", "wiperIssue"],
+  },
 ];
 
 const ISSUES = {
+  notSureIssue: {
+    en: {
+      title: "Not Sure What's Wrong? Start Here",
+      symptoms: [
+        "Something feels off but you can't tell exactly what",
+        "A mix of small symptoms at once (noise + smell + light, etc.)",
+        "A new sound, smell, or feeling you don't recognize",
+      ],
+      causes: [
+        "Could be minor (low fluid, loose cap) or serious — the only way to know is to narrow it down",
+      ],
+      steps: [
+        "Check the dashboard for any warning lights — a lit icon points straight to the right category in this app",
+        "Note exactly when it happens: at startup, while driving, when braking, when turning, or only when the AC is on",
+        "Notice any smell, noise, smoke, or leak, and try to tell where it's coming from (front, back, under the hood, under the car)",
+        "Check fluid levels you can safely see: engine oil, coolant, brake fluid, washer fluid",
+        "If you have a way to, get an OBD-II scan — many garages do this for free and it reads the exact fault code",
+        "Still not sure? Don't keep driving and guessing — use the Garages tab to find a nearby garage and describe the symptoms to them directly",
+      ],
+      video: "how to diagnose a car problem when you don't know what's wrong",
+    },
+    ar: {
+      title: "مش عارف العطل فين بالظبط؟ ابدأ من هنا",
+      symptoms: [
+        "حاسس إن في حاجة مش طبيعية بس مش عارف تحددها",
+        "أكتر من عرض بسيط في نفس الوقت (صوت + ريحة + لمبة تحذير مثلاً)",
+        "صوت أو ريحة أو إحساس جديد مش متعود عليه",
+      ],
+      causes: [
+        "ممكن يكون سبب بسيط (نقص سائل، غطاء مش محكم) أو سبب أكبر، والطريقة الوحيدة لمعرفة السبب هي تحديد العرض بدقة",
+      ],
+      steps: [
+        "افحص لوحة القيادة وشوف هل فيه أي لمبة تحذير مضاءة، فهي بتوجهك مباشرة للقسم المناسب في التطبيق",
+        "لاحظ بالظبط إمتى بتحصل المشكلة: عند بدء التشغيل، أثناء القيادة، عند الفرملة، عند لف المقود، أو بس لما المكيف شغال",
+        "لاحظ أي ريحة أو صوت أو دخان أو تسريب وحاول تحدد مكانه (قدام، ورا، تحت الكبوت، تحت العربية)",
+        "افحص مستويات السوائل اللي تقدر تشوفها بأمان: زيت المحرك، سائل التبريد، زيت الفرامل، سائل الغسيل",
+        "لو تقدر، اعمل فحص بجهاز OBD-II، ورش كتير بتعمله مجانًا وبيقرأ كود العطل بالظبط",
+        "لسه مش متأكد؟ متكملش تسوق وانت مخمن، استخدم تاب الجراجات في التطبيق ودور على جراج قريب واشرحله العرض مباشرة",
+      ],
+      video: "طريقة تشخيص عطل السيارة لما ما تعرفش السبب",
+    },
+  },
   checkEngine: {
     en: {
       title: "Check Engine Light Is On",
