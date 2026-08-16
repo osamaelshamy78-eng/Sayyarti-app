@@ -2248,26 +2248,40 @@ const CAR_MAKES = [
   { code: "other", en: "Other", ar: "أخرى", models: [] },
 ];
 
+const CAR_FORM_DRAFT_KEY = "karaji_car_form_draft";
+
 function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
-  const [form, setForm] = useState({
-    car_make: "",
-    car_model: "",
-    custom_make: "",
-    custom_model: "",
-    year: "",
-    price: "",
-    mileage: "",
-    chassis_number: "",
-    city: "",
-    country: "uae",
-    specs: "",
-    phone: "",
-    description: "",
-    photo_urls: [],
+  const [form, setForm] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CAR_FORM_DRAFT_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return {
+      car_make: "",
+      car_model: "",
+      custom_make: "",
+      custom_model: "",
+      year: "",
+      price: "",
+      mileage: "",
+      chassis_number: "",
+      city: "",
+      country: "uae",
+      specs: "",
+      phone: "",
+      description: "",
+      photo_urls: [],
+    };
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CAR_FORM_DRAFT_KEY, JSON.stringify(form));
+    } catch (e) {}
+  }, [form]);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -2354,6 +2368,9 @@ function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
       setError(insertError.message);
       return;
     }
+    try {
+      localStorage.removeItem(CAR_FORM_DRAFT_KEY);
+    } catch (e) {}
     onSubmitted();
   }
 
