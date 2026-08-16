@@ -1591,8 +1591,8 @@ function Section({ label, color, children }) {
     </div>
   );
 }
+
 function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRTL }) {
-  const [showGarageForm, setShowGarageForm] = useState(false);
   const issue = ISSUES[issueId][lang];
   return (
     <div className="pb-6">
@@ -1718,12 +1718,12 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
           <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.watchVideo}</span>
         </button>
       </div>
-    <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
     </div>
   );
 }
 
 function GaragesView({ lang, t, country, setCountry, isRTL }) {
+  const [showGarageForm, setShowGarageForm] = useState(false);
   const data = GARAGES[country];
   return (
     <div className="px-5 pt-5 pb-6">
@@ -1824,6 +1824,11 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
           </button>
         ))}
       </div>
+
+      <GarageListingForm
+        isOpen={showGarageForm}
+        onClose={() => setShowGarageForm(false)}
+      />
     </div>
   );
 }
