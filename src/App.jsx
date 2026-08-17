@@ -14,6 +14,7 @@ import {
   MessageCircle,
   HelpCircle,
   Search,
+  Droplet,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -1913,6 +1914,11 @@ const T = {
     faultCodeNoResults: "No matching code found — try the categories below, or ask a garage to scan it.",
     faultCodeMeaning: "What it means",
     faultCodeViewGuide: "View full troubleshooting guide →",
+    navMaintenance: "Quick Service",
+    maintenanceHeading: "Quick Service & Oil Change Centers",
+    maintenanceSub: "Pick a country to browse trusted quick-service chains",
+    maintenanceNote:
+      "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
   },
   ar: {
     wordmark: "كراجي",
@@ -1988,6 +1994,11 @@ const T = {
     faultCodeNoResults: "مفيش كود مطابق، جرب الأقسام تحت، أو اطلب من الجراج يفحصه بالجهاز.",
     faultCodeMeaning: "معنى الكود",
     faultCodeViewGuide: "شوف دليل الحل الكامل ←",
+    navMaintenance: "الصيانة السريعة",
+    maintenanceHeading: "مراكز الصيانة السريعة وتغيير الزيت",
+    maintenanceSub: "اختر الدولة عشان تشوف السلاسل الموثوقة",
+    maintenanceNote:
+      "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
   },
 };
 
@@ -2063,6 +2074,7 @@ function BottomNav({ lang, t, view, setView }) {
   const items = [
     { id: "home", label: t.navIssues, icon: Gauge },
     { id: "garages", label: t.navGarages, icon: MapPin },
+    { id: "maintenance", label: t.navMaintenance, icon: Droplet },
     { id: "cars", label: t.navCars, icon: Car },
     { id: "parts", label: t.navParts, icon: Settings },
   ];
@@ -2844,6 +2856,194 @@ function SparePartsView({ lang, t, country, setCountry, isRTL }) {
     </div>
   );
 
+}
+
+const MAINTENANCE_CENTERS = {
+  uae: {
+    en: "United Arab Emirates",
+    ar: "الإمارات العربية المتحدة",
+    list: [
+      {
+        name: "ADNOC Voyager Lube Change",
+        area: { en: "200+ stations across the UAE", ar: "أكتر من ٢٠٠ محطة في الإمارات" },
+        note: {
+          en: "Drive-thru quick oil change with a free 12-point vehicle check",
+          ar: "تغيير زيت سريع في الطابور بدون نزول من العربية، مع فحص مجاني من ١٢ نقطة",
+        },
+      },
+      {
+        name: "AutoPro (ENOC Group)",
+        area: { en: "40+ locations across Dubai, Sharjah & Ras Al Khaimah", ar: "أكتر من ٤٠ فرع في دبي والشارقة ورأس الخيمة" },
+        note: {
+          en: "UAE's largest quick-service network — oil, tyres, battery & AC",
+          ar: "أكبر شبكة صيانة سريعة في الإمارات، بتشمل الزيت والإطارات والبطارية والتكييف",
+        },
+      },
+      {
+        name: "Petromin Express",
+        area: { en: "Branches across the UAE", ar: "فروع في مختلف إمارات الدولة" },
+        note: {
+          en: "Regional quick-service chain — multi-brand oil, battery, tyres & AC under one roof",
+          ar: "سلسلة صيانة سريعة إقليمية، زيوت وبطاريات وإطارات وتكييف تحت سقف واحد",
+        },
+      },
+    ],
+  },
+  ksa: {
+    en: "Saudi Arabia",
+    ar: "المملكة العربية السعودية",
+    list: [
+      {
+        name: "Petromin Express",
+        area: { en: "700+ stations nationwide", ar: "أكتر من ٧٠٠ محطة في كل أنحاء المملكة" },
+        note: {
+          en: "Saudi's largest professional quick-service network — oil, battery, tyres & AC",
+          ar: "أكبر شبكة صيانة سريعة احترافية في السعودية، زيوت وبطاريات وإطارات وتكييف",
+        },
+      },
+      {
+        name: "Shell Helix Service Centers",
+        area: { en: "Stations across the Kingdom", ar: "محطات في مختلف مناطق المملكة" },
+        note: {
+          en: "Branded quick oil-change service at Shell fuel stations",
+          ar: "خدمة تغيير زيت سريعة بعلامة شل داخل محطات وقود شل",
+        },
+      },
+      {
+        name: "ADNOC Distribution",
+        area: { en: "Service stations in the Eastern Province & other regions", ar: "محطات خدمة في المنطقة الشرقية ومناطق أخرى" },
+        note: {
+          en: "Oil-change and car-care services at ADNOC stations in KSA",
+          ar: "خدمات تغيير زيت وعناية بالسيارة في محطات أدنوك بالمملكة",
+        },
+      },
+    ],
+  },
+  egypt: {
+    en: "Egypt",
+    ar: "مصر",
+    list: [
+      {
+        name: "TotalEnergies Quartz Auto Care",
+        area: { en: "40+ centers nationwide", ar: "أكتر من ٤٠ مركز في جميع المحافظات" },
+        note: {
+          en: "Quick oil change with free lubricant inspection, plus tyres, battery & wheel alignment",
+          ar: "تغيير زيت سريع مع فحص مجاني للتشحيم، وكمان إطارات وبطاريات وضبط زوايا",
+        },
+      },
+      {
+        name: "Petromin Express",
+        area: { en: "Branches across Egypt", ar: "فروع في مختلف المحافظات" },
+        note: {
+          en: "Regional quick-service chain — multi-brand oil, battery, tyres & AC under one roof",
+          ar: "سلسلة صيانة سريعة إقليمية، زيوت وبطاريات وإطارات وتكييف تحت سقف واحد",
+        },
+      },
+      {
+        name: "Nacita Auto Care",
+        area: { en: "Multiple branches across Egypt", ar: "فروع متعددة في مصر" },
+        note: {
+          en: "Oil change and general car-care service centers",
+          ar: "مراكز لتغيير الزيت والعناية العامة بالسيارة",
+        },
+      },
+    ],
+  },
+};
+
+function MaintenanceView({ lang, t, country, setCountry, isRTL }) {
+  const data = MAINTENANCE_CENTERS[country] || MAINTENANCE_CENTERS.uae;
+  const maintenanceCountryCode = MAINTENANCE_CENTERS[country] ? country : "uae";
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
+        {t.maintenanceHeading}
+      </h1>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>
+        {t.maintenanceSub}
+      </p>
+
+      <div className="flex gap-2 mb-4">
+        {Object.keys(MAINTENANCE_CENTERS).map((code) => {
+          const active = code === maintenanceCountryCode;
+          return (
+            <button
+              key={code}
+              onClick={() => setCountry(code)}
+              style={{
+                flex: 1,
+                border: `1px solid ${active ? C.amber : C.panelLine}`,
+                background: active ? `${C.amber}18` : C.panel,
+                color: active ? C.amber : C.creamDim,
+                borderRadius: 10,
+                padding: "9px 6px",
+                fontSize: 11.5,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              {MAINTENANCE_CENTERS[code][lang]}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        className="flex items-start gap-2 mb-4"
+        style={{
+          background: `${C.blue}14`,
+          border: `1px solid ${C.blue}44`,
+          borderRadius: 10,
+          padding: "10px 12px",
+        }}
+      >
+        <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
+        <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>
+          {t.maintenanceNote}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2.5">
+        {data.list.map((p, i) => (
+          <button
+            key={i}
+            onClick={() =>
+              window.open(
+                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  `${p.name} ${p.area.en} ${data.en}`
+                )}`,
+                "_blank"
+              )
+            }
+            className="w-full"
+            style={{
+              background: C.panel,
+              border: `1px solid ${C.panelLine}`,
+              borderRadius: 14,
+              padding: "14px 16px",
+              cursor: "pointer",
+              textAlign: isRTL ? "right" : "left",
+              display: "block",
+            }}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{p.name}</span>
+              <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
+            </div>
+            <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
+              {p.area[lang]}
+            </div>
+            <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
+              {p.note[lang]}
+            </div>
+            <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 600 }}>
+              {t.openInMaps}
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 /* ---------------------------------------------------------------
@@ -4203,6 +4403,9 @@ export default function App() {
           )}
           {view === "garages" && (
             <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+          )}
+          {view === "maintenance" && (
+            <MaintenanceView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
           )}
           {view === "parts" && (
             <SparePartsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
