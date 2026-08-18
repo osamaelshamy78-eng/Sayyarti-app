@@ -155,7 +155,7 @@ const CATEGORIES = [
     ar: "المحرك",
     guideEn: "Check Engine",
     guideAr: "افحص المحرك",
-    issues: ["checkEngine", "overheating", "noStart", "exhaustSmoke", "fuelSmell", "squealingBelt"],
+    issues: ["checkEngine", "overheating", "noStart", "exhaustSmoke", "fuelSmell", "squealingBelt", "roughIdle"],
 
   },
   {
@@ -165,7 +165,7 @@ const CATEGORIES = [
     ar: "البطارية والكهرباء",
     guideEn: "Battery Charge",
     guideAr: "شحن البطارية",
-    issues: ["deadBattery", "altWarning", "keyFobIssue"],
+    issues: ["deadBattery", "altWarning", "keyFobIssue", "batteryDrain"],
   },
   {
     id: "brakes",
@@ -174,7 +174,7 @@ const CATEGORIES = [
     ar: "الفرامل",
     guideEn: "Brake System",
     guideAr: "نظام الفرامل",
-    issues: ["brakeNoise", "softPedal"],
+    issues: ["brakeNoise", "softPedal", "brakeVibration"],
   },
   {
     id: "ac",
@@ -183,7 +183,7 @@ const CATEGORIES = [
     ar: "التكييف والتبريد",
     guideEn: "Engine Temperature",
     guideAr: "حرارة المحرك",
-    issues: ["acWarm", "acSmell"],
+    issues: ["acWarm", "acSmell", "acNoAir"],
   },
   {
     id: "tires",
@@ -192,7 +192,7 @@ const CATEGORIES = [
     ar: "الإطارات",
     guideEn: "Tire Pressure",
     guideAr: "ضغط الإطارات",
-    issues: ["tirePressure", "unevenWear", "flatTire"],
+    issues: ["tirePressure", "unevenWear", "flatTire", "tireVibration"],
   },
   {
     id: "oil",
@@ -219,7 +219,7 @@ const CATEGORIES = [
     ar: "التوجيه والتعليق",
     guideEn: "Power Steering",
     guideAr: "نظام التوجيه",
-    issues: ["steeringVibration", "clunkBumps"],
+    issues: ["steeringVibration", "clunkBumps", "shocksWorn"],
   },
   {
     id: "general",
@@ -1397,6 +1397,262 @@ const ISSUES = {
       video: "سبب خروج دخان من العادم حسب اللون",
     },
   },
+  roughIdle: {
+    en: {
+      title: "Rough Idle or Engine Shaking",
+      symptoms: [
+        "The engine shakes or vibrates noticeably while stopped/idling",
+        "RPM needle bounces up and down instead of staying steady",
+        "Engine feels like it might stall at a red light",
+      ],
+      causes: [
+        "Worn or fouled spark plugs / ignition coils causing a misfire",
+        "Dirty or faulty fuel injectors",
+        "Vacuum leak in a hose or intake gasket",
+        "Dirty throttle body or idle air control valve",
+      ],
+      steps: [
+        "Check if the check-engine light is also on, which points to a stored fault code",
+        "Note if it happens only when cold, only when hot, or all the time",
+        "Avoid heavy acceleration until it's checked, misfires can damage the catalytic converter over time",
+        "Get spark plugs, coils, and vacuum lines inspected at a garage",
+      ],
+      video: "rough idle car causes and fix",
+    },
+    ar: {
+      title: "اهتزاز المحرك أو خبط عند الوقوف",
+      symptoms: [
+        "المحرك بيهتز أو يرجّ بشكل واضح وهو واقف/في الدورة الخاملة",
+        "عداد اللفات بيصعد وينزل بدل ما يفضل ثابت",
+        "حاسس إن العربية ممكن تطفي عند الإشارة",
+      ],
+      causes: [
+        "بواجي أو كويلات إشعال متآكلة بتسبب ميس فاير",
+        "بخاخات وقود متسخة أو فيها عطل",
+        "تسريب هواء (فاكيوم) في خرطوم أو جوان السحب",
+        "جسم خانق أو حساس دورة خاملة متسخ",
+      ],
+      steps: [
+        "شوف لو لمبة المحرك مضاءة كمان، ده بيدل على كود عطل مسجل",
+        "لاحظ هل بيحصل وهي باردة، وهي سخنة، أو طول الوقت",
+        "تجنب الدعس القوي لحد ما تتفحص، الميس فاير ممكن يضر الكاتاليزر مع الوقت",
+        "اطلب فحص البواجي والكويلات وخراطيم الفاكيوم في الجراج",
+      ],
+      video: "سبب اهتزاز المحرك عند الوقوف",
+    },
+  },
+  batteryDrain: {
+    en: {
+      title: "Battery Keeps Dying Quickly",
+      symptoms: [
+        "Battery is dead again just a day or two after being charged/jump-started",
+        "Car struggles to start after sitting overnight",
+        "No obvious lights left on, yet battery still drains",
+      ],
+      causes: [
+        "A parasitic draw, something staying powered on after the car is off (interior light, aftermarket device, faulty relay)",
+        "An old or weak battery that no longer holds charge",
+        "A failing alternator not fully recharging the battery while driving",
+        "Corroded or loose battery terminals",
+      ],
+      steps: [
+        "Check terminals for corrosion or looseness and clean/tighten if needed",
+        "Make sure no interior lights, phone chargers, or accessories are left on",
+        "If it keeps happening, ask a garage to test the battery and alternator, and check for a parasitic draw",
+        "Note the battery's age, most batteries need replacing after 3-5 years",
+      ],
+      video: "car battery dies overnight parasitic drain test",
+    },
+    ar: {
+      title: "البطارية بتفضل تفضى بسرعة",
+      symptoms: [
+        "البطارية بتفضى تاني بعد يوم أو يومين بس من شحنها أو تنشيطها",
+        "العربية بتواجه صعوبة في الدوران بعد ما تقف طول الليل",
+        "مفيش حاجة واضحة سايبها شغالة، وبرضه البطارية بتفضى",
+      ],
+      causes: [
+        "استهلاك خفي، حاجة فاضلة واخدة كهرباء بعد ما تقفل العربية (نور داخلي، جهاز مركب، ريلاي عاطل)",
+        "بطارية قديمة أو ضعيفة مابقتش بتحتفظ بالشحن",
+        "دينامو مش بيشحن البطارية بالكامل وقت القيادة",
+        "أطراف البطارية متآكلة أو غير مثبتة كويس",
+      ],
+      steps: [
+        "افحص أطراف البطارية من التآكل أو الرخاوة ونضفها أو زودها لو محتاجة",
+        "اتأكد مفيش نور داخلي أو شاحن أو جهاز سايبه شغال",
+        "لو العطل بيتكرر، اطلب من الجراج يفحص البطارية والدينامو ويدور على استهلاك خفي",
+        "لاحظ عمر البطارية، أغلب البطاريات محتاجة تتغير بعد 3-5 سنين",
+      ],
+      video: "سبب فضاء البطارية بسرعة بدون سبب واضح",
+    },
+  },
+  brakeVibration: {
+    en: {
+      title: "Vibration or Pulsation When Braking",
+      symptoms: [
+        "Steering wheel or brake pedal shakes/pulses when pressing the brakes",
+        "Vibration gets stronger the harder you brake",
+        "Usually noticeable at higher speeds first",
+      ],
+      causes: [
+        "Warped brake rotors (discs), often from overheating or uneven wear",
+        "Uneven brake pad deposits on the rotor surface",
+        "Worn wheel bearing or loose suspension component (less common)",
+      ],
+      steps: [
+        "Avoid heavy or panic braking until it's checked, warped rotors reduce braking effectiveness",
+        "Note whether it happens only at high speed or at all speeds",
+        "Have a garage inspect the rotor thickness and surface for warping",
+        "Rotors may need resurfacing or replacement along with the pads",
+      ],
+      video: "brake pedal vibration warped rotors causes",
+    },
+    ar: {
+      title: "اهتزاز في العجلة أو الدواسة عند الفرملة",
+      symptoms: [
+        "عجلة القيادة أو دواسة الفرامل بتهتز عند الدعس على الفرامل",
+        "الاهتزاز بيزيد كل ما تفرمل بقوة أكتر",
+        "غالبًا بيبان الأول في السرعات العالية",
+      ],
+      causes: [
+        "طارة فرامل (دسك) معوجة، غالبًا من السخونة الزيادة أو التآكل الغير متساوي",
+        "ترسبات غير متساوية من التيل على سطح الطارة",
+        "بلي عجلة متآكل أو جزء في التعليق فك (أقل شيوعًا)",
+      ],
+      steps: [
+        "تجنب الفرملة القوية المفاجئة لحد الفحص، الطارة المعوجة بتقلل كفاءة الفرملة",
+        "لاحظ هل بيحصل بس في السرعة العالية ولا في كل السرعات",
+        "اطلب من الجراج يفحص سمك وسطح الطارة عشان يتأكد من الاعوجاج",
+        "الطارة ممكن تحتاج تسوية أو تغيير مع التيل",
+      ],
+      video: "سبب اهتزاز الفرامل عند الدعس",
+    },
+  },
+  acNoAir: {
+    en: {
+      title: "AC Blowing Weak or No Air",
+      symptoms: [
+        "Very little or no air comes out of the vents even on high fan speed",
+        "Air is cold when it does come out, just not much airflow",
+        "Sometimes gets better/worse when tapping the dashboard",
+      ],
+      causes: [
+        "Clogged cabin air filter blocking airflow",
+        "Blower motor weakening or failing",
+        "Blend door or blower motor resistor issue",
+        "Blocked vents or evaporator housing",
+      ],
+      steps: [
+        "Check and replace the cabin air filter first, it's the most common and cheapest cause",
+        "Test all fan speed settings to see if only certain speeds fail (points to the resistor)",
+        "If replacing the filter doesn't help, have a garage check the blower motor and resistor",
+      ],
+      video: "car AC blowing weak air fix",
+    },
+    ar: {
+      title: "التكييف بيطلع هوا ضعيف أو مفيش هوا خالص",
+      symptoms: [
+        "هوا قليل جدًا أو مفيش هوا طالع من الفتحات حتى على أعلى سرعة مروحة",
+        "الهوا بارد لما يطلع، بس الكمية قليلة",
+        "أحيانًا بيتحسن أو يسوء لما تخبط على التابلوه",
+      ],
+      causes: [
+        "فلتر هوا الكابينة متسد وبيمنع مرور الهواء",
+        "موتور المروحة (البلوّر) ضعيف أو بيعطل",
+        "عطل في مقاومة موتور المروحة أو باب الخلط",
+        "انسداد في الفتحات أو مبيت المبخر",
+      ],
+      steps: [
+        "افحص وغيّر فلتر هوا الكابينة الأول، ده أشيع سبب وأرخص حل",
+        "جرب كل سرعات المروحة عشان تشوف لو سرعات معينة بس مش شغالة (بيدل على المقاومة)",
+        "لو تغيير الفلتر مافادش، اطلب من الجراج يفحص موتور المروحة والمقاومة",
+      ],
+      video: "سبب ضعف هواء التكييف في السيارة",
+    },
+  },
+  tireVibration: {
+    en: {
+      title: "Steering Wheel Vibration at Speed",
+      symptoms: [
+        "Steering wheel shakes or wobbles, usually starting around 60-100 km/h",
+        "Vibration may lessen or increase at different speeds",
+        "Sometimes felt through the seat/floor as well",
+      ],
+      causes: [
+        "Wheel out of balance (most common cause)",
+        "Misaligned wheels",
+        "Bent rim or tire with an internal defect",
+        "Worn suspension or steering components",
+      ],
+      steps: [
+        "Note the exact speed range where it happens, this helps the technician diagnose it faster",
+        "Check tires for uneven wear, bulges, or visible damage",
+        "Get a wheel balance and alignment done, this fixes most cases",
+        "If it persists after balancing/alignment, ask the garage to check for bent rims or worn suspension parts",
+      ],
+      video: "steering wheel vibration at highway speed causes",
+    },
+    ar: {
+      title: "اهتزاز عجلة القيادة في السرعات العالية",
+      symptoms: [
+        "عجلة القيادة بتهتز أو ترعش، غالبًا بيبدأ حوالين 60-100 كم/س",
+        "الاهتزاز ممكن يقل أو يزيد في سرعات مختلفة",
+        "أحيانًا بيتحس كمان في الكرسي أو الأرضية",
+      ],
+      causes: [
+        "عدم توازن في الكاوتش (أشيع سبب)",
+        "عدم ضبط زوايا العجلات (الفرمة)",
+        "جنط معوج أو كاوتش فيه عيب داخلي",
+        "أجزاء تعليق أو توجيه متآكلة",
+      ],
+      steps: [
+        "لاحظ السرعة بالظبط اللي بيحصل فيها الاهتزاز، ده بيساعد الفني يشخص بسرعة",
+        "افحص الكاوتش من التآكل الغير متساوي أو الانتفاخ أو أي تلف واضح",
+        "اعمل توازن وضبط زوايا للعجلات، ده بيحل أغلب الحالات",
+        "لو الاهتزاز استمر بعد التوازن والضبط، اطلب من الجراج يفحص الجنوط وأجزاء التعليق",
+      ],
+      video: "سبب اهتزاز عجلة القيادة في السرعة العالية",
+    },
+  },
+  shocksWorn: {
+    en: {
+      title: "Bouncy or Rough Ride (Worn Shocks/Struts)",
+      symptoms: [
+        "Car bounces multiple times after going over a bump instead of settling quickly",
+        "Feels less stable/floaty during turns or braking",
+        "Uneven tire wear over time",
+      ],
+      causes: [
+        "Worn or leaking shock absorbers or struts",
+        "Worn suspension bushings",
+        "Broken or weakened springs",
+      ],
+      steps: [
+        "Do a simple bounce test, push down firmly on a corner of the car and release; if it bounces more than once or twice, shocks may be worn",
+        "Check for visible oil leaking from the shocks/struts",
+        "Have a garage inspect the suspension, worn shocks affect braking distance and handling, not just comfort",
+      ],
+      video: "worn shocks struts bounce test symptoms",
+    },
+    ar: {
+      title: "العربية بترتج كتير أو مشية مش مريحة (مساعدين تعبانين)",
+      symptoms: [
+        "العربية بترتج أكتر من مرة بعد ما تعدي مطب بدل ما تستقر بسرعة",
+        "حاسس إنها مش ثابتة أو طايرة شوية في اللفة أو الفرملة",
+        "تآكل غير متساوي في الكاوتش مع الوقت",
+      ],
+      causes: [
+        "مساعدين (شكمانات) تعبانين أو بيسرّبوا زيت",
+        "جلد التعليق (البوش) متآكل",
+        "سلندر أو نابض ضعيف أو مكسور",
+      ],
+      steps: [
+        "اعمل اختبار بسيط، ادعس بقوة على ركن العربية وسيبها؛ لو ارتدت أكتر من مرة أو اتنين يبقى المساعدين محتاجين تغيير",
+        "افحص لو فيه تسريب زيت واضح من المساعدين",
+        "اطلب من الجراج يفحص التعليق، المساعدين التعبانين بيأثروا على مسافة الفرملة والتحكم مش بس الراحة",
+      ],
+      video: "علامات تلف المساعدين وطريقة الفحص",
+    },
+  },
 };
 
 const OBD_CODES = {
@@ -1846,9 +2102,6 @@ const T = {
     wordmark: "Karaji",
     tagline: "Diagnose car issues & find trusted garages",
     navIssues: "Issues",
-    navFix: "Fix",
-    fixHeading: "Fix",
-    fixSub: "Choose a system to find the common fault and repair guide",
     navGarages: "Garages",
     homeHeading: "What's wrong with your car?",
     homeSub: "Tap a system to see common issues",
@@ -1932,9 +2185,6 @@ const T = {
     wordmark: "كراجي",
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
     navIssues: "الأعطال",
-    navFix: "شخص العطل",
-    fixHeading: "شخص العطل",
-    fixSub: "اختار نظام السيارة علشان تعرف العطل وطريقة الإصلاح",
     navGarages: "الورش",
     homeHeading: "ما هي مشكلة سيارتك؟",
     homeSub: "اضغط على أحد الأنظمة لرؤية الأعطال الشائعة",
@@ -2243,22 +2493,15 @@ const MAIN_SECTIONS = [
   { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
 ];
 
-function MainSectionsGrid({ lang, t, onOpenSection, onOpenFix }) {
-  const actions = [
-    ...MAIN_SECTIONS.map((s) => ({ ...s, type: "section" })),
-    { id: "fix", icon: Wrench, labelKey: "navFix", type: "fix" },
-  ];
-
+function MainSectionsGrid({ lang, t, onOpenSection }) {
   return (
     <div className="grid grid-cols-3 gap-3 mb-7">
-      {actions.map((s) => {
+      {MAIN_SECTIONS.map((s) => {
         const Icon = s.icon;
         return (
           <button
             key={s.id}
-            onClick={() =>
-              s.type === "fix" ? onOpenFix() : onOpenSection(s.id)
-            }
+            onClick={() => onOpenSection(s.id)}
             className="flex flex-col items-center gap-2"
             style={{
               background: C.panel,
@@ -2297,15 +2540,7 @@ function MainSectionsGrid({ lang, t, onOpenSection, onOpenFix }) {
   );
 }
 
-function HomeView({
-  lang,
-  t,
-  onOpenCategory,
-  onOpenGuide,
-  onOpenIssue,
-  onOpenSection,
-  onOpenFix,
-}) {
+function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSection }) {
   const [query, setQuery] = useState("");
   const [expandedCode, setExpandedCode] = useState(null);
 
@@ -2326,7 +2561,23 @@ function HomeView({
 
   return (
     <div className="px-5 pt-5 pb-6">
-      {/* 1. Fault-code search comes first on the home page */}
+      <h1
+        style={{
+          color: C.cream,
+          fontSize: 21,
+          fontWeight: 700,
+          fontFamily: "inherit",
+          margin: 0,
+        }}
+      >
+        {t.homeHeading}
+      </h1>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
+        {t.homeSub}
+      </p>
+
+      <MainSectionsGrid lang={lang} t={t} onOpenSection={onOpenSection} />
+
       <div className="mb-2">
         <label
           style={{
@@ -2463,7 +2714,6 @@ function HomeView({
         </div>
       )}
 
-      {/* 2. Warning-light guide comes directly after the search */}
       <button
         onClick={onOpenGuide}
         className="w-full flex items-center gap-3 mb-6"
@@ -2492,41 +2742,17 @@ function HomeView({
         )}
       </button>
 
-      {/* 3. Main app icons start with Garages, then the rest + Fix */}
-      <MainSectionsGrid
-        lang={lang}
-        t={t}
-        onOpenSection={onOpenSection}
-        onOpenFix={onOpenFix}
-      />
-    </div>
-  );
-}
-
-function FixView({ lang, t, onOpenCategory, onBack, isRTL }) {
-  return (
-    <div className="pb-6">
-      <BackHeader label={t.backHome} onBack={onBack} isRTL={isRTL} />
-      <div className="px-5">
-        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 4px 0" }}>
-          {t.fixHeading}
-        </h1>
-        <p style={{ color: C.creamDim, fontSize: 13, marginBottom: 18 }}>
-          {t.fixSub}
-        </p>
-
-        <div className="grid grid-cols-2 gap-y-7 gap-x-3">
-          {CATEGORIES.map((cat) => (
-            <Dial
-              key={cat.id}
-              Icon={cat.icon}
-              label={cat[lang]}
-              count={cat.issues.length}
-              unitLabel={cat.issues.length === 1 ? t.issuesCount : t.issuesCountPlural}
-              onClick={() => onOpenCategory(cat)}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-2 gap-y-7 gap-x-3">
+        {CATEGORIES.map((cat) => (
+          <Dial
+            key={cat.id}
+            Icon={cat.icon}
+            label={cat[lang]}
+            count={cat.issues.length}
+            unitLabel={cat.issues.length === 1 ? t.issuesCount : t.issuesCountPlural}
+            onClick={() => onOpenCategory(cat)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -4372,7 +4598,7 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
 --------------------------------------------------------------- */
 export default function App() {
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("home"); // home | fix | category | issue | garages
+  const [view, setView] = useState("home"); // home | category | issue | garages
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeIssueId, setActiveIssueId] = useState(null);
   const [country, setCountry] = useState("uae");
@@ -4422,7 +4648,7 @@ export default function App() {
         setView("category");
         return;
       }
-      if (view === "category" || view === "guide" || view === "fix") {
+      if (view === "category" || view === "guide") {
         setView("home");
         setActiveCategory(null);
         setActiveIssueId(null);
@@ -4454,10 +4680,6 @@ export default function App() {
   }
   function openGuide() {
     setView("guide");
-    navPush();
-  }
-  function openFix() {
-    setView("fix");
     navPush();
   }
   function openIssue(id) {
@@ -4539,16 +4761,6 @@ export default function App() {
               onOpenGuide={openGuide}
               onOpenIssue={openIssue}
               onOpenSection={openSection}
-              onOpenFix={openFix}
-            />
-          )}
-          {view === "fix" && (
-            <FixView
-              lang={lang}
-              t={t}
-              onOpenCategory={openCategory}
-              onBack={goBack}
-              isRTL={isRTL}
             />
           )}
           {view === "guide" && (
