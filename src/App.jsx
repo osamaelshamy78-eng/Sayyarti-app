@@ -16,6 +16,7 @@ import {
   Search,
   Droplet,
   Camera,
+  Menu,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -1922,6 +1923,7 @@ const T = {
     maintenanceNote:
       "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
     navDiagnosis: "Photo Diagnosis",
+    backHome: "Home",
   },
   ar: {
     wordmark: "كراجي",
@@ -2003,18 +2005,19 @@ const T = {
     maintenanceNote:
       "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
     navDiagnosis: "تشخيص بالصورة",
+    backHome: "الرئيسية",
   },
 };
 
 /* ---------------------------------------------------------------
    Small building blocks
 --------------------------------------------------------------- */
-function TopBar({ lang, setLang, t, onLogoTap }) {
+function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage }) {
   const isRTL = lang === "ar";
   return (
     <div
       className="flex items-center justify-between px-5 pt-3 pb-4"
-      style={{ borderBottom: `1px solid ${C.panelLine}` }}
+      style={{ borderBottom: `1px solid ${C.panelLine}`, position: "relative" }}
     >
       <button
         onClick={onLogoTap}
@@ -2045,31 +2048,82 @@ function TopBar({ lang, setLang, t, onLogoTap }) {
         </span>
       </button>
 
-      <div
-        className="flex items-center rounded-full p-0.5"
-        style={{ background: C.panel, border: `1px solid ${C.panelLine}` }}
-      >
-        {["en", "ar"].map((code) => (
+      <div className="flex items-center gap-2">
+        <div
+          className="flex items-center rounded-full p-0.5"
+          style={{ background: C.panel, border: `1px solid ${C.panelLine}` }}
+        >
+          {["en", "ar"].map((code) => (
+            <button
+              key={code}
+              onClick={() => setLang(code)}
+              style={{
+                border: "none",
+                cursor: "pointer",
+                padding: "5px 12px",
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                background: lang === code ? C.amber : "transparent",
+                color: lang === code ? C.asphalt : C.creamDim,
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              {code === "en" ? "EN" : "AR"}
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={onToggleMenu}
+          className="flex items-center justify-center rounded-full"
+          style={{
+            width: 32,
+            height: 32,
+            background: C.panel,
+            border: `1px solid ${C.panelLine}`,
+            cursor: "pointer",
+          }}
+        >
+          <Menu size={16} color={C.cream} strokeWidth={2} />
+        </button>
+      </div>
+
+      {menuOpen && (
+        <div
+          style={{
+            position: "absolute",
+            top: 54,
+            insetInlineEnd: 20,
+            background: C.panel,
+            border: `1px solid ${C.panelLine}`,
+            borderRadius: 12,
+            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            overflow: "hidden",
+            zIndex: 50,
+            minWidth: 190,
+          }}
+        >
           <button
-            key={code}
-            onClick={() => setLang(code)}
+            onClick={onAddGarage}
+            className="w-full"
             style={{
+              display: "block",
+              padding: "12px 16px",
+              background: "none",
               border: "none",
-              cursor: "pointer",
-              padding: "5px 12px",
-              borderRadius: 999,
-              fontSize: 12,
+              color: C.cream,
+              fontSize: 13,
               fontWeight: 600,
-              letterSpacing: "0.04em",
-              background: lang === code ? C.amber : "transparent",
-              color: lang === code ? C.asphalt : C.creamDim,
-              fontFamily: "'Inter', sans-serif",
+              textAlign: isRTL ? "right" : "left",
+              cursor: "pointer",
             }}
           >
-            {code === "en" ? "EN" : "AR"}
+            {t.addGarageBtn}
           </button>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -2175,7 +2229,62 @@ function Dial({ Icon, label, count, unitLabel, onClick }) {
 /* ---------------------------------------------------------------
    Views
 --------------------------------------------------------------- */
-function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
+const MAIN_SECTIONS = [
+  { id: "garages", icon: MapPin, labelKey: "navGarages" },
+  { id: "maintenance", icon: Droplet, labelKey: "navMaintenance" },
+  { id: "cars", icon: Car, labelKey: "navCars" },
+  { id: "parts", icon: Settings, labelKey: "navParts" },
+  { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
+];
+
+function MainSectionsGrid({ lang, t, onOpenSection }) {
+  return (
+    <div className="grid grid-cols-3 gap-3 mb-7">
+      {MAIN_SECTIONS.map((s) => {
+        const Icon = s.icon;
+        return (
+          <button
+            key={s.id}
+            onClick={() => onOpenSection(s.id)}
+            className="flex flex-col items-center gap-2"
+            style={{
+              background: C.panel,
+              border: `1px solid ${C.panelLine}`,
+              borderRadius: 14,
+              padding: "14px 8px",
+              cursor: "pointer",
+            }}
+          >
+            <div
+              className="flex items-center justify-center rounded-full"
+              style={{
+                width: 44,
+                height: 44,
+                background: `${C.amber}18`,
+                border: `1px solid ${C.amberDim}`,
+              }}
+            >
+              <Icon size={20} color={C.amber} strokeWidth={1.8} />
+            </div>
+            <span
+              style={{
+                color: C.cream,
+                fontSize: 11.5,
+                fontWeight: 600,
+                textAlign: "center",
+                lineHeight: 1.25,
+              }}
+            >
+              {t[s.labelKey]}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSection }) {
   const [query, setQuery] = useState("");
   const [expandedCode, setExpandedCode] = useState(null);
 
@@ -2210,6 +2319,8 @@ function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
       <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
         {t.homeSub}
       </p>
+
+      <MainSectionsGrid lang={lang} t={t} onOpenSection={onOpenSection} />
 
       <div className="mb-2">
         <label
@@ -4237,6 +4348,8 @@ export default function App() {
   const [country, setCountry] = useState("uae");
   const [carMode, setCarMode] = useState("browse"); // browse | add | submitted
   const [selectedCar, setSelectedCar] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [showGarageForm, setShowGarageForm] = useState(false);
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
@@ -4330,10 +4443,16 @@ export default function App() {
     setSelectedCar(car);
     navPush();
   }
-  function setNav(id) {
-    if (id === "home") goHome();
-    else setView(id);
+  function openSection(id) {
+    setView(id);
     navPush();
+  }
+  function toggleMenu() {
+    setMenuOpen((m) => !m);
+  }
+  function handleAddGarage() {
+    setMenuOpen(false);
+    setShowGarageForm(true);
   }
 
   return (
@@ -4366,7 +4485,16 @@ export default function App() {
           <span style={{ letterSpacing: 1 }}>●●●●</span>
         </div>
 
-        <TopBar lang={lang} setLang={setLang} t={t} onLogoTap={goHome} />
+        <TopBar
+          lang={lang}
+          setLang={setLang}
+          t={t}
+          onLogoTap={goHome}
+          menuOpen={menuOpen}
+          onToggleMenu={toggleMenu}
+          onAddGarage={handleAddGarage}
+        />
+        <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
         <div className="flex-1 overflow-y-auto">
           {view === "home" && (
@@ -4376,6 +4504,7 @@ export default function App() {
               onOpenCategory={openCategory}
               onOpenGuide={openGuide}
               onOpenIssue={openIssue}
+              onOpenSection={openSection}
             />
           )}
           {view === "guide" && (
@@ -4409,33 +4538,46 @@ export default function App() {
             />
           )}
           {view === "garages" && (
-            <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <GaragesView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            </>
           )}
           {view === "maintenance" && (
-            <MaintenanceView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <MaintenanceView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            </>
           )}
           {view === "parts" && (
-            <SparePartsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <SparePartsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+            </>
           )}
           {view === "diagnosis" && (
-            <PhotoDiagnosisView lang={lang} />
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <PhotoDiagnosisView lang={lang} />
+            </>
           )}
           {view === "cars" && (
-            <CarsView
-              lang={lang}
-              t={t}
-              isRTL={isRTL}
-              mode={carMode}
-              selected={selectedCar}
-              onOpenAdd={openCarAdd}
-              onSubmitted={carSubmitted}
-              onSelectCar={selectCar}
-              onBack={goBack}
-            />
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <CarsView
+                lang={lang}
+                t={t}
+                isRTL={isRTL}
+                mode={carMode}
+                selected={selectedCar}
+                onOpenAdd={openCarAdd}
+                onSubmitted={carSubmitted}
+                onSelectCar={selectCar}
+                onBack={goBack}
+              />
+            </>
           )}
         </div>
-
-        <BottomNav lang={lang} t={t} view={view} setView={setNav} />
       </div>
     </div>
   );
