@@ -91,10 +91,10 @@ export default function PhotoDiagnosisView({ lang }) {
 
   return (
     <div className="max-w-lg mx-auto p-4 pb-24" dir={isAr ? "rtl" : "ltr"}>
-      <h1 className="text-2xl font-bold mb-2">
+      <h1 className="text-2xl font-bold mb-2 text-white">
         {isAr ? "تشخيص بالصورة" : "Photo Diagnosis"}
       </h1>
-      <p className="text-sm text-gray-500 mb-6">
+      <p className="text-sm text-gray-400 mb-6">
         {isAr
           ? "ارفع صورة لجزء أو مشكلة في سيارتك وخد تشخيص فوري من الذكاء الاصطناعي"
           : "Upload a photo of a car part or issue and get an instant AI diagnosis"}
