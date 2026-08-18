@@ -1,7 +1,15 @@
 import { useState } from "react";
+import BuyCreditForm from "./BuyCreditForm"; // عدّل المسار ده لو حفظت الملف في مكان تاني
 
 const EDGE_FUNCTION_URL =
   "https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/smart-endpoint";
+
+// ===== باقات الرصيد (لازم تفضل مطابقة لـ BuyCreditForm.jsx) =====
+const PACKAGES = [
+  { credits: 3, price: 9, labelAr: "تجربة", labelEn: "Trial" },
+  { credits: 10, price: 25, labelAr: "قياسية", labelEn: "Standard" },
+  { credits: 25, price: 50, labelAr: "موفرة", labelEn: "Saver" },
+];
 
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
@@ -13,6 +21,7 @@ export default function PhotoDiagnosisView({ lang }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [creditsRemaining, setCreditsRemaining] = useState(null);
+  const [buyOpen, setBuyOpen] = useState(false);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -91,6 +100,53 @@ export default function PhotoDiagnosisView({ lang }) {
           : "Upload a photo of a car part or issue and get an instant AI diagnosis"}
       </p>
 
+      <div className="mb-5 bg-gray-50 border rounded-lg p-4">
+        <h2 className="font-semibold text-sm mb-2">
+          {isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}
+        </h2>
+        <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4 list-decimal" : "pl-4 list-decimal"}`}>
+          <li>
+            {isAr
+              ? "صوّر أو ارفع صورة واضحة للجزء أو المشكلة في عربيتك"
+              : "Take or upload a clear photo of the part or issue"}
+          </li>
+          <li>
+            {isAr
+              ? "الذكاء الاصطناعي بيحلل الصورة ويديك تشخيص أولي فوري"
+              : "AI analyzes the photo and gives you an instant preliminary diagnosis"}
+          </li>
+          <li>
+            {isAr
+              ? "كل تحليل بيخصم كريدت واحد من رصيدك"
+              : "Each analysis uses one credit from your balance"}
+          </li>
+        </ol>
+        <p className="text-xs text-gray-400 mt-2">
+          {isAr
+            ? "التشخيص استرشادي ولا يغني عن فحص ميكانيكي حقيقي."
+            : "This diagnosis is advisory only and doesn't replace a real mechanic's inspection."}
+        </p>
+
+        <h3 className="font-semibold text-sm mt-4 mb-2">
+          {isAr ? "أسعار الرصيد" : "Credit pricing"}
+        </h3>
+        <div className="space-y-1">
+          {PACKAGES.map((pkg) => (
+            <div key={pkg.credits} className="flex justify-between text-sm text-gray-600">
+              <span>{isAr ? pkg.labelAr : pkg.labelEn} — {isAr ? `${pkg.credits} تشخيص` : `${pkg.credits} diagnoses`}</span>
+              <span className="font-semibold text-gray-800">{pkg.price} {isAr ? "درهم" : "AED"}</span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => setBuyOpen(true)}
+          className="w-full mt-3 bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm"
+        >
+          {isAr ? "اشترِ رصيد" : "Buy credit"}
+        </button>
+      </div>
+
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">
           {isAr ? "كود الرصيد" : "Credit code"}
@@ -159,6 +215,8 @@ export default function PhotoDiagnosisView({ lang }) {
           )}
         </div>
       )}
+
+      <BuyCreditForm isOpen={buyOpen} onClose={() => setBuyOpen(false)} lang={lang} />
     </div>
   );
 }
