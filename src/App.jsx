@@ -1846,6 +1846,9 @@ const T = {
     wordmark: "Karaji",
     tagline: "Diagnose car issues & find trusted garages",
     navIssues: "Issues",
+    navFix: "Fix",
+    fixHeading: "Fix",
+    fixSub: "Choose a system to find the common fault and repair guide",
     navGarages: "Garages",
     homeHeading: "What's wrong with your car?",
     homeSub: "Tap a system to see common issues",
@@ -1929,6 +1932,9 @@ const T = {
     wordmark: "كراجي",
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
     navIssues: "الأعطال",
+    navFix: "شخص العطل",
+    fixHeading: "شخص العطل",
+    fixSub: "اختار نظام السيارة علشان تعرف العطل وطريقة الإصلاح",
     navGarages: "الورش",
     homeHeading: "ما هي مشكلة سيارتك؟",
     homeSub: "اضغط على أحد الأنظمة لرؤية الأعطال الشائعة",
@@ -2237,15 +2243,22 @@ const MAIN_SECTIONS = [
   { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
 ];
 
-function MainSectionsGrid({ lang, t, onOpenSection }) {
+function MainSectionsGrid({ lang, t, onOpenSection, onOpenFix }) {
+  const actions = [
+    ...MAIN_SECTIONS.map((s) => ({ ...s, type: "section" })),
+    { id: "fix", icon: Wrench, labelKey: "navFix", type: "fix" },
+  ];
+
   return (
     <div className="grid grid-cols-3 gap-3 mb-7">
-      {MAIN_SECTIONS.map((s) => {
+      {actions.map((s) => {
         const Icon = s.icon;
         return (
           <button
             key={s.id}
-            onClick={() => onOpenSection(s.id)}
+            onClick={() =>
+              s.type === "fix" ? onOpenFix() : onOpenSection(s.id)
+            }
             className="flex flex-col items-center gap-2"
             style={{
               background: C.panel,
@@ -2284,7 +2297,15 @@ function MainSectionsGrid({ lang, t, onOpenSection }) {
   );
 }
 
-function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSection }) {
+function HomeView({
+  lang,
+  t,
+  onOpenCategory,
+  onOpenGuide,
+  onOpenIssue,
+  onOpenSection,
+  onOpenFix,
+}) {
   const [query, setQuery] = useState("");
   const [expandedCode, setExpandedCode] = useState(null);
 
@@ -2305,23 +2326,7 @@ function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSec
 
   return (
     <div className="px-5 pt-5 pb-6">
-      <h1
-        style={{
-          color: C.cream,
-          fontSize: 21,
-          fontWeight: 700,
-          fontFamily: "inherit",
-          margin: 0,
-        }}
-      >
-        {t.homeHeading}
-      </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
-        {t.homeSub}
-      </p>
-
-      <MainSectionsGrid lang={lang} t={t} onOpenSection={onOpenSection} />
-
+      {/* 1. Fault-code search comes first on the home page */}
       <div className="mb-2">
         <label
           style={{
@@ -2458,6 +2463,7 @@ function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSec
         </div>
       )}
 
+      {/* 2. Warning-light guide comes directly after the search */}
       <button
         onClick={onOpenGuide}
         className="w-full flex items-center gap-3 mb-6"
@@ -2486,17 +2492,41 @@ function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSec
         )}
       </button>
 
-      <div className="grid grid-cols-2 gap-y-7 gap-x-3">
-        {CATEGORIES.map((cat) => (
-          <Dial
-            key={cat.id}
-            Icon={cat.icon}
-            label={cat[lang]}
-            count={cat.issues.length}
-            unitLabel={cat.issues.length === 1 ? t.issuesCount : t.issuesCountPlural}
-            onClick={() => onOpenCategory(cat)}
-          />
-        ))}
+      {/* 3. Main app icons start with Garages, then the rest + Fix */}
+      <MainSectionsGrid
+        lang={lang}
+        t={t}
+        onOpenSection={onOpenSection}
+        onOpenFix={onOpenFix}
+      />
+    </div>
+  );
+}
+
+function FixView({ lang, t, onOpenCategory, onBack, isRTL }) {
+  return (
+    <div className="pb-6">
+      <BackHeader label={t.backHome} onBack={onBack} isRTL={isRTL} />
+      <div className="px-5">
+        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 4px 0" }}>
+          {t.fixHeading}
+        </h1>
+        <p style={{ color: C.creamDim, fontSize: 13, marginBottom: 18 }}>
+          {t.fixSub}
+        </p>
+
+        <div className="grid grid-cols-2 gap-y-7 gap-x-3">
+          {CATEGORIES.map((cat) => (
+            <Dial
+              key={cat.id}
+              Icon={cat.icon}
+              label={cat[lang]}
+              count={cat.issues.length}
+              unitLabel={cat.issues.length === 1 ? t.issuesCount : t.issuesCountPlural}
+              onClick={() => onOpenCategory(cat)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -4342,7 +4372,7 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
 --------------------------------------------------------------- */
 export default function App() {
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("home"); // home | category | issue | garages
+  const [view, setView] = useState("home"); // home | fix | category | issue | garages
   const [activeCategory, setActiveCategory] = useState(null);
   const [activeIssueId, setActiveIssueId] = useState(null);
   const [country, setCountry] = useState("uae");
@@ -4392,7 +4422,7 @@ export default function App() {
         setView("category");
         return;
       }
-      if (view === "category" || view === "guide") {
+      if (view === "category" || view === "guide" || view === "fix") {
         setView("home");
         setActiveCategory(null);
         setActiveIssueId(null);
@@ -4424,6 +4454,10 @@ export default function App() {
   }
   function openGuide() {
     setView("guide");
+    navPush();
+  }
+  function openFix() {
+    setView("fix");
     navPush();
   }
   function openIssue(id) {
@@ -4505,6 +4539,16 @@ export default function App() {
               onOpenGuide={openGuide}
               onOpenIssue={openIssue}
               onOpenSection={openSection}
+              onOpenFix={openFix}
+            />
+          )}
+          {view === "fix" && (
+            <FixView
+              lang={lang}
+              t={t}
+              onOpenCategory={openCategory}
+              onBack={goBack}
+              isRTL={isRTL}
             />
           )}
           {view === "guide" && (
