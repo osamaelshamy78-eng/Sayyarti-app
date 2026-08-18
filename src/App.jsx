@@ -2486,6 +2486,7 @@ function Dial({ Icon, label, count, unitLabel, onClick }) {
    Views
 --------------------------------------------------------------- */
 const MAIN_SECTIONS = [
+  { id: "fix", icon: Gauge, labelKey: "navIssues" },
   { id: "garages", icon: MapPin, labelKey: "navGarages" },
   { id: "maintenance", icon: Droplet, labelKey: "navMaintenance" },
   { id: "cars", icon: Car, labelKey: "navCars" },
@@ -2540,7 +2541,30 @@ function MainSectionsGrid({ lang, t, onOpenSection }) {
   );
 }
 
-function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSection }) {
+function HomeView({ lang, t, onOpenSection }) {
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <h1
+        style={{
+          color: C.cream,
+          fontSize: 21,
+          fontWeight: 700,
+          fontFamily: "inherit",
+          margin: 0,
+        }}
+      >
+        {t.homeHeading}
+      </h1>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
+        {t.homeSub}
+      </p>
+
+      <MainSectionsGrid lang={lang} t={t} onOpenSection={onOpenSection} />
+    </div>
+  );
+}
+
+function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
   const [query, setQuery] = useState("");
   const [expandedCode, setExpandedCode] = useState(null);
 
@@ -2561,23 +2585,6 @@ function HomeView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenSec
 
   return (
     <div className="px-5 pt-5 pb-6">
-      <h1
-        style={{
-          color: C.cream,
-          fontSize: 21,
-          fontWeight: 700,
-          fontFamily: "inherit",
-          margin: 0,
-        }}
-      >
-        {t.homeHeading}
-      </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 16 }}>
-        {t.homeSub}
-      </p>
-
-      <MainSectionsGrid lang={lang} t={t} onOpenSection={onOpenSection} />
-
       <div className="mb-2">
         <label
           style={{
@@ -4649,7 +4656,7 @@ export default function App() {
         return;
       }
       if (view === "category" || view === "guide") {
-        setView("home");
+        setView("fix");
         setActiveCategory(null);
         setActiveIssueId(null);
         return;
@@ -4757,11 +4764,20 @@ export default function App() {
             <HomeView
               lang={lang}
               t={t}
-              onOpenCategory={openCategory}
-              onOpenGuide={openGuide}
-              onOpenIssue={openIssue}
               onOpenSection={openSection}
             />
+          )}
+          {view === "fix" && (
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <FixView
+                lang={lang}
+                t={t}
+                onOpenCategory={openCategory}
+                onOpenGuide={openGuide}
+                onOpenIssue={openIssue}
+              />
+            </>
           )}
           {view === "guide" && (
             <LightsGuideView
