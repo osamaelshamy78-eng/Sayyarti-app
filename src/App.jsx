@@ -15,9 +15,11 @@ import {
   HelpCircle,
   Search,
   Droplet,
+  Camera,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
+import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
 
 /* ---------------------------------------------------------------
    Design tokens
@@ -1919,6 +1921,7 @@ const T = {
     maintenanceSub: "Pick a country to browse trusted quick-service chains",
     maintenanceNote:
       "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
+    navDiagnosis: "Photo Diagnosis",
   },
   ar: {
     wordmark: "كراجي",
@@ -1999,6 +2002,7 @@ const T = {
     maintenanceSub: "اختر الدولة عشان تشوف السلاسل الموثوقة",
     maintenanceNote:
       "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
+    navDiagnosis: "تشخيص بالصورة",
   },
 };
 
@@ -2077,6 +2081,7 @@ function BottomNav({ lang, t, view, setView }) {
     { id: "maintenance", label: t.navMaintenance, icon: Droplet },
     { id: "cars", label: t.navCars, icon: Car },
     { id: "parts", label: t.navParts, icon: Settings },
+    { id: "diagnosis", label: t.navDiagnosis, icon: Camera },
   ];
   return (
     <div
@@ -2084,6 +2089,7 @@ function BottomNav({ lang, t, view, setView }) {
       style={{
         borderTop: `1px solid ${C.panelLine}`,
         background: C.panel,
+        overflowX: "auto",
       }}
     >
       {items.map((it) => {
@@ -2096,15 +2102,16 @@ function BottomNav({ lang, t, view, setView }) {
             key={it.id}
             onClick={() => setView(it.id)}
             className="flex-1 flex flex-col items-center gap-1 py-3"
-            style={{ border: "none", background: "none", cursor: "pointer" }}
+            style={{ border: "none", background: "none", cursor: "pointer", minWidth: 58 }}
           >
             <Icon size={20} color={active ? C.amber : C.grey} strokeWidth={2} />
             <span
               style={{
-                fontSize: 11,
+                fontSize: 10.5,
                 fontFamily: lang === "ar" ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif",
                 color: active ? C.amber : C.grey,
                 fontWeight: active ? 600 : 500,
+                textAlign: "center",
               }}
             >
               {it.label}
@@ -4409,6 +4416,9 @@ export default function App() {
           )}
           {view === "parts" && (
             <SparePartsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
+          )}
+          {view === "diagnosis" && (
+            <PhotoDiagnosisView lang={lang} />
           )}
           {view === "cars" && (
             <CarsView
