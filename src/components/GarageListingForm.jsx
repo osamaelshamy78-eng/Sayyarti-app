@@ -27,7 +27,7 @@ const RANK_LABELS = {
   0: "ترتيب عادي",
 };
 
-export default function GarageListingForm({ isOpen, onClose }) {
+export default function GarageListingForm({ isOpen, onClose, country = "uae" }) {
   const [step, setStep] = useState(1); // 1: بيانات الجراج, 2: الترتيب والدفع
   const [takenRanks, setTakenRanks] = useState([]);
   const [loadingRanks, setLoadingRanks] = useState(true);
@@ -61,8 +61,7 @@ export default function GarageListingForm({ isOpen, onClose }) {
     setLoadingRanks(true);
     const { data, error } = await supabase
       .from("garage_active_ranks")
-      .select("rank")
-      .in("rank", [1, 2, 3]);
+      .select("rank");
 
     if (!error && data) {
       setTakenRanks(data.map((r) => r.rank));
@@ -166,30 +165,32 @@ export default function GarageListingForm({ isOpen, onClose }) {
       const photoUrl = await uploadFile(photoFile, "garage-photos");
       const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
 
-      // الإضافة تتم من خلال RPC محمي؛ المستخدم لا يملك صلاحية INSERT مباشرة.
-      const { error: insertError } = await supabase.rpc("submit_garage_listing", {
-        p_garage_name: form.garage_name.trim(),
-        p_owner_name: form.owner_name.trim(),
-        p_phone: form.phone.trim(),
-        p_address: form.address.trim(),
+      // الإرسال يتم من خلال RPC آمن؛ السعر والحالة والرتبة يتم التحقق منها داخل Supabase.
+      const { data: requestId, error: submitError } = await supabase.rpc("submit_garage_listing", {
+        p_garage_name: form.garage_name,
+        p_owner_name: form.owner_name,
+        p_phone: form.phone,
+        p_address: form.address,
         p_lat: form.lat,
         p_lng: form.lng,
         p_map_link: form.map_link || null,
         p_rank: form.rank,
         p_photo_url: photoUrl,
         p_receipt_url: receiptUrl,
+        p_country: country,
       });
 
-      if (insertError) {
-        // الترتيب 1/2/3 محجوز بشكل ذري داخل قاعدة البيانات.
-        if (insertError.code === "23505" || /rank|unique_active_rank/i.test(insertError.message || "")) {
+      if (submitError) {
+        const msg = String(submitError.message || "");
+        if (msg.toLowerCase().includes("rank") || msg.includes("duplicate") || submitError.code === "23505") {
           setError("للأسف تم حجز هذا الترتيب للتو من مستخدم آخر، من فضلك اختر ترتيب آخر");
           await fetchTakenRanks();
-          setSubmitting(false);
           return;
         }
-        throw insertError;
+        throw submitError;
       }
+
+      if (!requestId) throw new Error("لم يتم إنشاء طلب الجراج");
 
       sendNotificationEmail(form);
       setSuccess(true);
