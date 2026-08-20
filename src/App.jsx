@@ -2326,7 +2326,18 @@ const T = {
     carNoDb:
       "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
     adminTitle: "Karajy Admin",
-    adminSubtitle: "Manage car listings",
+    adminSubtitle: "Manage car listings and garage requests",
+    adminCarsTab: "Cars",
+    adminGaragesTab: "Garages",
+    adminNoGarages: "No garage requests found.",
+    adminPending: "Pending",
+    adminApproved: "Approved",
+    adminRejected: "Rejected",
+    adminApprove: "Approve",
+    adminReject: "Reject",
+    adminViewReceipt: "View receipt",
+    adminGarageRank: "Rank",
+    adminNormalRank: "Normal",
     adminEmail: "Admin email",
     adminPassword: "Password",
     adminLogin: "Sign in",
@@ -2424,7 +2435,18 @@ const T = {
     carContact: "تواصل مع البائع",
     carNoDb: "سوق السيارات لسه مش متصل بقاعدة البيانات. بعد إعداد Supabase هتظهر الإعلانات هنا.",
     adminTitle: "إدارة كراجي",
-    adminSubtitle: "إدارة إعلانات السيارات",
+    adminSubtitle: "إدارة إعلانات السيارات وطلبات الجراجات",
+    adminCarsTab: "السيارات",
+    adminGaragesTab: "الجراجات",
+    adminNoGarages: "لا توجد طلبات جراجات.",
+    adminPending: "قيد المراجعة",
+    adminApproved: "مقبول",
+    adminRejected: "مرفوض",
+    adminApprove: "موافقة",
+    adminReject: "رفض",
+    adminViewReceipt: "عرض الإيصال",
+    adminGarageRank: "الترتيب",
+    adminNormalRank: "عادي",
     adminEmail: "البريد الإلكتروني",
     adminPassword: "كلمة المرور",
     adminLogin: "تسجيل الدخول",
@@ -2458,7 +2480,7 @@ const T = {
 /* ---------------------------------------------------------------
    Small building blocks
 --------------------------------------------------------------- */
-function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage, onOpenAdmin }) {
+function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage }) {
   const isRTL = lang === "ar";
   return (
     <div
@@ -2552,46 +2574,21 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
           }}
         >
           <button
-            onClick={onOpenAdmin}
-            className="w-full flex items-center gap-2"
-            style={{
-              display: "flex",
-              width: "100%",
-              padding: "12px 16px",
-              background: "none",
-              border: "none",
-              color: C.cream,
-              fontSize: 13,
-              fontWeight: 600,
-              textAlign: isRTL ? "right" : "left",
-              cursor: "pointer",
-              flexDirection: isRTL ? "row-reverse" : "row",
-            }}
-          >
-            <ShieldCheck size={16} color={C.amber} strokeWidth={2} />
-            <span style={{ flex: 1 }}>{t.adminLogin}</span>
-          </button>
-
-          <button
             onClick={onAddGarage}
-            className="w-full flex items-center gap-2"
+            className="w-full"
             style={{
-              display: "flex",
-              width: "100%",
+              display: "block",
               padding: "12px 16px",
               background: "none",
               border: "none",
-              borderTop: `1px solid ${C.panelLine}`,
               color: C.cream,
               fontSize: 13,
               fontWeight: 600,
               textAlign: isRTL ? "right" : "left",
               cursor: "pointer",
-              flexDirection: isRTL ? "row-reverse" : "row",
             }}
           >
-            <Plus size={16} color={C.amber} strokeWidth={2} />
-            <span style={{ flex: 1 }}>{t.addGarageBtn}</span>
+            {t.addGarageBtn}
           </button>
         </div>
       )}
@@ -4578,54 +4575,20 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
           style={{ overflowX: "auto", scrollSnapType: "x mandatory" }}
         >
           {photos.map((url, i) => (
-            <div
+            <img
               key={i}
+              src={url}
+              alt=""
               style={{
-                position: "relative",
                 width: "85%",
                 height: 220,
+                objectFit: "cover",
+                borderRadius: 14,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
               }}
-            >
-              <img
-                src={url}
-                alt=""
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: 14,
-                  display: "block",
-                }}
-                onError={(e) => (e.target.style.opacity = 0.3)}
-              />
-              {car.status === "sold" && (
-                <div
-                  aria-label={t.soldBadge}
-                  style={{
-                    position: "absolute",
-                    top: "50%",
-                    left: "50%",
-                    transform: "translate(-50%, -50%) rotate(-12deg)",
-                    border: `3px solid ${C.red}`,
-                    color: C.red,
-                    background: "rgba(10,11,13,0.78)",
-                    borderRadius: 10,
-                    padding: "8px 22px",
-                    fontSize: 24,
-                    fontWeight: 900,
-                    letterSpacing: 2,
-                    textTransform: lang === "en" ? "uppercase" : "none",
-                    whiteSpace: "nowrap",
-                    zIndex: 3,
-                    pointerEvents: "none",
-                  }}
-                >
-                  {t.soldBadge}
-                </div>
-              )}
-            </div>
+              onError={(e) => (e.target.style.opacity = 0.3)}
+            />
           ))}
         </div>
       ) : null}
@@ -4851,31 +4814,6 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
                     onError={(e) => (e.target.style.display = "none")}
                   />
-                  {c.status === "sold" && (
-                    <div
-                      aria-label={t.soldBadge}
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%) rotate(-12deg)",
-                        border: `3px solid ${C.red}`,
-                        color: C.red,
-                        background: "rgba(10,11,13,0.78)",
-                        borderRadius: 10,
-                        padding: "8px 22px",
-                        fontSize: 24,
-                        fontWeight: 900,
-                        letterSpacing: 2,
-                        textTransform: lang === "en" ? "uppercase" : "none",
-                        whiteSpace: "nowrap",
-                        zIndex: 3,
-                        pointerEvents: "none",
-                      }}
-                    >
-                      {t.soldBadge}
-                    </div>
-                  )}
                   {c.photo_urls && c.photo_urls.length > 1 && (
                     <span
                       style={{
@@ -4996,46 +4934,32 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [adminTab, setAdminTab] = useState("cars");
+  const [garageListings, setGarageListings] = useState([]);
+  const [garageLoading, setGarageLoading] = useState(false);
+  const [garageBusyId, setGarageBusyId] = useState(null);
 
   useEffect(() => {
-    if (!supabase) {
-      setChecking(false);
-      return;
-    }
+    if (!supabase) { setChecking(false); return; }
     let active = true;
     async function verifySession() {
       const { data } = await supabase.auth.getUser();
       const currentUser = data?.user || null;
       if (!currentUser) {
-        if (active) {
-          setUser(null);
-          setChecking(false);
-        }
+        if (active) { setUser(null); setChecking(false); }
         return;
       }
       const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
       if (!adminError && adminData === true) {
-        if (active) {
-          setUser(currentUser);
-          setChecking(false);
-        }
+        if (active) { setUser(currentUser); setChecking(false); }
       } else {
         await supabase.auth.signOut();
-        if (active) {
-          setUser(null);
-          setLoginError(t.adminInvalid);
-          setChecking(false);
-        }
+        if (active) { setUser(null); setLoginError(t.adminInvalid); setChecking(false); }
       }
     }
     verifySession();
-    const { data: listener } = supabase.auth.onAuthStateChange(() => {
-      setTimeout(() => verifySession(), 0);
-    });
-    return () => {
-      active = false;
-      listener?.subscription?.unsubscribe?.();
-    };
+    const { data: listener } = supabase.auth.onAuthStateChange(() => setTimeout(() => verifySession(), 0));
+    return () => { active = false; listener?.subscription?.unsubscribe?.(); };
   }, []);
 
   async function loadListings() {
@@ -5051,19 +4975,32 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setLoading(false);
   }
 
+  async function loadGarageListings() {
+    if (!supabase || !user) return;
+    setGarageLoading(true);
+    const { data, error } = await supabase
+      .from("garage_listings")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) setLoginError(error.message);
+    setGarageListings(data || []);
+    setGarageLoading(false);
+  }
+
   useEffect(() => {
     if (user) loadListings();
   }, [user]);
+
+  useEffect(() => {
+    if (user && adminTab === "garages") loadGarageListings();
+  }, [user, adminTab]);
 
   async function handleLogin(e) {
     e.preventDefault();
     if (!supabase) return;
     setLoginError("");
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setLoginError(error.message);
-      return;
-    }
+    if (error) { setLoginError(error.message); return; }
     const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
     if (adminError || adminData !== true) {
       await supabase.auth.signOut();
@@ -5074,152 +5011,127 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   }
 
   async function updateStatus(car, nextStatus) {
-    if (!supabase || !user) return;
-    setBusyId(car.id);
-    setLoginError("");
-    const { error } = await supabase
-      .from("car_listings")
-      .update({ status: nextStatus, sold_at: nextStatus === "sold" ? new Date().toISOString() : null })
-      .eq("id", car.id);
-    setBusyId(null);
-    if (error) {
-      setLoginError(t.adminUpdateError);
-      return;
-    }
-    await loadListings();
+    if (!supabase || !user || busyId) return;
+    setBusyId(car.id); setLoginError("");
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) throw new Error("Your admin session has expired. Please sign in again.");
+      const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
+      if (adminError || adminData !== true) throw new Error(t.adminInvalid);
+      const { data: updatedRows, error: updateError } = await supabase
+        .from("car_listings").update({ status: nextStatus }).eq("id", car.id).select("id,status");
+      if (updateError) throw updateError;
+      if (!updatedRows || updatedRows.length === 0) throw new Error("The listing was not updated.");
+      setListings((current) => current.map((item) => item.id === car.id ? { ...item, status: nextStatus } : item));
+      await loadListings();
+    } catch (error) {
+      console.error("Karajy admin status update:", error);
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally { setBusyId(null); }
+  }
+
+  async function updateGarageStatus(garage, nextStatus) {
+    if (!supabase || !user || garageBusyId) return;
+    setGarageBusyId(garage.id); setLoginError("");
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) throw new Error("Your admin session has expired. Please sign in again.");
+      const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
+      if (adminError || adminData !== true) throw new Error(t.adminInvalid);
+      const { data: updated, error: updateError } = await supabase.rpc("set_garage_status", {
+        p_id: garage.id, p_status: nextStatus,
+      });
+      if (updateError) throw updateError;
+      if (updated !== true) throw new Error("The garage listing was not updated.");
+      setGarageListings((current) => current.map((item) => item.id === garage.id ? { ...item, status: nextStatus } : item));
+    } catch (error) {
+      console.error("Karajy garage admin status update:", error);
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally { setGarageBusyId(null); }
   }
 
   async function logout() {
     if (supabase) await supabase.auth.signOut();
-    setUser(null);
-    setListings([]);
+    setUser(null); setListings([]); setGarageListings([]);
   }
 
   const fieldStyle = {
-    width: "100%",
-    background: C.asphalt,
-    border: `1px solid ${C.panelLine}`,
-    borderRadius: 10,
-    padding: "11px 12px",
-    color: C.cream,
-    fontSize: 13,
-    marginBottom: 10,
-    fontFamily: "inherit",
-    textAlign: isRTL ? "right" : "left",
-    boxSizing: "border-box",
+    width: "100%", background: C.asphalt, border: `1px solid ${C.panelLine}`, borderRadius: 10,
+    padding: "11px 12px", color: C.cream, fontSize: 13, marginBottom: 10,
+    fontFamily: "inherit", textAlign: isRTL ? "right" : "left", boxSizing: "border-box",
   };
 
-  if (checking) {
-    return <div className="px-5 pt-8 text-center" style={{ color: C.creamDim }}>{t.adminLoading}</div>;
-  }
+  if (checking) return <div className="px-5 pt-8 text-center" style={{ color: C.creamDim }}>{t.adminLoading}</div>;
 
-  if (!user) {
-    return (
-      <div className="px-5 pt-8 pb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck size={24} color={C.amber} />
-          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
-        </div>
-        <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
-          {t.adminLoginRequired}
-        </p>
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            autoComplete="username"
-            placeholder={t.adminEmail}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={fieldStyle}
-          />
-          <input
-            type="password"
-            autoComplete="current-password"
-            placeholder={t.adminPassword}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={fieldStyle}
-          />
-          {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
-          <button
-            type="submit"
-            style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}
-          >
-            {t.adminLogin}
-          </button>
-        </form>
-      </div>
-    );
-  }
+  if (!user) return (
+    <div className="px-5 pt-8 pb-6">
+      <div className="flex items-center gap-2 mb-2"><ShieldCheck size={24} color={C.amber} /><h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1></div>
+      <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>{t.adminLoginRequired}</p>
+      <form onSubmit={handleLogin}>
+        <input type="email" autoComplete="username" placeholder={t.adminEmail} value={email} onChange={(e) => setEmail(e.target.value)} style={fieldStyle} />
+        <input type="password" autoComplete="current-password" placeholder={t.adminPassword} value={password} onChange={(e) => setPassword(e.target.value)} style={fieldStyle} />
+        {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
+        <button type="submit" style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}>{t.adminLogin}</button>
+      </form>
+    </div>
+  );
 
   return (
     <div className="px-5 pt-5 pb-6">
       <div className="flex items-center justify-between gap-2 mb-1">
-        <div className="flex items-center gap-2">
-          <ShieldCheck size={22} color={C.amber} />
-          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
-        </div>
-        <button onClick={logout} style={{ background: "transparent", border: `1px solid ${C.panelLine}`, color: C.creamDim, borderRadius: 9, padding: "7px 9px", cursor: "pointer" }}>
-          <LogOut size={15} />
-        </button>
+        <div className="flex items-center gap-2"><ShieldCheck size={22} color={C.amber} /><h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1></div>
+        <button onClick={logout} style={{ background: "transparent", border: `1px solid ${C.panelLine}`, color: C.creamDim, borderRadius: 9, padding: "7px 9px", cursor: "pointer" }}><LogOut size={15} /></button>
       </div>
       <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>{t.adminSubtitle}</p>
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <button onClick={() => setAdminTab("cars")} style={{ background: adminTab === "cars" ? C.amber : "transparent", color: adminTab === "cars" ? C.asphalt : C.creamDim, border: `1px solid ${adminTab === "cars" ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 10px", fontWeight: 800, cursor: "pointer" }}>{t.adminCarsTab}</button>
+        <button onClick={() => setAdminTab("garages")} style={{ background: adminTab === "garages" ? C.amber : "transparent", color: adminTab === "garages" ? C.asphalt : C.creamDim, border: `1px solid ${adminTab === "garages" ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 10px", fontWeight: 800, cursor: "pointer" }}>{t.adminGaragesTab}</button>
+      </div>
       {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
-      {loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.carLoading}</p>
-      ) : listings.length === 0 ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminNoListings}</p>
-      ) : (
+
+      {adminTab === "garages" ? (
+        garageLoading ? <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminLoading}</p> :
+        garageListings.length === 0 ? <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminNoGarages}</p> :
         <div className="flex flex-col gap-2.5">
-          {listings.map((c) => (
-            <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
-              {(c.photo_url || c.photo_urls?.[0]) && (
-                <div style={{ position: "relative" }}>
-                  <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
-                  {c.status === "sold" && (
-                    <div
-                      aria-label={t.soldBadge}
-                      style={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%) rotate(-14deg)",
-                        border: `4px solid ${C.red}`,
-                        color: C.red,
-                        background: "rgba(10,11,13,0.88)",
-                        borderRadius: 12,
-                        padding: "8px 28px",
-                        fontSize: 28,
-                        fontWeight: 950,
-                        letterSpacing: 2.5,
-                        textTransform: lang === "en" ? "uppercase" : "none",
-                        whiteSpace: "nowrap",
-                        zIndex: 20,
-                        pointerEvents: "none",
-                        boxShadow: `0 0 0 2px rgba(10,11,13,0.45), 0 4px 14px rgba(0,0,0,0.45)`,
-                      }}
-                    >
-                      {t.soldBadge}
-                    </div>
-                  )}
-                </div>
-              )}
+          {garageListings.map((g) => (
+            <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+              {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 130, objectFit: "cover", display: "block" }} />}
               <div style={{ padding: "11px 12px" }}>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{c.make_model}{c.year ? ` · ${c.year}` : ""}</div>
-                    <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{c.price}{c.city ? ` · ${c.city}` : ""}</div>
+                    <div style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{g.garage_name}</div>
+                    <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{g.owner_name} · {g.phone}</div>
+                    <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{g.address}</div>
                   </div>
+                  <span style={{ color: g.status === "approved" ? C.amber : g.status === "rejected" ? C.red : C.creamDim, fontSize: 11, fontWeight: 800 }}>
+                    {g.status === "approved" ? t.adminApproved : g.status === "rejected" ? t.adminRejected : t.adminPending}
+                  </span>
+                </div>
+                <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 8 }}>{t.adminGarageRank}: {g.rank === 0 ? t.adminNormalRank : g.rank} · {g.price} AED</div>
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  {g.receipt_url && <button onClick={() => window.open(g.receipt_url, "_blank")} style={{ background: "transparent", border: `1px solid ${C.panelLine}`, color: C.cream, borderRadius: 10, padding: "8px 10px", cursor: "pointer", fontSize: 12, fontWeight: 700 }}>{t.adminViewReceipt}</button>}
+                  <button disabled={garageBusyId === g.id} onClick={() => updateGarageStatus(g, g.status === "approved" ? "rejected" : "approved")} style={{ background: "transparent", border: `1px solid ${g.status === "approved" ? C.red : C.amberDim}`, color: g.status === "approved" ? C.red : C.amber, borderRadius: 10, padding: "8px 10px", cursor: garageBusyId === g.id ? "wait" : "pointer", fontSize: 12, fontWeight: 700 }}>
+                    {g.status === "approved" ? t.adminReject : t.adminApprove}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        loading ? <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.carLoading}</p> :
+        listings.length === 0 ? <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminNoListings}</p> :
+        <div className="flex flex-col gap-2.5">
+          {listings.map((c) => (
+            <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+              {(c.photo_url || c.photo_urls?.[0]) && <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />}
+              <div style={{ padding: "11px 12px" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <div><div style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{c.make_model}{c.year ? ` · ${c.year}` : ""}</div><div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{c.price}{c.city ? ` · ${c.city}` : ""}</div></div>
                   <span style={{ color: c.status === "sold" ? C.red : C.amber, fontSize: 11, fontWeight: 800 }}>{c.status === "sold" ? t.adminSold : t.adminAvailable}</span>
                 </div>
-                <button
-                  disabled={busyId === c.id}
-                  onClick={() => updateStatus(c, c.status === "sold" ? "approved" : "sold")}
-                  className="flex items-center justify-center gap-2 mt-3"
-                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}
-                >
-                  {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}
-                  {c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
+                <button disabled={busyId === c.id} onClick={() => updateStatus(c, c.status === "sold" ? "approved" : "sold")} className="flex items-center justify-center gap-2 mt-3" style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}>
+                  {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}{c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
                 </button>
               </div>
             </div>
@@ -5335,10 +5247,6 @@ export default function App() {
     setMenuOpen(false);
     setShowGarageForm(true);
   }
-  function handleOpenAdmin() {
-    setMenuOpen(false);
-    navPush("/admin");
-  }
 
   return (
     <div
@@ -5378,7 +5286,6 @@ export default function App() {
           menuOpen={menuOpen}
           onToggleMenu={toggleMenu}
           onAddGarage={handleAddGarage}
-          onOpenAdmin={handleOpenAdmin}
         />
         <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
