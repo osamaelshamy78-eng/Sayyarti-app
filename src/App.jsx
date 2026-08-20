@@ -17,6 +17,10 @@ import {
   Droplet,
   Camera,
   Menu,
+  ShieldCheck,
+  LogOut,
+  CheckCircle2,
+  RotateCcw,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -1875,6 +1879,7 @@ function routeFromPath(pathname) {
   if (path === "/cars") return { view: "cars" };
   if (path === "/cars/add") return { view: "cars", carMode: "add" };
   if (path === "/cars/submitted") return { view: "cars", carMode: "submitted" };
+  if (path === "/admin") return { view: "admin" };
 
   const fixMatch = path.match(/^\/fix\/([^/]+)$/);
   if (fixMatch) {
@@ -2320,6 +2325,22 @@ const T = {
     carContact: "Contact Seller",
     carNoDb:
       "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
+    adminTitle: "Karajy Admin",
+    adminSubtitle: "Manage car listings",
+    adminEmail: "Admin email",
+    adminPassword: "Password",
+    adminLogin: "Sign in",
+    adminLogout: "Sign out",
+    adminLoginRequired: "Admin access only",
+    adminInvalid: "You are not authorized to manage listings.",
+    adminLoading: "Loading admin panel...",
+    adminNoListings: "No listings found.",
+    adminAvailable: "Available",
+    adminSold: "Sold",
+    adminMarkSold: "Mark as sold",
+    adminMarkAvailable: "Mark as available",
+    adminUpdateError: "Could not update this listing.",
+    soldBadge: "SOLD",
     faultCodeSearchLabel: "Search a Fault Code",
     faultCodeSearchPlaceholder: "e.g. P0300 or \"misfire\"",
     faultCodeSearchHint: "Enter the OBD-II code your scanner showed, or a keyword",
@@ -2402,6 +2423,22 @@ const T = {
     carLoading: "جاري تحميل الإعلانات...",
     carContact: "تواصل مع البائع",
     carNoDb: "سوق السيارات لسه مش متصل بقاعدة البيانات. بعد إعداد Supabase هتظهر الإعلانات هنا.",
+    adminTitle: "إدارة كراجي",
+    adminSubtitle: "إدارة إعلانات السيارات",
+    adminEmail: "البريد الإلكتروني",
+    adminPassword: "كلمة المرور",
+    adminLogin: "تسجيل الدخول",
+    adminLogout: "تسجيل الخروج",
+    adminLoginRequired: "الدخول مخصص للإدارة فقط",
+    adminInvalid: "هذا الحساب غير مصرح له بإدارة الإعلانات.",
+    adminLoading: "جاري تحميل لوحة الإدارة...",
+    adminNoListings: "لا توجد إعلانات.",
+    adminAvailable: "متاحة",
+    adminSold: "تم البيع",
+    adminMarkSold: "تحديد تم البيع",
+    adminMarkAvailable: "إعادة للعرض",
+    adminUpdateError: "تعذر تحديث الإعلان.",
+    soldBadge: "تم البيع",
     faultCodeSearchLabel: "دور برمز العطل",
     faultCodeSearchPlaceholder: "مثال: P0300 أو \"قطع تماس\"",
     faultCodeSearchHint: "اكتب كود الـ OBD-II اللي طلعلك في جهاز الفحص، أو كلمة مفتاحية",
@@ -3664,23 +3701,8 @@ const CAR_MAKES = [
       { en: "Corolla", ar: "كورولا" },
       { en: "Camry", ar: "كامري" },
       { en: "Land Cruiser", ar: "لاند كروزر" },
-      { en: "Land Cruiser Prado", ar: "لاند كروزر برادو" },
       { en: "Yaris", ar: "يارس" },
       { en: "Hilux", ar: "هايلوكس" },
-      { en: "Fortuner", ar: "فورتشنر" },
-      { en: "RAV4", ar: "راف 4" },
-      { en: "Raize", ar: "رايز" },
-      { en: "Rush", ar: "راش" },
-      { en: "Veloz", ar: "فيلوز" },
-      { en: "Corolla Cross", ar: "كورولا كروس" },
-      { en: "Avalon", ar: "أفالون" },
-      { en: "Crown", ar: "كراون" },
-      { en: "Sequoia", ar: "سيكويا" },
-      { en: "Tundra", ar: "تندرا" },
-      { en: "Innova", ar: "إنوفا" },
-      { en: "Hiace", ar: "هايس" },
-      { en: "Supra", ar: "سوبرا" },
-      { en: "GR 86", ar: "جي آر 86" },
     ],
   },
   {
@@ -3692,17 +3714,7 @@ const CAR_MAKES = [
       { en: "Sonata", ar: "سوناتا" },
       { en: "Tucson", ar: "توسان" },
       { en: "Accent", ar: "أكسنت" },
-      { en: "Santa Fe", ar: "سانتافي" },
-      { en: "Creta", ar: "كريتا" },
-      { en: "Venue", ar: "فينيو" },
-      { en: "Kona", ar: "كونا" },
-      { en: "Palisade", ar: "باليسيد" },
-      { en: "Ioniq 5", ar: "أيونيك 5" },
-      { en: "Ioniq 6", ar: "أيونيك 6" },
-      { en: "Azera", ar: "أزيرا" },
-      { en: "Staria", ar: "ستاريا" },
-      { en: "H-1", ar: "إتش 1" },
-      { en: "i10", ar: "آي 10" },
+      { en: "Santa Fe", ar: "سنتافي" },
     ],
   },
   {
@@ -3715,14 +3727,6 @@ const CAR_MAKES = [
       { en: "Patrol", ar: "باترول" },
       { en: "X-Trail", ar: "إكستريل" },
       { en: "Sentra", ar: "سنترا" },
-      { en: "Kicks", ar: "كيكس" },
-      { en: "Pathfinder", ar: "باثفايندر" },
-      { en: "Armada", ar: "أرمادا" },
-      { en: "Xterra", ar: "إكستيرا" },
-      { en: "Navara", ar: "نافارا" },
-      { en: "Urvan", ar: "أورفان" },
-      { en: "Z", ar: "زد" },
-      { en: "Magnite", ar: "ماغنايت" },
     ],
   },
   {
@@ -3735,15 +3739,6 @@ const CAR_MAKES = [
       { en: "Sorento", ar: "سورينتو" },
       { en: "Picanto", ar: "بيكانتو" },
       { en: "Rio", ar: "ريو" },
-      { en: "K5", ar: "K5" },
-      { en: "K8", ar: "K8" },
-      { en: "Seltos", ar: "سيلتوس" },
-      { en: "Sonet", ar: "سونيت" },
-      { en: "Telluride", ar: "تيلورايد" },
-      { en: "Carnival", ar: "كارنفال" },
-      { en: "Stinger", ar: "ستينجر" },
-      { en: "EV6", ar: "EV6" },
-      { en: "EV9", ar: "EV9" },
     ],
   },
   {
@@ -3756,11 +3751,6 @@ const CAR_MAKES = [
       { en: "CR-V", ar: "سي آر في" },
       { en: "City", ar: "سيتي" },
       { en: "Pilot", ar: "بايلوت" },
-      { en: "HR-V", ar: "إتش آر في" },
-      { en: "BR-V", ar: "بي آر في" },
-      { en: "ZR-V", ar: "زد آر في" },
-      { en: "Odyssey", ar: "أوديسي" },
-      { en: "Integra", ar: "إنتيجرا" },
     ],
   },
   {
@@ -3773,14 +3763,6 @@ const CAR_MAKES = [
       { en: "Tahoe", ar: "تاهو" },
       { en: "Captiva", ar: "كابتيفا" },
       { en: "Spark", ar: "سبارك" },
-      { en: "Suburban", ar: "سوبربان" },
-      { en: "Traverse", ar: "ترافيرس" },
-      { en: "Equinox", ar: "إكوينوكس" },
-      { en: "Trailblazer", ar: "تريل بليزر" },
-      { en: "Silverado", ar: "سيلفرادو" },
-      { en: "Blazer", ar: "بليزر" },
-      { en: "Camaro", ar: "كامارو" },
-      { en: "Corvette", ar: "كورفيت" },
     ],
   },
   {
@@ -3793,15 +3775,6 @@ const CAR_MAKES = [
       { en: "F-150", ar: "إف 150" },
       { en: "EcoSport", ar: "إيكوسبورت" },
       { en: "Edge", ar: "إيدج" },
-      { en: "Territory", ar: "تيريتوري" },
-      { en: "Everest", ar: "إيفرست" },
-      { en: "Ranger", ar: "رينجر" },
-      { en: "Mustang", ar: "موستانج" },
-      { en: "Bronco", ar: "برونكو" },
-      { en: "Expedition", ar: "إكسبديشن" },
-      { en: "Escape", ar: "إسكيب" },
-      { en: "Taurus", ar: "تورس" },
-      { en: "Transit", ar: "ترانزيت" },
     ],
   },
   {
@@ -3809,24 +3782,11 @@ const CAR_MAKES = [
     en: "BMW",
     ar: "بي إم دبليو",
     models: [
-      { en: "1 Series", ar: "الفئة الأولى" },
-      { en: "2 Series", ar: "الفئة الثانية" },
       { en: "3 Series", ar: "الفئة الثالثة" },
-      { en: "4 Series", ar: "الفئة الرابعة" },
       { en: "5 Series", ar: "الفئة الخامسة" },
-      { en: "7 Series", ar: "الفئة السابعة" },
-      { en: "8 Series", ar: "الفئة الثامنة" },
-      { en: "X1", ar: "إكس 1" },
-      { en: "X2", ar: "إكس 2" },
-      { en: "X3", ar: "إكس 3" },
-      { en: "X4", ar: "إكس 4" },
       { en: "X5", ar: "إكس 5" },
-      { en: "X6", ar: "إكس 6" },
-      { en: "X7", ar: "إكس 7" },
-      { en: "i4", ar: "آي 4" },
-      { en: "i5", ar: "آي 5" },
-      { en: "i7", ar: "آي 7" },
-      { en: "iX", ar: "آي إكس" },
+      { en: "X3", ar: "إكس 3" },
+      { en: "7 Series", ar: "الفئة السابعة" },
     ],
   },
   {
@@ -3834,22 +3794,11 @@ const CAR_MAKES = [
     en: "Mercedes-Benz",
     ar: "مرسيدس بنز",
     models: [
-      { en: "A-Class", ar: "A كلاس" },
-      { en: "B-Class", ar: "B كلاس" },
-      { en: "C-Class", ar: "C كلاس" },
-      { en: "E-Class", ar: "E كلاس" },
-      { en: "S-Class", ar: "S كلاس" },
-      { en: "CLA", ar: "CLA" },
-      { en: "CLS", ar: "CLS" },
-      { en: "GLA", ar: "GLA" },
-      { en: "GLB", ar: "GLB" },
-      { en: "GLC", ar: "GLC" },
-      { en: "GLE", ar: "GLE" },
-      { en: "GLS", ar: "GLS" },
-      { en: "G-Class", ar: "G كلاس" },
-      { en: "V-Class", ar: "V كلاس" },
-      { en: "EQS", ar: "EQS" },
-      { en: "EQE", ar: "EQE" },
+      { en: "C-Class", ar: "سي كلاس" },
+      { en: "E-Class", ar: "إي كلاس" },
+      { en: "S-Class", ar: "إس كلاس" },
+      { en: "GLE", ar: "جي إل إي" },
+      { en: "GLC", ar: "جي إل سي" },
     ],
   },
   {
@@ -3857,17 +3806,11 @@ const CAR_MAKES = [
     en: "Lexus",
     ar: "لكزس",
     models: [
-      { en: "ES", ar: "ES" },
-      { en: "IS", ar: "IS" },
-      { en: "LS", ar: "LS" },
-      { en: "UX", ar: "UX" },
-      { en: "NX", ar: "NX" },
-      { en: "RX", ar: "RX" },
-      { en: "GX", ar: "GX" },
-      { en: "LX", ar: "LX" },
-      { en: "LM", ar: "LM" },
-      { en: "LC", ar: "LC" },
-      { en: "RZ", ar: "RZ" },
+      { en: "ES", ar: "إي إس" },
+      { en: "RX", ar: "آر إكس" },
+      { en: "LX", ar: "إل إكس" },
+      { en: "NX", ar: "إن إكس" },
+      { en: "GX", ar: "جي إكس" },
     ],
   },
   {
@@ -3880,10 +3823,6 @@ const CAR_MAKES = [
       { en: "Outlander", ar: "أوتلاندر" },
       { en: "ASX", ar: "إيه إس إكس" },
       { en: "Attrage", ar: "أتراج" },
-      { en: "Eclipse Cross", ar: "إكليبس كروس" },
-      { en: "Xpander", ar: "إكسباندر" },
-      { en: "Montero Sport", ar: "مونتيرو سبورت" },
-      { en: "L200", ar: "L200" },
     ],
   },
   {
@@ -3896,9 +3835,6 @@ const CAR_MAKES = [
       { en: "Cherokee", ar: "شيروكي" },
       { en: "Compass", ar: "كومباس" },
       { en: "Renegade", ar: "رينيجيد" },
-      { en: "Gladiator", ar: "جلادياتور" },
-      { en: "Grand Wagoneer", ar: "جراند واجونير" },
-      { en: "Wagoneer", ar: "واجونير" },
     ],
   },
   {
@@ -3911,12 +3847,6 @@ const CAR_MAKES = [
       { en: "Koleos", ar: "كوليوس" },
       { en: "Kadjar", ar: "كادجار" },
       { en: "Symbol", ar: "سيمبول" },
-      { en: "Megane", ar: "ميجان" },
-      { en: "Clio", ar: "كليو" },
-      { en: "Captur", ar: "كابتشر" },
-      { en: "Arkana", ar: "أركانا" },
-      { en: "Austral", ar: "أوسترال" },
-      { en: "Master", ar: "ماستر" },
     ],
   },
   {
@@ -3924,17 +3854,11 @@ const CAR_MAKES = [
     en: "MG",
     ar: "إم جي",
     models: [
-      { en: "MG3", ar: "إم جي 3" },
-      { en: "MG4", ar: "إم جي 4" },
       { en: "MG5", ar: "إم جي 5" },
       { en: "MG6", ar: "إم جي 6" },
-      { en: "MG7", ar: "إم جي 7" },
       { en: "ZS", ar: "زد إس" },
-      { en: "ZS EV", ar: "زد إس EV" },
       { en: "HS", ar: "إتش إس" },
       { en: "RX5", ar: "آر إكس 5" },
-      { en: "RX8", ar: "آر إكس 8" },
-      { en: "Marvel R", ar: "مارفل R" },
     ],
   },
   {
@@ -3943,12 +3867,10 @@ const CAR_MAKES = [
     ar: "لاند روفر",
     models: [
       { en: "Range Rover", ar: "رنج روفر" },
-      { en: "Range Rover Sport", ar: "رنج روفر سبورت" },
-      { en: "Range Rover Velar", ar: "رنج روفر فيلار" },
-      { en: "Range Rover Evoque", ar: "رنج روفر إيفوك" },
       { en: "Discovery", ar: "ديسكفري" },
-      { en: "Discovery Sport", ar: "ديسكفري سبورت" },
       { en: "Defender", ar: "ديفندر" },
+      { en: "Evoque", ar: "إيفوك" },
+      { en: "Sport", ar: "سبورت" },
     ],
   },
   {
@@ -3961,12 +3883,6 @@ const CAR_MAKES = [
       { en: "Passat", ar: "باسات" },
       { en: "Tiguan", ar: "تيجوان" },
       { en: "Teramont", ar: "تيرامونت" },
-      { en: "Touareg", ar: "طوارق" },
-      { en: "T-Roc", ar: "تي روك" },
-      { en: "Taos", ar: "تاوس" },
-      { en: "Arteon", ar: "أرتيون" },
-      { en: "ID.4", ar: "ID.4" },
-      { en: "ID.6", ar: "ID.6" },
     ],
   },
   {
@@ -3974,18 +3890,11 @@ const CAR_MAKES = [
     en: "Audi",
     ar: "أودي",
     models: [
-      { en: "A3", ar: "A3" },
-      { en: "A4", ar: "A4" },
-      { en: "A5", ar: "A5" },
-      { en: "A6", ar: "A6" },
-      { en: "A7", ar: "A7" },
-      { en: "A8", ar: "A8" },
-      { en: "Q2", ar: "Q2" },
-      { en: "Q3", ar: "Q3" },
-      { en: "Q5", ar: "Q5" },
-      { en: "Q7", ar: "Q7" },
-      { en: "Q8", ar: "Q8" },
-      { en: "e-tron", ar: "إي ترون" },
+      { en: "A3", ar: "إيه 3" },
+      { en: "A4", ar: "إيه 4" },
+      { en: "A6", ar: "إيه 6" },
+      { en: "Q5", ar: "كيو 5" },
+      { en: "Q7", ar: "كيو 7" },
     ],
   },
   {
@@ -3998,10 +3907,6 @@ const CAR_MAKES = [
       { en: "Baleno", ar: "بالينو" },
       { en: "Ciaz", ar: "سياز" },
       { en: "Jimny", ar: "جيمني" },
-      { en: "Ertiga", ar: "إرتيجا" },
-      { en: "Dzire", ar: "ديزاير" },
-      { en: "XL7", ar: "XL7" },
-      { en: "Grand Vitara", ar: "جراند فيتارا" },
     ],
   },
   {
@@ -4009,15 +3914,11 @@ const CAR_MAKES = [
     en: "Peugeot",
     ar: "بيجو",
     models: [
-      { en: "208", ar: "208" },
       { en: "301", ar: "301" },
       { en: "308", ar: "308" },
-      { en: "408", ar: "408" },
-      { en: "2008", ar: "2008" },
       { en: "3008", ar: "3008" },
       { en: "5008", ar: "5008" },
-      { en: "508", ar: "508" },
-      { en: "Partner", ar: "بارتنر" },
+      { en: "2008", ar: "2008" },
     ],
   },
   {
@@ -4025,16 +3926,11 @@ const CAR_MAKES = [
     en: "Mazda",
     ar: "مازدا",
     models: [
-      { en: "Mazda2", ar: "مازدا 2" },
       { en: "Mazda3", ar: "مازدا 3" },
       { en: "Mazda6", ar: "مازدا 6" },
-      { en: "CX-3", ar: "سي إكس 3" },
-      { en: "CX-30", ar: "سي إكس 30" },
       { en: "CX-5", ar: "سي إكس 5" },
       { en: "CX-9", ar: "سي إكس 9" },
-      { en: "CX-60", ar: "سي إكس 60" },
-      { en: "CX-90", ar: "سي إكس 90" },
-      { en: "MX-5", ar: "إم إكس 5" },
+      { en: "CX-3", ar: "سي إكس 3" },
     ],
   },
   {
@@ -4043,12 +3939,9 @@ const CAR_MAKES = [
     ar: "جي إم سي",
     models: [
       { en: "Yukon", ar: "يوكن" },
-      { en: "Yukon XL", ar: "يوكن XL" },
       { en: "Sierra", ar: "سييرا" },
       { en: "Terrain", ar: "تيرين" },
       { en: "Acadia", ar: "أكاديا" },
-      { en: "Canyon", ar: "كانـيون" },
-      { en: "Hummer EV", ar: "هامر EV" },
     ],
   },
   {
@@ -4056,14 +3949,10 @@ const CAR_MAKES = [
     en: "Infiniti",
     ar: "إنفينيتي",
     models: [
-      { en: "Q30", ar: "Q30" },
-      { en: "Q50", ar: "Q50" },
-      { en: "Q60", ar: "Q60" },
-      { en: "QX30", ar: "QX30" },
-      { en: "QX50", ar: "QX50" },
-      { en: "QX55", ar: "QX55" },
-      { en: "QX60", ar: "QX60" },
-      { en: "QX80", ar: "QX80" },
+      { en: "Q50", ar: "كيو 50" },
+      { en: "QX60", ar: "كيو إكس 60" },
+      { en: "QX80", ar: "كيو إكس 80" },
+      { en: "QX50", ar: "كيو إكس 50" },
     ],
   },
   {
@@ -4071,14 +3960,10 @@ const CAR_MAKES = [
     en: "Volvo",
     ar: "فولفو",
     models: [
-      { en: "S60", ar: "S60" },
-      { en: "S90", ar: "S90" },
-      { en: "V60", ar: "V60" },
-      { en: "XC40", ar: "XC40" },
-      { en: "XC60", ar: "XC60" },
-      { en: "XC90", ar: "XC90" },
-      { en: "EX30", ar: "EX30" },
-      { en: "EX90", ar: "EX90" },
+      { en: "S60", ar: "إس 60" },
+      { en: "S90", ar: "إس 90" },
+      { en: "XC60", ar: "إكس سي 60" },
+      { en: "XC90", ar: "إكس سي 90" },
     ],
   },
   {
@@ -4086,13 +3971,10 @@ const CAR_MAKES = [
     en: "Skoda",
     ar: "سكودا",
     models: [
-      { en: "Fabia", ar: "فابيا" },
       { en: "Octavia", ar: "أوكتافيا" },
       { en: "Superb", ar: "سوبيرب" },
-      { en: "Kamiq", ar: "كاميك" },
-      { en: "Karoq", ar: "كاروك" },
       { en: "Kodiaq", ar: "كودياك" },
-      { en: "Enyaq", ar: "إينياك" },
+      { en: "Karoq", ar: "كاروك" },
     ],
   },
   {
@@ -4100,13 +3982,10 @@ const CAR_MAKES = [
     en: "Chery",
     ar: "شيري",
     models: [
-      { en: "Arrizo 5", ar: "أريزو 5" },
-      { en: "Arrizo 8", ar: "أريزو 8" },
-      { en: "Tiggo 4", ar: "تيجو 4" },
       { en: "Tiggo 7", ar: "تيجو 7" },
       { en: "Tiggo 8", ar: "تيجو 8" },
-      { en: "Tiggo 8 Pro Max", ar: "تيجو 8 برو ماكس" },
-      { en: "Tiggo 9", ar: "تيجو 9" },
+      { en: "Arrizo 5", ar: "أريزو 5" },
+      { en: "Tiggo 4", ar: "تيجو 4" },
     ],
   },
   {
@@ -4114,12 +3993,10 @@ const CAR_MAKES = [
     en: "Fiat",
     ar: "فيات",
     models: [
-      { en: "500", ar: "500" },
-      { en: "500X", ar: "500X" },
-      { en: "Panda", ar: "باندا" },
       { en: "Tipo", ar: "تيبو" },
+      { en: "500", ar: "500" },
+      { en: "Panda", ar: "باندا" },
       { en: "Doblo", ar: "دوبلو" },
-      { en: "Fiorino", ar: "فيورينو" },
     ],
   },
   {
@@ -4127,18 +4004,10 @@ const CAR_MAKES = [
     en: "BYD",
     ar: "بي واي دي",
     models: [
-      { en: "F3", ar: "F3" },
-      { en: "Qin", ar: "تشين" },
-      { en: "Qin Plus", ar: "تشين بلس" },
-      { en: "Han", ar: "هان" },
-      { en: "Seal", ar: "سيل" },
+      { en: "F3", ar: "إف 3" },
       { en: "Song Plus", ar: "سونج بلس" },
-      { en: "Song Pro", ar: "سونج برو" },
       { en: "Atto 3", ar: "أتو 3" },
-      { en: "Dolphin", ar: "دولفين" },
-      { en: "Tang", ar: "تانج" },
-      { en: "Seal U", ar: "سيل U" },
-      { en: "Seagull", ar: "سيجال" },
+      { en: "Han", ar: "هان" },
     ],
   },
   {
@@ -4150,9 +4019,6 @@ const CAR_MAKES = [
       { en: "Macan", ar: "ماكان" },
       { en: "Panamera", ar: "باناميرا" },
       { en: "911", ar: "911" },
-      { en: "718 Cayman", ar: "718 كايمن" },
-      { en: "718 Boxster", ar: "718 بوكستر" },
-      { en: "Taycan", ar: "تايكان" },
     ],
   },
   {
@@ -4160,12 +4026,10 @@ const CAR_MAKES = [
     en: "Genesis",
     ar: "جينيسيس",
     models: [
-      { en: "G70", ar: "G70" },
-      { en: "G80", ar: "G80" },
-      { en: "G90", ar: "G90" },
-      { en: "GV60", ar: "GV60" },
-      { en: "GV70", ar: "GV70" },
-      { en: "GV80", ar: "GV80" },
+      { en: "G70", ar: "جي 70" },
+      { en: "G80", ar: "جي 80" },
+      { en: "G90", ar: "جي 90" },
+      { en: "GV80", ar: "جي في 80" },
     ],
   },
   {
@@ -4174,13 +4038,9 @@ const CAR_MAKES = [
     ar: "كاديلاك",
     models: [
       { en: "Escalade", ar: "إسكاليد" },
-      { en: "Escalade IQ", ar: "إسكاليد IQ" },
-      { en: "XT4", ar: "XT4" },
-      { en: "XT5", ar: "XT5" },
-      { en: "XT6", ar: "XT6" },
-      { en: "CT4", ar: "CT4" },
-      { en: "CT5", ar: "CT5" },
-      { en: "Lyriq", ar: "ليريك" },
+      { en: "XT5", ar: "إكس تي 5" },
+      { en: "XT6", ar: "إكس تي 6" },
+      { en: "CT5", ar: "سي تي 5" },
     ],
   },
   {
@@ -4191,8 +4051,6 @@ const CAR_MAKES = [
       { en: "Charger", ar: "تشارجر" },
       { en: "Challenger", ar: "تشالنجر" },
       { en: "Durango", ar: "دورانجو" },
-      { en: "Hornet", ar: "هورنت" },
-      { en: "Ram", ar: "رام" },
     ],
   },
   {
@@ -4200,12 +4058,10 @@ const CAR_MAKES = [
     en: "Jaguar",
     ar: "جاكوار",
     models: [
-      { en: "XE", ar: "XE" },
-      { en: "XF", ar: "XF" },
-      { en: "F-Pace", ar: "F-Pace" },
-      { en: "E-Pace", ar: "E-Pace" },
-      { en: "F-Type", ar: "F-Type" },
-      { en: "I-Pace", ar: "I-Pace" },
+      { en: "XE", ar: "إكس إي" },
+      { en: "XF", ar: "إكس إف" },
+      { en: "F-Pace", ar: "إف بيس" },
+      { en: "E-Pace", ar: "إي بيس" },
     ],
   },
   {
@@ -4214,10 +4070,8 @@ const CAR_MAKES = [
     ar: "ميني",
     models: [
       { en: "Cooper", ar: "كوبر" },
-      { en: "Cooper S", ar: "كوبر S" },
       { en: "Countryman", ar: "كاونتري مان" },
       { en: "Clubman", ar: "كلوبمان" },
-      { en: "Aceman", ar: "أكيمان" },
     ],
   },
   {
@@ -4227,8 +4081,6 @@ const CAR_MAKES = [
     models: [
       { en: "D-Max", ar: "دي ماكس" },
       { en: "MU-X", ar: "إم يو إكس" },
-      { en: "N-Series", ar: "N-Series" },
-      { en: "NPR", ar: "NPR" },
     ],
   },
   {
@@ -4236,12 +4088,9 @@ const CAR_MAKES = [
     en: "Haval",
     ar: "هافال",
     models: [
-      { en: "H6", ar: "H6" },
-      { en: "H6 GT", ar: "H6 GT" },
+      { en: "H6", ar: "إتش 6" },
       { en: "Jolion", ar: "جوليون" },
-      { en: "Jolion Pro", ar: "جوليون برو" },
-      { en: "H9", ar: "H9" },
-      { en: "Dargo", ar: "دارجو" },
+      { en: "H9", ar: "إتش 9" },
     ],
   },
   {
@@ -4252,9 +4101,6 @@ const CAR_MAKES = [
       { en: "Emgrand", ar: "إمجراند" },
       { en: "Coolray", ar: "كولراي" },
       { en: "Azkarra", ar: "أزكارا" },
-      { en: "Monjaro", ar: "مونجارو" },
-      { en: "Okavango", ar: "أوكافانجو" },
-      { en: "Starray", ar: "ستاراي" },
     ],
   },
   {
@@ -4262,13 +4108,9 @@ const CAR_MAKES = [
     en: "JAC",
     ar: "جاك",
     models: [
-      { en: "S3", ar: "S3" },
-      { en: "J4", ar: "J4" },
-      { en: "JS3", ar: "JS3" },
-      { en: "JS4", ar: "JS4" },
-      { en: "JS6", ar: "JS6" },
-      { en: "J7", ar: "J7" },
-      { en: "T8", ar: "T8" },
+      { en: "S3", ar: "إس 3" },
+      { en: "J4", ar: "جيه 4" },
+      { en: "JS4", ar: "جيه إس 4" },
     ],
   },
   {
@@ -4278,9 +4120,6 @@ const CAR_MAKES = [
     models: [
       { en: "Terios", ar: "تيريوس" },
       { en: "Sirion", ar: "سيريون" },
-      { en: "Mira", ar: "ميرا" },
-      { en: "Rocky", ar: "روكي" },
-      { en: "Gran Max", ar: "جران ماكس" },
     ],
   },
   {
@@ -4290,11 +4129,7 @@ const CAR_MAKES = [
     models: [
       { en: "Astra", ar: "أسترا" },
       { en: "Corsa", ar: "كورسا" },
-      { en: "Crossland", ar: "كروس لاند" },
       { en: "Grandland", ar: "جراندلاند" },
-      { en: "Mokka", ar: "موكا" },
-      { en: "Insignia", ar: "إنسيجنيا" },
-      { en: "Zafira", ar: "زافيرا" },
     ],
   },
   {
@@ -4302,14 +4137,9 @@ const CAR_MAKES = [
     en: "Subaru",
     ar: "سوبارو",
     models: [
-      { en: "Impreza", ar: "إمبريزا" },
-      { en: "Legacy", ar: "ليجاسي" },
       { en: "Forester", ar: "فورستر" },
       { en: "Outback", ar: "أوت باك" },
       { en: "XV", ar: "إكس في" },
-      { en: "Crosstrek", ar: "كروستريك" },
-      { en: "WRX", ar: "WRX" },
-      { en: "BRZ", ar: "BRZ" },
     ],
   },
   {
@@ -4318,10 +4148,9 @@ const CAR_MAKES = [
     ar: "تسلا",
     models: [
       { en: "Model 3", ar: "موديل 3" },
-      { en: "Model Y", ar: "موديل Y" },
-      { en: "Model S", ar: "موديل S" },
-      { en: "Model X", ar: "موديل X" },
-      { en: "Cybertruck", ar: "سايبرترك" },
+      { en: "Model Y", ar: "موديل واي" },
+      { en: "Model S", ar: "موديل إس" },
+      { en: "Model X", ar: "موديل إكس" },
     ],
   },
   {
@@ -4329,247 +4158,12 @@ const CAR_MAKES = [
     en: "Changan",
     ar: "شانجان",
     models: [
-      { en: "Alsvin", ar: "ألسفن" },
+      { en: "CS35", ar: "سي إس 35" },
+      { en: "CS55", ar: "سي إس 55" },
       { en: "Eado", ar: "إيدو" },
-      { en: "CS35 Plus", ar: "CS35 Plus" },
-      { en: "CS55 Plus", ar: "CS55 Plus" },
-      { en: "CS75 Plus", ar: "CS75 Plus" },
-      { en: "CS85", ar: "CS85" },
-      { en: "CS95", ar: "CS95" },
-      { en: "UNI-T", ar: "UNI-T" },
-      { en: "UNI-K", ar: "UNI-K" },
-      { en: "UNI-V", ar: "UNI-V" },
     ],
   },
-  {
-    code: "jetour",
-    en: "Jetour",
-    ar: "جيتور",
-    models: [
-      { en: "X70", ar: "X70" },
-      { en: "X70 Plus", ar: "X70 بلس" },
-      { en: "X90 Plus", ar: "X90 بلس" },
-      { en: "Dashing", ar: "داشينج" },
-      { en: "X50", ar: "X50" },
-      { en: "Traveller", ar: "ترافيلر" },
-      { en: "T2", ar: "T2" },
-    ],
-  },
-  {
-    code: "gac",
-    en: "GAC",
-    ar: "جي إيه سي",
-    models: [
-      { en: "GS3", ar: "GS3" },
-      { en: "GS4", ar: "GS4" },
-      { en: "GS5", ar: "GS5" },
-      { en: "GS8", ar: "GS8" },
-      { en: "Empow", ar: "إمباو" },
-      { en: "GA4", ar: "GA4" },
-      { en: "GA6", ar: "GA6" },
-      { en: "M8", ar: "M8" },
-    ],
-  },
-  {
-    code: "dongfeng",
-    en: "Dongfeng",
-    ar: "دونغ فينغ",
-    models: [
-      { en: "Aeolus S50", ar: "أيولوس S50" },
-      { en: "Aeolus S70", ar: "أيولوس S70" },
-      { en: "T5 Evo", ar: "T5 Evo" },
-      { en: "Huge", ar: "Huge" },
-      { en: "Mage", ar: "Mage" },
-      { en: "Shine", ar: "شاين" },
-    ],
-  },
-  {
-    code: "exeed",
-    en: "Exeed",
-    ar: "إكسيد",
-    models: [
-      { en: "LX", ar: "LX" },
-      { en: "TXL", ar: "TXL" },
-      { en: "VX", ar: "VX" },
-      { en: "RX", ar: "RX" },
-      { en: "ES", ar: "ES" },
-    ],
-  },
-  {
-    code: "omoda",
-    en: "Omoda",
-    ar: "أومودا",
-    models: [
-      { en: "C5", ar: "C5" },
-      { en: "C7", ar: "C7" },
-      { en: "E5", ar: "E5" },
-    ],
-  },
-  {
-    code: "jaecoo",
-    en: "Jaecoo",
-    ar: "جايكو",
-    models: [
-      { en: "J7", ar: "J7" },
-      { en: "J8", ar: "J8" },
-      { en: "J5", ar: "J5" },
-    ],
-  },
-  {
-    code: "tank",
-    en: "Tank",
-    ar: "تانك",
-    models: [
-      { en: "300", ar: "300" },
-      { en: "500", ar: "500" },
-      { en: "700", ar: "700" },
-    ],
-  },
-  {
-    code: "hongqi",
-    en: "Hongqi",
-    ar: "هونشي",
-    models: [
-      { en: "H5", ar: "H5" },
-      { en: "H6", ar: "H6" },
-      { en: "H9", ar: "H9" },
-      { en: "HS3", ar: "HS3" },
-      { en: "HS5", ar: "HS5" },
-      { en: "HS7", ar: "HS7" },
-      { en: "E-HS9", ar: "E-HS9" },
-    ],
-  },
-  {
-    code: "zeekr",
-    en: "Zeekr",
-    ar: "زيكر",
-    models: [
-      { en: "001", ar: "001" },
-      { en: "007", ar: "007" },
-      { en: "009", ar: "009" },
-      { en: "X", ar: "X" },
-      { en: "7X", ar: "7X" },
-    ],
-  },
-  {
-    code: "nio",
-    en: "NIO",
-    ar: "نيو",
-    models: [
-      { en: "ET5", ar: "ET5" },
-      { en: "ET7", ar: "ET7" },
-      { en: "EL6", ar: "EL6" },
-      { en: "EL7", ar: "EL7" },
-      { en: "EL8", ar: "EL8" },
-    ],
-  },
-  {
-    code: "lincoln",
-    en: "Lincoln",
-    ar: "لينكولن",
-    models: [
-      { en: "Corsair", ar: "كورساير" },
-      { en: "Nautilus", ar: "نوتيلوس" },
-      { en: "Aviator", ar: "أفياتور" },
-      { en: "Navigator", ar: "نافيجيتور" },
-    ],
-  },
-  {
-    code: "seat",
-    en: "SEAT",
-    ar: "سيات",
-    models: [
-      { en: "Ibiza", ar: "إيبيزا" },
-      { en: "Leon", ar: "ليون" },
-      { en: "Arona", ar: "أرونا" },
-      { en: "Ateca", ar: "أتيكا" },
-      { en: "Tarraco", ar: "تاراكو" },
-    ],
-  },
-  {
-    code: "citroen",
-    en: "Citroen",
-    ar: "سيتروين",
-    models: [
-      { en: "C3", ar: "C3" },
-      { en: "C4", ar: "C4" },
-      { en: "C5 Aircross", ar: "C5 إيركروس" },
-      { en: "C3 Aircross", ar: "C3 إيركروس" },
-      { en: "Berlingo", ar: "برلينجو" },
-    ],
-  },
-  {
-    code: "ram",
-    en: "RAM",
-    ar: "رام",
-    models: [
-      { en: "1500", ar: "1500" },
-      { en: "2500", ar: "2500" },
-      { en: "3500", ar: "3500" },
-      { en: "TRX", ar: "TRX" },
-      { en: "ProMaster", ar: "برومستر" },
-    ],
-  },
-  {
-    code: "alfaromeo",
-    en: "Alfa Romeo",
-    ar: "ألفا روميو",
-    models: [
-      { en: "Giulia", ar: "جوليا" },
-      { en: "Stelvio", ar: "ستيلفيو" },
-      { en: "Tonale", ar: "تونالي" },
-    ],
-  },
-  {
-    code: "maserati",
-    en: "Maserati",
-    ar: "مازيراتي",
-    models: [
-      { en: "Ghibli", ar: "جيبلي" },
-      { en: "Levante", ar: "ليفانتي" },
-      { en: "Grecale", ar: "جريكال" },
-      { en: "Quattroporte", ar: "كواتروبورتي" },
-      { en: "GranTurismo", ar: "جران توريزمو" },
-    ],
-  },
-  {
-    code: "foton",
-    en: "Foton",
-    ar: "فوتون",
-    models: [
-      { en: "Tunland", ar: "تونلاند" },
-      { en: "View", ar: "فيو" },
-      { en: "Toano", ar: "توانو" },
-    ],
-  },
-  {
-    code: "mahindra",
-    en: "Mahindra",
-    ar: "ماهيندرا",
-    models: [
-      { en: "Scorpio", ar: "سكوربيو" },
-      { en: "XUV700", ar: "XUV700" },
-      { en: "Thar", ar: "ثار" },
-      { en: "Pik Up", ar: "بيك أب" },
-    ],
-  },
-  {
-    code: "lada",
-    en: "Lada",
-    ar: "لادا",
-    models: [
-      { en: "Niva", ar: "نيفا" },
-      { en: "Vesta", ar: "فيستا" },
-      { en: "Granta", ar: "جرانتا" },
-    ],
-  },
-  {
-    code: "other",
-    en: "Other",
-    ar: "أخرى",
-    models: [
-    ],
-  },
+  { code: "other", en: "Other", ar: "أخرى", models: [] },
 ];
 
 const CAR_FORM_DRAFT_KEY = "karaji_car_form_draft";
@@ -5010,22 +4604,38 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
           </div>
         )}
 
-        <button
-          onClick={() =>
-            window.open(`https://wa.me/${car.phone.replace(/[^0-9]/g, "")}`, "_blank")
-          }
-          className="w-full flex items-center justify-center gap-2"
-          style={{
-            background: C.amber,
-            border: "none",
-            borderRadius: 12,
-            padding: "13px 16px",
-            cursor: "pointer",
-          }}
-        >
-          <MessageCircle size={18} color={C.asphalt} />
-          <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.carContact}</span>
-        </button>
+        {car.status === "sold" ? (
+          <div
+            className="w-full flex items-center justify-center gap-2"
+            style={{
+              background: `${C.red}18`,
+              border: `1px solid ${C.red}66`,
+              borderRadius: 12,
+              padding: "13px 16px",
+              boxSizing: "border-box",
+            }}
+          >
+            <CheckCircle2 size={18} color={C.red} />
+            <span style={{ color: C.red, fontSize: 14, fontWeight: 800 }}>{t.soldBadge}</span>
+          </div>
+        ) : (
+          <button
+            onClick={() =>
+              window.open(`https://wa.me/${car.phone.replace(/[^0-9]/g, "")}`, "_blank")
+            }
+            className="w-full flex items-center justify-center gap-2"
+            style={{
+              background: C.amber,
+              border: "none",
+              borderRadius: 12,
+              padding: "13px 16px",
+              cursor: "pointer",
+            }}
+          >
+            <MessageCircle size={18} color={C.asphalt} />
+            <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.carContact}</span>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -5045,7 +4655,7 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
       const { data } = await supabase
         .from("car_listings")
         .select("*")
-        .eq("status", "approved")
+        .in("status", ["approved", "sold"])
         .order("created_at", { ascending: false });
       if (active) {
         setListings(data || []);
@@ -5202,6 +4812,26 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                 </div>
               )}
               <div style={{ padding: "12px 14px" }}>
+                {c.status === "sold" && (
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 5,
+                      background: `${C.red}18`,
+                      border: `1px solid ${C.red}66`,
+                      color: C.red,
+                      borderRadius: 999,
+                      padding: "3px 8px",
+                      fontSize: 10.5,
+                      fontWeight: 800,
+                      marginBottom: 7,
+                    }}
+                  >
+                    <CheckCircle2 size={12} />
+                    {t.soldBadge}
+                  </div>
+                )}
                 <div className="flex items-start justify-between gap-2">
                   <span style={{ color: C.cream, fontSize: 14.5, fontWeight: 700 }}>
                     {c.make_model} {c.year ? `· ${c.year}` : ""}
@@ -5223,25 +4853,261 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                     {c.description}
                   </p>
                 )}
+                {c.status === "sold" ? (
+                  <div
+                    className="flex items-center justify-center gap-2 mt-3"
+                    style={{
+                      width: "100%",
+                      background: `${C.red}12`,
+                      border: `1px solid ${C.red}55`,
+                      borderRadius: 10,
+                      padding: "8px 12px",
+                    }}
+                  >
+                    <CheckCircle2 size={14} color={C.red} />
+                    <span style={{ color: C.red, fontSize: 12.5, fontWeight: 700 }}>
+                      {t.soldBadge}
+                    </span>
+                  </div>
+                ) : (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.open(`https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`, "_blank");
+                    }}
+                    className="flex items-center justify-center gap-2 mt-3"
+                    style={{
+                      width: "100%",
+                      background: "transparent",
+                      border: `1px solid ${C.amberDim}`,
+                      borderRadius: 10,
+                      padding: "8px 12px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <MessageCircle size={14} color={C.amber} />
+                    <span style={{ color: C.amber, fontSize: 12.5, fontWeight: 600 }}>
+                      {t.carContact}
+                    </span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------
+   Admin car listing management
+--------------------------------------------------------------- */
+function AdminCarsView({ lang, t, isRTL, onBack }) {
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [busyId, setBusyId] = useState(null);
+
+  useEffect(() => {
+    if (!supabase) {
+      setChecking(false);
+      return;
+    }
+    let active = true;
+    async function verifySession() {
+      const { data } = await supabase.auth.getUser();
+      const currentUser = data?.user || null;
+      if (!currentUser) {
+        if (active) {
+          setUser(null);
+          setChecking(false);
+        }
+        return;
+      }
+      const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
+      if (!adminError && adminData === true) {
+        if (active) {
+          setUser(currentUser);
+          setChecking(false);
+        }
+      } else {
+        await supabase.auth.signOut();
+        if (active) {
+          setUser(null);
+          setLoginError(t.adminInvalid);
+          setChecking(false);
+        }
+      }
+    }
+    verifySession();
+    const { data: listener } = supabase.auth.onAuthStateChange(() => {
+      setTimeout(() => verifySession(), 0);
+    });
+    return () => {
+      active = false;
+      listener?.subscription?.unsubscribe?.();
+    };
+  }, []);
+
+  async function loadListings() {
+    if (!supabase || !user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("car_listings")
+      .select("*")
+      .in("status", ["approved", "sold"])
+      .order("created_at", { ascending: false });
+    if (error) setLoginError(error.message);
+    setListings(data || []);
+    setLoading(false);
+  }
+
+  useEffect(() => {
+    if (user) loadListings();
+  }, [user]);
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    if (!supabase) return;
+    setLoginError("");
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
+    if (adminError || adminData !== true) {
+      await supabase.auth.signOut();
+      setLoginError(t.adminInvalid);
+      return;
+    }
+    setUser(data?.user || null);
+  }
+
+  async function updateStatus(car, nextStatus) {
+    if (!supabase || !user) return;
+    setBusyId(car.id);
+    setLoginError("");
+    const { error } = await supabase
+      .from("car_listings")
+      .update({ status: nextStatus, sold_at: nextStatus === "sold" ? new Date().toISOString() : null })
+      .eq("id", car.id);
+    setBusyId(null);
+    if (error) {
+      setLoginError(t.adminUpdateError);
+      return;
+    }
+    await loadListings();
+  }
+
+  async function logout() {
+    if (supabase) await supabase.auth.signOut();
+    setUser(null);
+    setListings([]);
+  }
+
+  const fieldStyle = {
+    width: "100%",
+    background: C.asphalt,
+    border: `1px solid ${C.panelLine}`,
+    borderRadius: 10,
+    padding: "11px 12px",
+    color: C.cream,
+    fontSize: 13,
+    marginBottom: 10,
+    fontFamily: "inherit",
+    textAlign: isRTL ? "right" : "left",
+    boxSizing: "border-box",
+  };
+
+  if (checking) {
+    return <div className="px-5 pt-8 text-center" style={{ color: C.creamDim }}>{t.adminLoading}</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="px-5 pt-8 pb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <ShieldCheck size={24} color={C.amber} />
+          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
+        </div>
+        <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
+          {t.adminLoginRequired}
+        </p>
+        <form onSubmit={handleLogin}>
+          <input
+            type="email"
+            autoComplete="username"
+            placeholder={t.adminEmail}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            style={fieldStyle}
+          />
+          <input
+            type="password"
+            autoComplete="current-password"
+            placeholder={t.adminPassword}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={fieldStyle}
+          />
+          {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
+          <button
+            type="submit"
+            style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}
+          >
+            {t.adminLogin}
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-2">
+          <ShieldCheck size={22} color={C.amber} />
+          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
+        </div>
+        <button onClick={logout} style={{ background: "transparent", border: `1px solid ${C.panelLine}`, color: C.creamDim, borderRadius: 9, padding: "7px 9px", cursor: "pointer" }}>
+          <LogOut size={15} />
+        </button>
+      </div>
+      <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>{t.adminSubtitle}</p>
+      {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
+      {loading ? (
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.carLoading}</p>
+      ) : listings.length === 0 ? (
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminNoListings}</p>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {listings.map((c) => (
+            <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+              {(c.photo_url || c.photo_urls?.[0]) && (
+                <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+              )}
+              <div style={{ padding: "11px 12px" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{c.make_model}{c.year ? ` · ${c.year}` : ""}</div>
+                    <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{c.price}{c.city ? ` · ${c.city}` : ""}</div>
+                  </div>
+                  <span style={{ color: c.status === "sold" ? C.red : C.amber, fontSize: 11, fontWeight: 800 }}>{c.status === "sold" ? t.adminSold : t.adminAvailable}</span>
+                </div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(`https://wa.me/${c.phone.replace(/[^0-9]/g, "")}`, "_blank");
-                  }}
+                  disabled={busyId === c.id}
+                  onClick={() => updateStatus(c, c.status === "sold" ? "approved" : "sold")}
                   className="flex items-center justify-center gap-2 mt-3"
-                  style={{
-                    width: "100%",
-                    background: "transparent",
-                    border: `1px solid ${C.amberDim}`,
-                    borderRadius: 10,
-                    padding: "8px 12px",
-                    cursor: "pointer",
-                  }}
+                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}
                 >
-                  <MessageCircle size={14} color={C.amber} />
-                  <span style={{ color: C.amber, fontSize: 12.5, fontWeight: 600 }}>
-                    {t.carContact}
-                  </span>
+                  {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}
+                  {c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
                 </button>
               </div>
             </div>
@@ -5482,6 +5348,12 @@ export default function App() {
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
               <PhotoDiagnosisView lang={lang} />
+            </>
+          )}
+          {view === "admin" && (
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <AdminCarsView lang={lang} t={t} isRTL={isRTL} onBack={goHome} />
             </>
           )}
           {view === "cars" && (
