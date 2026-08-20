@@ -62,17 +62,30 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
     return data.publicUrl;
   }
 
-  function sendNotificationEmail(payload) {
-    if (!window.emailjs) return; // لو السكربت لسه مايتحملش، تجاهل بهدوء
-    window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-      garage_name: "طلب شراء رصيد تشخيص بالصورة",
-      owner_name: "-",
-      phone: payload.whatsapp,
-      address: `باقة ${payload.pkg.labelAr} (${payload.pkg.credits} تشخيص)`,
-      map_link: "-",
-      rank: payload.pkg.labelAr,
-      price: payload.pkg.price,
-    });
+  async function sendNotificationEmail(payload) {
+    // نستنى لحد ما سكربت EmailJS يتحمل بدل ما نتجاهل الإرسال بصمت
+    let attempts = 0;
+    while (!window.emailjs && attempts < 20) {
+      await new Promise((r) => setTimeout(r, 250));
+      attempts++;
+    }
+    if (!window.emailjs) {
+      console.error("EmailJS لم يتم تحميله، تم تخطي إرسال إشعار الإيميل");
+      return;
+    }
+    try {
+      await window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
+        garage_name: "طلب شراء رصيد تشخيص بالصورة",
+        owner_name: "-",
+        phone: payload.whatsapp,
+        address: `باقة ${payload.pkg.labelAr} (${payload.pkg.credits} تشخيص)`,
+        map_link: "-",
+        rank: payload.pkg.labelAr,
+        price: payload.pkg.price,
+      });
+    } catch (err) {
+      console.error("فشل إرسال إشعار الإيميل:", err);
+    }
   }
 
   function validateStep2() {
