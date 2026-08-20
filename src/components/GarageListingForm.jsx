@@ -60,10 +60,9 @@ export default function GarageListingForm({ isOpen, onClose }) {
   async function fetchTakenRanks() {
     setLoadingRanks(true);
     const { data, error } = await supabase
-      .from("garage_listings")
+      .from("garage_active_ranks")
       .select("rank")
-      .in("rank", [1, 2, 3])
-      .neq("status", "rejected");
+      .in("rank", [1, 2, 3]);
 
     if (!error && data) {
       setTakenRanks(data.map((r) => r.rank));
@@ -167,26 +166,23 @@ export default function GarageListingForm({ isOpen, onClose }) {
       const photoUrl = await uploadFile(photoFile, "garage-photos");
       const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
 
-      // احجز الترتيب فوراً بإدخال السطر (الـ unique index في قاعدة البيانات
-      // بيمنع اتنين ياخدوا نفس الترتيب 1/2/3 في نفس اللحظة)
-      const { error: insertError } = await supabase.from("garage_listings").insert({
-        garage_name: form.garage_name,
-        owner_name: form.owner_name,
-        phone: form.phone,
-        address: form.address,
-        lat: form.lat,
-        lng: form.lng,
-        map_link: form.map_link,
-        rank: form.rank,
-        price: RANK_PRICES[form.rank],
-        photo_url: photoUrl,
-        receipt_url: receiptUrl,
-        status: "pending",
+      // الإضافة تتم من خلال RPC محمي؛ المستخدم لا يملك صلاحية INSERT مباشرة.
+      const { error: insertError } = await supabase.rpc("submit_garage_listing", {
+        p_garage_name: form.garage_name.trim(),
+        p_owner_name: form.owner_name.trim(),
+        p_phone: form.phone.trim(),
+        p_address: form.address.trim(),
+        p_lat: form.lat,
+        p_lng: form.lng,
+        p_map_link: form.map_link || null,
+        p_rank: form.rank,
+        p_photo_url: photoUrl,
+        p_receipt_url: receiptUrl,
       });
 
       if (insertError) {
-        // لو الترتيب اتحجز من حد تاني في نفس اللحظة بالظبط
-        if (insertError.code === "23505") {
+        // الترتيب 1/2/3 محجوز بشكل ذري داخل قاعدة البيانات.
+        if (insertError.code === "23505" || /rank|unique_active_rank/i.test(insertError.message || "")) {
           setError("للأسف تم حجز هذا الترتيب للتو من مستخدم آخر، من فضلك اختر ترتيب آخر");
           await fetchTakenRanks();
           setSubmitting(false);
