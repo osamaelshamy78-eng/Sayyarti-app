@@ -2458,7 +2458,7 @@ const T = {
 /* ---------------------------------------------------------------
    Small building blocks
 --------------------------------------------------------------- */
-function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage }) {
+function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage, onOpenAdmin }) {
   const isRTL = lang === "ar";
   return (
     <div
@@ -2552,10 +2552,11 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
           }}
         >
           <button
-            onClick={onAddGarage}
-            className="w-full"
+            onClick={onOpenAdmin}
+            className="w-full flex items-center gap-2"
             style={{
-              display: "block",
+              display: "flex",
+              width: "100%",
               padding: "12px 16px",
               background: "none",
               border: "none",
@@ -2564,9 +2565,33 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
               fontWeight: 600,
               textAlign: isRTL ? "right" : "left",
               cursor: "pointer",
+              flexDirection: isRTL ? "row-reverse" : "row",
             }}
           >
-            {t.addGarageBtn}
+            <ShieldCheck size={16} color={C.amber} strokeWidth={2} />
+            <span style={{ flex: 1 }}>{t.adminLogin}</span>
+          </button>
+
+          <button
+            onClick={onAddGarage}
+            className="w-full flex items-center gap-2"
+            style={{
+              display: "flex",
+              width: "100%",
+              padding: "12px 16px",
+              background: "none",
+              border: "none",
+              borderTop: `1px solid ${C.panelLine}`,
+              color: C.cream,
+              fontSize: 13,
+              fontWeight: 600,
+              textAlign: isRTL ? "right" : "left",
+              cursor: "pointer",
+              flexDirection: isRTL ? "row-reverse" : "row",
+            }}
+          >
+            <Plus size={16} color={C.amber} strokeWidth={2} />
+            <span style={{ flex: 1 }}>{t.addGarageBtn}</span>
           </button>
         </div>
       )}
@@ -4990,57 +5015,19 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   }
 
   async function updateStatus(car, nextStatus) {
-    if (!supabase || !user || busyId) return;
-
+    if (!supabase || !user) return;
     setBusyId(car.id);
     setLoginError("");
-
-    try {
-      // Re-check the current authenticated user before changing a listing.
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData?.user) {
-        throw new Error("Your admin session has expired. Please sign in again.");
-      }
-
-      // Re-check the admin permission on the server.
-      const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
-      if (adminError || adminData !== true) {
-        throw new Error(t.adminInvalid);
-      }
-
-      // Update only the status. This avoids failing if an older database
-      // does not yet contain the optional sold_at column.
-      const { data: updatedRows, error: updateError } = await supabase
-        .from("car_listings")
-        .update({ status: nextStatus })
-        .eq("id", car.id)
-        .select("id,status");
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      // RLS can allow an UPDATE request but return no updated rows.
-      if (!updatedRows || updatedRows.length === 0) {
-        throw new Error(
-          "The listing was not updated. Check the car_listings UPDATE policy for your admin account."
-        );
-      }
-
-      // Update the screen immediately, then refresh from Supabase.
-      setListings((current) =>
-        current.map((item) =>
-          item.id === car.id ? { ...item, status: nextStatus } : item
-        )
-      );
-
-      await loadListings();
-    } catch (error) {
-      console.error("Karajy admin status update:", error);
-      setLoginError(error?.message || t.adminUpdateError);
-    } finally {
-      setBusyId(null);
+    const { error } = await supabase
+      .from("car_listings")
+      .update({ status: nextStatus, sold_at: nextStatus === "sold" ? new Date().toISOString() : null })
+      .eq("id", car.id);
+    setBusyId(null);
+    if (error) {
+      setLoginError(t.adminUpdateError);
+      return;
     }
+    await loadListings();
   }
 
   async function logout() {
@@ -5261,6 +5248,10 @@ export default function App() {
     setMenuOpen(false);
     setShowGarageForm(true);
   }
+  function handleOpenAdmin() {
+    setMenuOpen(false);
+    navPush("/admin");
+  }
 
   return (
     <div
@@ -5300,6 +5291,7 @@ export default function App() {
           menuOpen={menuOpen}
           onToggleMenu={toggleMenu}
           onAddGarage={handleAddGarage}
+          onOpenAdmin={handleOpenAdmin}
         />
         <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
