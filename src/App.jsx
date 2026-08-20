@@ -4990,19 +4990,57 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   }
 
   async function updateStatus(car, nextStatus) {
-    if (!supabase || !user) return;
+    if (!supabase || !user || busyId) return;
+
     setBusyId(car.id);
     setLoginError("");
-    const { error } = await supabase
-      .from("car_listings")
-      .update({ status: nextStatus, sold_at: nextStatus === "sold" ? new Date().toISOString() : null })
-      .eq("id", car.id);
-    setBusyId(null);
-    if (error) {
-      setLoginError(t.adminUpdateError);
-      return;
+
+    try {
+      // Re-check the current authenticated user before changing a listing.
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        throw new Error("Your admin session has expired. Please sign in again.");
+      }
+
+      // Re-check the admin permission on the server.
+      const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
+      if (adminError || adminData !== true) {
+        throw new Error(t.adminInvalid);
+      }
+
+      // Update only the status. This avoids failing if an older database
+      // does not yet contain the optional sold_at column.
+      const { data: updatedRows, error: updateError } = await supabase
+        .from("car_listings")
+        .update({ status: nextStatus })
+        .eq("id", car.id)
+        .select("id,status");
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      // RLS can allow an UPDATE request but return no updated rows.
+      if (!updatedRows || updatedRows.length === 0) {
+        throw new Error(
+          "The listing was not updated. Check the car_listings UPDATE policy for your admin account."
+        );
+      }
+
+      // Update the screen immediately, then refresh from Supabase.
+      setListings((current) =>
+        current.map((item) =>
+          item.id === car.id ? { ...item, status: nextStatus } : item
+        )
+      );
+
+      await loadListings();
+    } catch (error) {
+      console.error("Karajy admin status update:", error);
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally {
+      setBusyId(null);
     }
-    await loadListings();
   }
 
   async function logout() {
