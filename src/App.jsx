@@ -1758,7 +1758,7 @@ const OBD_CODES = {
   P0335: {
     relatedIssue: "noStart",
     en: { title: "Crankshaft Position Sensor Circuit", meaning: "A key sensor for engine timing has failed — can cause stalling or a no-start." },
-    ar: { title: "دائرة حساس وضع عمود المرفق", meaning: "حساس مهم لتوقيت المحرك بيه عطل، ممكن يسبب وقفة مفاجئة أو رفض تشغيل." },
+    ar: { title: "دائرة حساس وضع عمود المرفق", meaning: "حساس مهم لتوقيت المحرك بيه عطل، ممكن يسبب وقفة مفاجئة أو {t.adminReject} تشغيل." },
   },
   P0340: {
     relatedIssue: "checkEngine",
@@ -2340,6 +2340,28 @@ const T = {
     adminMarkSold: "Mark as sold",
     adminMarkAvailable: "Mark as available",
     adminUpdateError: "Could not update this listing.",
+    adminManageSubtitle: "Manage garages + photo diagnosis requests + cars",
+    adminPhotosTab: "Photo Diagnosis",
+    adminGaragesTab: "Garage Requests",
+    adminCarsTab: "Cars",
+    adminRequestsCount: "requests",
+    adminLoadingRequests: "Loading requests...",
+    adminNoPhotoRequests: "No photo diagnosis requests.",
+    adminPhotoRequest: "Photo diagnosis request",
+    adminPackage: "Package",
+    adminDiagnosis: "diagnoses",
+    adminStatus: "Status",
+    adminViewReceipt: "View transfer receipt",
+    adminCreditCode: "Credit code",
+    adminSendCode: "Send code to customer on WhatsApp",
+    adminApproving: "Approving...",
+    adminApproveGenerate: "Approve + Generate Code",
+    adminNoGarageRequests: "No garage requests.",
+    adminRank: "Rank",
+    adminYear: "AED/year",
+    adminApprove: "Approve",
+    adminReject: "Reject",
+    adminNoCars: "No cars.",
     soldBadge: "SOLD",
     faultCodeSearchLabel: "Search a Fault Code",
     faultCodeSearchPlaceholder: "e.g. P0300 or \"misfire\"",
@@ -2438,6 +2460,28 @@ const T = {
     adminMarkSold: "تحديد تم البيع",
     adminMarkAvailable: "إعادة للعرض",
     adminUpdateError: "تعذر تحديث الإعلان.",
+    adminManageSubtitle: "إدارة الجراجات + طلبات تشخيص الصور + السيارات",
+    adminPhotosTab: "صور الأعطال",
+    adminGaragesTab: "طلبات الجراجات",
+    adminCarsTab: "السيارات",
+    adminRequestsCount: "طلب",
+    adminLoadingRequests: "جاري تحميل الطلبات...",
+    adminNoPhotoRequests: "لا توجد طلبات تشخيص صور.",
+    adminPhotoRequest: "طلب تشخيص صور",
+    adminPackage: "الباقة",
+    adminDiagnosis: "تشخيص",
+    adminStatus: "الحالة",
+    adminViewReceipt: "عرض إيصال التحويل",
+    adminCreditCode: "كود الرصيد",
+    adminSendCode: "إرسال الكود للعميل على WhatsApp",
+    adminApproving: "جاري الاعتماد...",
+    adminApproveGenerate: "اعتماد + توليد الكود",
+    adminNoGarageRequests: "لا توجد طلبات جراجات.",
+    adminRank: "الترتيب",
+    adminYear: "درهم/سنة",
+    adminApprove: "اعتماد",
+    adminReject: "رفض",
+    adminNoCars: "لا توجد سيارات.",
     soldBadge: "تم البيع",
     faultCodeSearchLabel: "دور برمز العطل",
     faultCodeSearchPlaceholder: "مثال: P0300 أو \"قطع تماس\"",
@@ -4817,6 +4861,22 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
                     onError={(e) => (e.target.style.display = "none")}
                   />
+                  {c.status === "sold" && (
+                    <div
+                      aria-label={t.soldBadge}
+                      style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        transform: "translate(-50%, -50%) rotate(-12deg)",
+                        border: `3px solid ${C.red}`, color: C.red,
+                        background: "rgba(10,11,13,0.78)", borderRadius: 10,
+                        padding: "7px 18px", fontSize: 21, fontWeight: 900,
+                        letterSpacing: 2, textTransform: lang === "en" ? "uppercase" : "none",
+                        whiteSpace: "nowrap", zIndex: 3, pointerEvents: "none",
+                      }}
+                    >
+                      {t.soldBadge}
+                    </div>
+                  )}
                   {c.photo_urls && c.photo_urls.length > 1 && (
                     <span
                       style={{
@@ -5143,16 +5203,16 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       </div>
 
       <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>
-        إدارة الجراجات + طلبات تشخيص الصور + السيارات
+        {t.adminManageSubtitle}
       </p>
 
       {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
 
       <div className="grid grid-cols-3 gap-2 mb-4">
         {[
-          ["photo", "صور الأعطال", photoRequests.filter((x) => x.status === "pending").length],
-          ["garage", "طلبات الجراجات", garageRequests.filter((x) => x.status === "pending").length],
-          ["cars", "السيارات", cars.length],
+          ["photo", t.adminPhotosTab, photoRequests.filter((x) => x.status === "pending").length],
+          ["garage", t.adminGaragesTab, garageRequests.filter((x) => x.status === "pending").length],
+          ["cars", t.adminCarsTab, cars.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
             style={{
@@ -5161,46 +5221,46 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               border: `1px solid ${tab === id ? C.amber : C.panelLine}`,
               borderRadius: 10, padding: "9px 6px", fontSize: 11.5, fontWeight: 800
             }}>
-            {label}<br /><span style={{ fontSize: 10, opacity: .8 }}>{count} طلب</span>
+            {label}<br /><span style={{ fontSize: 10, opacity: .8 }}>{count} {t.adminRequestsCount}</span>
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>جاري تحميل الطلبات...</p>
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminLoadingRequests}</p>
       ) : tab === "photo" ? (
         <div className="flex flex-col gap-2.5">
-          {photoRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد طلبات تشخيص صور.</p>}
+          {photoRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoPhotoRequests}</p>}
           {photoRequests.map((p) => {
             const code = generatedCodes[p.id] || p.generated_code;
             return (
               <div key={p.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12 }}>
-                <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>طلب تشخيص صور</div>
+                <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>{t.adminPhotoRequest}</div>
                 <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>WhatsApp: {p.whatsapp_number}</div>
-                <div style={{ color: C.creamDim, fontSize: 12 }}>الباقة: {p.package_credits} تشخيص — {p.package_price} درهم</div>
+                <div style={{ color: C.creamDim, fontSize: 12 }}>{t.adminPackage}: {p.package_credits} {t.adminDiagnosis} — {p.package_price} AED</div>
                 <div style={{ color: p.status === "approved" ? "#7BC67B" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
-                  الحالة: {p.status}
+                  {t.adminStatus}: {p.status}
                 </div>
                 {p.receipt_url && (
                   <a href={p.receipt_url} target="_blank" rel="noreferrer"
                     style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>
-                    عرض إيصال التحويل
+                    {t.adminViewReceipt}
                   </a>
                 )}
                 {code && (
                   <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: C.asphalt, border: `1px solid ${C.amber}55` }}>
-                    <div style={{ color: C.creamDim, fontSize: 11 }}>كود الرصيد</div>
+                    <div style={{ color: C.creamDim, fontSize: 11 }}>{t.adminCreditCode}</div>
                     <div dir="ltr" style={{ color: C.amber, fontSize: 18, fontWeight: 900, letterSpacing: 1.2 }}>{code}</div>
                     <button onClick={() => openWhatsApp(p.whatsapp_number, code, p.package_credits)}
                       style={{ width: "100%", marginTop: 8, background: C.amber, color: C.asphalt, border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
-                      إرسال الكود للعميل على WhatsApp
+                      {t.adminSendCode}
                     </button>
                   </div>
                 )}
                 {!code && p.status === "pending" && (
                   <button disabled={busyId === p.id} onClick={() => approvePhoto(p)}
                     style={{ width: "100%", marginTop: 10, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
-                    {busyId === p.id ? "جاري الاعتماد..." : "اعتماد + توليد الكود"}
+                    {busyId === p.id ? t.adminApproving : t.adminApproveGenerate}
                   </button>
                 )}
               </div>
@@ -5209,7 +5269,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "garage" ? (
         <div className="flex flex-col gap-2.5">
-          {garageRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد طلبات جراجات.</p>}
+          {garageRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoGarageRequests}</p>}
           {garageRequests.map((g) => (
             <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
               {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 130, objectFit: "cover" }} />}
@@ -5217,18 +5277,18 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                 <div style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.garage_name}</div>
                 <div style={{ color: C.creamDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
                 <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
-                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>الترتيب: {g.rank} · {Number(g.price).toLocaleString()} درهم/سنة</div>
-                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>الحالة: {g.status}</div>
-                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>عرض إيصال التحويل</a>}
+                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
+                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
+                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>{t.adminViewReceipt}</a>}
                 {g.status === "pending" && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "approved")}
                       style={{ background: "#2F7D32", color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
-                      اعتماد
+                      {t.adminApprove}
                     </button>
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "rejected")}
                       style={{ background: "transparent", color: C.red, border: `1px solid ${C.red}88`, borderRadius: 8, padding: 9, fontWeight: 800 }}>
-                      رفض
+                      {t.adminReject}
                     </button>
                   </div>
                 )}
@@ -5238,11 +5298,29 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {cars.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد سيارات.</p>}
+          {cars.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoCars}</p>}
           {cars.map((c) => (
             <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
               {(c.photo_url || c.photo_urls?.[0]) && (
-                <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                <div style={{ position: "relative" }}>
+                  <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                  {c.status === "sold" && (
+                    <div
+                      aria-label={t.soldBadge}
+                      style={{
+                        position: "absolute", top: "50%", left: "50%",
+                        transform: "translate(-50%, -50%) rotate(-12deg)",
+                        border: `3px solid ${C.red}`, color: C.red,
+                        background: "rgba(10,11,13,0.78)", borderRadius: 10,
+                        padding: "6px 16px", fontSize: 18, fontWeight: 900,
+                        letterSpacing: 2, textTransform: lang === "en" ? "uppercase" : "none",
+                        whiteSpace: "nowrap", zIndex: 3, pointerEvents: "none",
+                      }}
+                    >
+                      {t.soldBadge}
+                    </div>
+                  )}
+                </div>
               )}
               <div style={{ padding: "11px 12px" }}>
                 <div className="flex items-start justify-between gap-2">
