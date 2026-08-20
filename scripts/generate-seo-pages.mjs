@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
+const SITE_URL = "https://www.karaji.online";
 const dist = path.join(root, "dist");
 const source = fs.readFileSync(path.join(root, "src", "App.jsx"), "utf8");
 const template = fs.readFileSync(path.join(dist, "index.html"), "utf8");
@@ -90,14 +91,14 @@ const sectionPaths = [
 const pages = [...sectionPaths, ...categoryPaths, ...issuePaths, ...obdPaths];
 
 function renderPage(page) {
-  const canonical = `https://karajy-app.vercel.app${page.path}`;
+  const canonical = `${SITE_URL}${page.path}`;
   const jsonLd = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebPage",
     name: page.title,
     description: page.description,
     url: canonical,
-    isPartOf: { "@type": "WebSite", name: "Karaji", url: "https://karajy-app.vercel.app/" },
+    isPartOf: { "@type": "WebSite", name: "Karaji", url: `${SITE_URL}/` },
     inLanguage: "en",
   }).replace(/</g, "\\u003c");
 
@@ -119,8 +120,8 @@ for (const page of pages) {
 }
 
 
-const sitemapUrls = pages.map((page) => `  <url><loc>https://karajy-app.vercel.app${page.path}</loc></url>`).join("\n");
-fs.writeFileSync(path.join(dist, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://karajy-app.vercel.app/</loc></url>\n${sitemapUrls}\n</urlset>\n`);
-fs.writeFileSync(path.join(dist, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: https://karajy-app.vercel.app/sitemap.xml\n`);
+const sitemapUrls = pages.map((page) => `  <url><loc>${SITE_URL}${page.path}</loc></url>`).join("\n");
+fs.writeFileSync(path.join(dist, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>${SITE_URL}/</loc></url>\n${sitemapUrls}\n</urlset>\n`);
+fs.writeFileSync(path.join(dist, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 
 console.log(`Generated ${pages.length} SEO route pages.`);
