@@ -75,12 +75,12 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
     }
     try {
       await window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-        garage_name: "طلب شراء رصيد تشخيص بالصورة",
-        owner_name: "-",
+        garage_name: "طلب شراء رصيد تشخيص بالصور",
+        owner_name: "طلب تشخيص صورة",
         phone: payload.whatsapp,
-        address: `باقة ${payload.pkg.labelAr} (${payload.pkg.credits} تشخيص)`,
-        map_link: "-",
-        rank: payload.pkg.labelAr,
+        address: `باقة التشخيص: ${payload.pkg.labelAr} — ${payload.pkg.credits} تشخيص`,
+        map_link: "Photo Diagnosis / Credit Purchase",
+        rank: `Credits: ${payload.pkg.credits}`,
         price: payload.pkg.price,
       });
     } catch (err) {
@@ -108,12 +108,10 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
     try {
       const receiptUrl = await uploadReceipt(receiptFile);
 
-      const { error: insertError } = await supabase.from("photo_diagnosis_requests").insert({
-        whatsapp_number: whatsapp.trim(),
-        package_credits: selectedPkg.credits,
-        package_price: selectedPkg.price,
-        receipt_url: receiptUrl,
-        status: "pending",
+      const { error: insertError } = await supabase.rpc("submit_photo_diagnosis_request", {
+        p_whatsapp_number: whatsapp.trim(),
+        p_package_credits: selectedPkg.credits,
+        p_receipt_url: receiptUrl,
       });
 
       if (insertError) throw insertError;
