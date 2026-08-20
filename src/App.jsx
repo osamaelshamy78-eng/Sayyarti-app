@@ -3309,24 +3309,7 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
 
 function GaragesView({ lang, t, country, setCountry, isRTL }) {
   const [showGarageForm, setShowGarageForm] = useState(false);
-  const [approvedGarages, setApprovedGarages] = useState([]);
   const data = GARAGES[country];
-
-  useEffect(() => {
-    let active = true;
-    async function loadApprovedGarages() {
-      if (!supabase) return;
-      const { data: rows } = await supabase
-        .from("garage_directory")
-        .select("id,garage_name,address,lat,lng,map_link,rank,price,photo_url,country")
-        .eq("country", country)
-        .order("rank", { ascending: true })
-        .order("created_at", { ascending: false });
-      if (active) setApprovedGarages(rows || []);
-    }
-    loadApprovedGarages();
-    return () => { active = false; };
-  }, [country]);
   return (
     <div className="px-5 pt-5 pb-6">
       <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
@@ -3387,34 +3370,6 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
         <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.garagesNote}</span>
       </div>
 
-      {approvedGarages.length > 0 && (
-        <div className="mb-5">
-          <h2 style={{ color: C.cream, fontSize: 15, fontWeight: 800, marginBottom: 9 }}>
-            {lang === "ar" ? "جراجات معتمدة على كراجي" : "Karajy approved garages"}
-          </h2>
-          <div className="flex flex-col gap-2.5">
-            {approvedGarages.map((g) => (
-              <button
-                key={g.id}
-                onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.address)}`, "_blank")}
-                className="w-full"
-                style={{ background: C.panel, border: `1px solid ${g.rank ? C.amberDim : C.panelLine}`, borderRadius: 14, overflow: "hidden", cursor: "pointer", textAlign: isRTL ? "right" : "left" }}
-              >
-                {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }} />}
-                <div style={{ padding: "12px 14px" }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <span style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.garage_name}</span>
-                    {g.rank > 0 && <span style={{ color: C.amber, fontSize: 10.5, fontWeight: 800 }}>{lang === "ar" ? `ترتيب ${g.rank}` : `Rank ${g.rank}`}</span>}
-                  </div>
-                  <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>{g.address}</div>
-                  <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 700 }}>{t.openInMaps}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="flex flex-col gap-2.5">
         {data.list.map((g, i) => (
           <button
@@ -3458,7 +3413,6 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
       <GarageListingForm
         isOpen={showGarageForm}
         onClose={() => setShowGarageForm(false)}
-        country={country}
       />
     </div>
   );
@@ -4980,11 +4934,13 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
-  const [listings, setListings] = useState([]);
+  const [tab, setTab] = useState("photo");
+  const [cars, setCars] = useState([]);
+  const [garageRequests, setGarageRequests] = useState([]);
+  const [photoRequests, setPhotoRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
-  const [adminSection, setAdminSection] = useState("cars");
-  const [garageRequests, setGarageRequests] = useState([]);
+  const [generatedCodes, setGeneratedCodes] = useState({});
 
   useEffect(() => {
     if (!supabase) {
@@ -5027,46 +4983,26 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     };
   }, []);
 
-  async function loadGarageRequests() {
+  async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const { data, error } = await supabase.rpc("get_garage_admin_requests");
-    if (error) setLoginError(error.message);
-    setGarageRequests(data || []);
-    setLoading(false);
-  }
-
-  async function updateGarageStatus(id, status) {
-    if (!supabase || !user) return;
-    setBusyId(id);
-    setLoginError("");
-    const { error } = await supabase.rpc("set_garage_status", { p_id: id, p_status: status });
-    setBusyId(null);
-    if (error) {
-      setLoginError(error.message || t.adminUpdateError);
-      return;
-    }
-    await loadGarageRequests();
-  }
-
-  async function loadListings() {
-    if (!supabase || !user) return;
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("car_listings")
-      .select("*")
-      .in("status", ["approved", "sold"])
-      .order("created_at", { ascending: false });
-    if (error) setLoginError(error.message);
-    setListings(data || []);
+    const [carsRes, garagesRes, photosRes] = await Promise.all([
+      supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
+      supabase.rpc("get_garage_admin_requests"),
+      supabase.rpc("get_photo_diagnosis_requests"),
+    ]);
+    if (carsRes.error) setLoginError(carsRes.error.message);
+    if (garagesRes.error) setLoginError(garagesRes.error.message);
+    if (photosRes.error) setLoginError(photosRes.error.message);
+    setCars(carsRes.data || []);
+    setGarageRequests(garagesRes.data || []);
+    setPhotoRequests(photosRes.data || []);
     setLoading(false);
   }
 
   useEffect(() => {
-    if (!user) return;
-    if (adminSection === "cars") loadListings();
-    else loadGarageRequests();
-  }, [user, adminSection]);
+    if (user) loadAll();
+  }, [user]);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -5086,10 +5022,9 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setUser(data?.user || null);
   }
 
-  async function updateStatus(car, nextStatus) {
+  async function updateCarStatus(car, nextStatus) {
     if (!supabase || !user) return;
     setBusyId(car.id);
-    setLoginError("");
     const { error } = await supabase
       .from("car_listings")
       .update({ status: nextStatus, sold_at: nextStatus === "sold" ? new Date().toISOString() : null })
@@ -5099,13 +5034,58 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       setLoginError(t.adminUpdateError);
       return;
     }
-    await loadListings();
+    await loadAll();
+  }
+
+  async function updateGarageStatus(item, nextStatus) {
+    if (!supabase || !user) return;
+    setBusyId(item.id);
+    const { error } = await supabase.rpc("set_garage_status", {
+      p_id: item.id,
+      p_status: nextStatus,
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    await loadAll();
+  }
+
+  async function approvePhoto(item) {
+    if (!supabase || !user) return;
+    setBusyId(item.id);
+    setLoginError("");
+    const { data, error } = await supabase.rpc("generate_photo_credit_code", {
+      p_request_id: item.id,
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row?.code) {
+      setGeneratedCodes((prev) => ({ ...prev, [item.id]: row.code }));
+    }
+    await loadAll();
+  }
+
+  function openWhatsApp(phone, code, credits) {
+    if (!phone || !code) return;
+    const clean = String(phone).replace(/[^\d]/g, "");
+    const msg = encodeURIComponent(
+      `كود كراجي لتشخيص الصور: ${code}\nالرصيد: ${credits} تشخيص\nاستخدم الكود داخل قسم تشخيص بالصور في تطبيق كراجي.`
+    );
+    window.open(`https://wa.me/${clean}?text=${msg}`, "_blank");
   }
 
   async function logout() {
     if (supabase) await supabase.auth.signOut();
     setUser(null);
-    setListings([]);
+    setCars([]);
+    setGarageRequests([]);
+    setPhotoRequests([]);
   }
 
   const fieldStyle = {
@@ -5137,27 +5117,12 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           {t.adminLoginRequired}
         </p>
         <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            autoComplete="username"
-            placeholder={t.adminEmail}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={fieldStyle}
-          />
-          <input
-            type="password"
-            autoComplete="current-password"
-            placeholder={t.adminPassword}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={fieldStyle}
-          />
+          <input type="email" autoComplete="username" placeholder={t.adminEmail} value={email}
+            onChange={(e) => setEmail(e.target.value)} style={fieldStyle} />
+          <input type="password" autoComplete="current-password" placeholder={t.adminPassword} value={password}
+            onChange={(e) => setPassword(e.target.value)} style={fieldStyle} />
           {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
-          <button
-            type="submit"
-            style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}
-          >
+          <button type="submit" style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}>
             {t.adminLogin}
           </button>
         </form>
@@ -5176,24 +5141,105 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           <LogOut size={15} />
         </button>
       </div>
-      <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 12 }}>{t.adminSubtitle}</p>
-      <div className="flex gap-2 mb-4">
-        <button onClick={() => setAdminSection("cars")} style={{ flex: 1, background: adminSection === "cars" ? C.amber : C.panel, color: adminSection === "cars" ? C.asphalt : C.creamDim, border: `1px solid ${adminSection === "cars" ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 8px", fontWeight: 800, cursor: "pointer" }}>
-          {lang === "ar" ? "السيارات" : "Cars"}
-        </button>
-        <button onClick={() => setAdminSection("garages")} style={{ flex: 1, background: adminSection === "garages" ? C.amber : C.panel, color: adminSection === "garages" ? C.asphalt : C.creamDim, border: `1px solid ${adminSection === "garages" ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 8px", fontWeight: 800, cursor: "pointer" }}>
-          {lang === "ar" ? "طلبات الجراجات" : "Garage Requests"}
-        </button>
-      </div>
+
+      <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>
+        إدارة الجراجات + طلبات تشخيص الصور + السيارات
+      </p>
+
       {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
+
+      <div className="grid grid-cols-3 gap-2 mb-4">
+        {[
+          ["photo", "صور الأعطال", photoRequests.filter((x) => x.status === "pending").length],
+          ["garage", "طلبات الجراجات", garageRequests.filter((x) => x.status === "pending").length],
+          ["cars", "السيارات", cars.length],
+        ].map(([id, label, count]) => (
+          <button key={id} onClick={() => setTab(id)}
+            style={{
+              background: tab === id ? C.amber : C.panel,
+              color: tab === id ? C.asphalt : C.cream,
+              border: `1px solid ${tab === id ? C.amber : C.panelLine}`,
+              borderRadius: 10, padding: "9px 6px", fontSize: 11.5, fontWeight: 800
+            }}>
+            {label}<br /><span style={{ fontSize: 10, opacity: .8 }}>{count} طلب</span>
+          </button>
+        ))}
+      </div>
+
       {loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.carLoading}</p>
-      ) : adminSection === "cars" ? (
-        listings.length === 0 ? (
-          <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminNoListings}</p>
-        ) : (
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>جاري تحميل الطلبات...</p>
+      ) : tab === "photo" ? (
         <div className="flex flex-col gap-2.5">
-          {listings.map((c) => (
+          {photoRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد طلبات تشخيص صور.</p>}
+          {photoRequests.map((p) => {
+            const code = generatedCodes[p.id] || p.generated_code;
+            return (
+              <div key={p.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12 }}>
+                <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>طلب تشخيص صور</div>
+                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>WhatsApp: {p.whatsapp_number}</div>
+                <div style={{ color: C.creamDim, fontSize: 12 }}>الباقة: {p.package_credits} تشخيص — {p.package_price} درهم</div>
+                <div style={{ color: p.status === "approved" ? "#7BC67B" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
+                  الحالة: {p.status}
+                </div>
+                {p.receipt_url && (
+                  <a href={p.receipt_url} target="_blank" rel="noreferrer"
+                    style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>
+                    عرض إيصال التحويل
+                  </a>
+                )}
+                {code && (
+                  <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: C.asphalt, border: `1px solid ${C.amber}55` }}>
+                    <div style={{ color: C.creamDim, fontSize: 11 }}>كود الرصيد</div>
+                    <div dir="ltr" style={{ color: C.amber, fontSize: 18, fontWeight: 900, letterSpacing: 1.2 }}>{code}</div>
+                    <button onClick={() => openWhatsApp(p.whatsapp_number, code, p.package_credits)}
+                      style={{ width: "100%", marginTop: 8, background: C.amber, color: C.asphalt, border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      إرسال الكود للعميل على WhatsApp
+                    </button>
+                  </div>
+                )}
+                {!code && p.status === "pending" && (
+                  <button disabled={busyId === p.id} onClick={() => approvePhoto(p)}
+                    style={{ width: "100%", marginTop: 10, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                    {busyId === p.id ? "جاري الاعتماد..." : "اعتماد + توليد الكود"}
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : tab === "garage" ? (
+        <div className="flex flex-col gap-2.5">
+          {garageRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد طلبات جراجات.</p>}
+          {garageRequests.map((g) => (
+            <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+              {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 130, objectFit: "cover" }} />}
+              <div style={{ padding: 12 }}>
+                <div style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.garage_name}</div>
+                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
+                <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
+                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>الترتيب: {g.rank} · {Number(g.price).toLocaleString()} درهم/سنة</div>
+                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>الحالة: {g.status}</div>
+                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>عرض إيصال التحويل</a>}
+                {g.status === "pending" && (
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "approved")}
+                      style={{ background: "#2F7D32", color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      اعتماد
+                    </button>
+                    <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "rejected")}
+                      style={{ background: "transparent", color: C.red, border: `1px solid ${C.red}88`, borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      رفض
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2.5">
+          {cars.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>لا توجد سيارات.</p>}
+          {cars.map((c) => (
             <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
               {(c.photo_url || c.photo_urls?.[0]) && (
                 <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
@@ -5206,12 +5252,9 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                   </div>
                   <span style={{ color: c.status === "sold" ? C.red : C.amber, fontSize: 11, fontWeight: 800 }}>{c.status === "sold" ? t.adminSold : t.adminAvailable}</span>
                 </div>
-                <button
-                  disabled={busyId === c.id}
-                  onClick={() => updateStatus(c, c.status === "sold" ? "approved" : "sold")}
+                <button disabled={busyId === c.id} onClick={() => updateCarStatus(c, c.status === "sold" ? "approved" : "sold")}
                   className="flex items-center justify-center gap-2 mt-3"
-                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}
-                >
+                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}>
                   {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}
                   {c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
                 </button>
@@ -5219,40 +5262,6 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
             </div>
           ))}
         </div>
-        )
-      ) : (
-        garageRequests.length === 0 ? (
-          <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>
-            {lang === "ar" ? "لا توجد طلبات جراجات حاليًا." : "No garage requests yet."}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {garageRequests.map((g) => (
-              <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
-                {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }} />}
-                <div style={{ padding: "12px" }}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div style={{ color: C.cream, fontSize: 15, fontWeight: 800 }}>{g.garage_name}</div>
-                      <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{g.owner_name} · {g.phone}</div>
-                    </div>
-                    <span style={{ color: g.status === "approved" ? C.amber : g.status === "rejected" ? C.red : C.creamDim, fontSize: 10.5, fontWeight: 800 }}>{g.status}</span>
-                  </div>
-                  <div style={{ color: C.creamDim, fontSize: 12, marginTop: 7 }}>{g.address}</div>
-                  <div style={{ color: C.amber, fontSize: 12, marginTop: 6, fontWeight: 800 }}>{lang === "ar" ? `الترتيب ${g.rank} · ${g.price} درهم` : `Rank ${g.rank} · ${g.price} AED`}</div>
-                  {g.receipt_url && <button onClick={() => window.open(g.receipt_url, "_blank")} style={{ width: "100%", marginTop: 10, background: "transparent", border: `1px solid ${C.panelLine}`, borderRadius: 9, padding: "9px", color: C.blue, fontWeight: 700, cursor: "pointer" }}>{lang === "ar" ? "فتح إيصال التحويل" : "Open payment receipt"}</button>}
-                  {g.map_link && <button onClick={() => window.open(g.map_link, "_blank")} style={{ width: "100%", marginTop: 8, background: "transparent", border: `1px solid ${C.panelLine}`, borderRadius: 9, padding: "9px", color: C.creamDim, fontWeight: 700, cursor: "pointer" }}>{lang === "ar" ? "فتح الموقع" : "Open location"}</button>}
-                  {g.status === "pending" && (
-                    <div className="flex gap-2 mt-3">
-                      <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g.id, "approved")} style={{ flex: 1, background: C.amber, border: "none", borderRadius: 9, padding: "10px", color: C.asphalt, fontWeight: 800, cursor: busyId === g.id ? "wait" : "pointer" }}>{lang === "ar" ? "اعتماد" : "Approve"}</button>
-                      <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g.id, "rejected")} style={{ flex: 1, background: "transparent", border: `1px solid ${C.red}88`, borderRadius: 9, padding: "10px", color: C.red, fontWeight: 800, cursor: busyId === g.id ? "wait" : "pointer" }}>{lang === "ar" ? "رفض" : "Reject"}</button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
       )}
     </div>
   );
