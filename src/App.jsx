@@ -1833,6 +1833,159 @@ const OBD_CODES = {
   },
 };
 
+
+/* ---------------------------------------------------------------
+   SEO-friendly URL routing helpers
+--------------------------------------------------------------- */
+function seoSlug(text) {
+  return String(text || "")
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+const ISSUE_SLUGS = Object.fromEntries(
+  Object.entries(ISSUES).map(([id, item]) => [id, seoSlug(item.en.title)])
+);
+
+function issueIdFromSlug(slug) {
+  return Object.keys(ISSUE_SLUGS).find((id) => ISSUE_SLUGS[id] === slug) || null;
+}
+
+function categoryFromId(id) {
+  return CATEGORIES.find((cat) => cat.id === id) || null;
+}
+
+function categoryForIssue(issueId) {
+  return CATEGORIES.find((cat) => cat.issues.includes(issueId)) || null;
+}
+
+function routeFromPath(pathname) {
+  const path = (pathname || "/").replace(/\/+$/, "") || "/";
+  if (path === "/") return { view: "home" };
+  if (path === "/fix") return { view: "fix" };
+  if (path === "/guide") return { view: "guide" };
+  if (path === "/garages") return { view: "garages" };
+  if (path === "/maintenance") return { view: "maintenance" };
+  if (path === "/parts") return { view: "parts" };
+  if (path === "/diagnosis") return { view: "diagnosis" };
+  if (path === "/cars") return { view: "cars" };
+  if (path === "/cars/add") return { view: "cars", carMode: "add" };
+  if (path === "/cars/submitted") return { view: "cars", carMode: "submitted" };
+
+  const fixMatch = path.match(/^\/fix\/([^/]+)$/);
+  if (fixMatch) {
+    const category = categoryFromId(fixMatch[1]);
+    if (category) return { view: "category", activeCategory: category };
+  }
+
+  const faultMatch = path.match(/^\/fault\/([^/]+)$/);
+  if (faultMatch) {
+    const issueId = issueIdFromSlug(faultMatch[1]);
+    if (issueId) {
+      return {
+        view: "issue",
+        activeIssueId: issueId,
+        activeCategory: categoryForIssue(issueId),
+      };
+    }
+  }
+
+  const obdMatch = path.match(/^\/obd\/([^/]+)$/i);
+  if (obdMatch) {
+    const code = obdMatch[1].toUpperCase();
+    if (OBD_CODES[code]) return { view: "obd", activeObdCode: code };
+  }
+
+  return { view: "home", fallback: true };
+}
+
+function routePathForIssue(issueId) {
+  return `/fault/${ISSUE_SLUGS[issueId] || seoSlug(issueId)}`;
+}
+
+function routePathForCategory(category) {
+  return `/fix/${category.id}`;
+}
+
+function applySeoMeta({ lang, view, activeIssueId, activeCategory, activeObdCode }) {
+  if (typeof document === "undefined") return;
+  const isArabic = lang === "ar";
+  let title = "Karaji — Car Issues & Trusted Garages";
+  let description = isArabic
+    ? "كراجي يساعدك في تشخيص أعطال السيارات، معرفة أكواد OBD والعثور على الجراج المناسب."
+    : "Karaji helps you diagnose car problems, understand OBD fault codes and find trusted garages.";
+
+  if (view === "issue" && activeIssueId && ISSUES[activeIssueId]) {
+    const item = ISSUES[activeIssueId][lang];
+    title = `${item.title} | Karaji`;
+    description = isArabic
+      ? `${item.title}: الأعراض والأسباب وخطوات الفحص والإصلاح على كراجي.`
+      : `${item.title}: symptoms, common causes and practical diagnostic steps on Karaji.`;
+  } else if (view === "obd" && activeObdCode && OBD_CODES[activeObdCode]) {
+    const item = OBD_CODES[activeObdCode][lang];
+    title = `${activeObdCode} — ${item.title} | Karaji`;
+    description = `${item.title}. ${item.meaning}`;
+  } else if (view === "category" && activeCategory) {
+    title = `${activeCategory[lang]} — Car Problems & Fixes | Karaji`;
+    description = isArabic
+      ? `دليل أعطال ${activeCategory.ar}: الأعراض والأسباب وطرق الفحص والإصلاح.`
+      : `${activeCategory.en} problems: symptoms, causes and practical repair guidance.`;
+  } else if (view === "fix") {
+    title = isArabic ? "تشخيص أعطال السيارات | كراجي" : "Car Fault Diagnosis | Karaji";
+    description = isArabic
+      ? "ابحث عن عطل سيارتك، افحص أكواد OBD وشاهد دليل الأعطال والإصلاح."
+      : "Search car problems, check OBD-II codes and browse practical repair guides.";
+  } else if (view === "guide") {
+    title = isArabic ? "دليل لمبات السيارة | كراجي" : "Car Warning Lights Guide | Karaji";
+    description = isArabic
+      ? "افهم لمبات التحذير في لوحة القيادة واعرف الخطوة التالية."
+      : "Understand dashboard warning lights and know what to check next.";
+  } else if (view === "garages") {
+    title = isArabic ? "جراجات وورش سيارات | كراجي" : "Car Garages & Workshops | Karaji";
+    description = isArabic
+      ? "اعثر على جراجات وورش سيارات حسب الدولة والموقع."
+      : "Find car garages and workshops by country and location.";
+  }
+
+  document.title = title;
+  let meta = document.querySelector('meta[name="description"]');
+  if (!meta) {
+    meta = document.createElement("meta");
+    meta.setAttribute("name", "description");
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute("content", description);
+
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.setAttribute("rel", "canonical");
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute("href", window.location.origin + window.location.pathname);
+
+  let jsonLd = document.getElementById("karaji-route-jsonld");
+  if (!jsonLd) {
+    jsonLd = document.createElement("script");
+    jsonLd.type = "application/ld+json";
+    jsonLd.id = "karaji-route-jsonld";
+    document.head.appendChild(jsonLd);
+  }
+  jsonLd.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: window.location.href,
+    inLanguage: lang,
+    isPartOf: { "@type": "WebSite", name: "Karaji", url: window.location.origin },
+  });
+}
+
 const GARAGES = {
   uae: {
     en: "United Arab Emirates",
@@ -2103,8 +2256,8 @@ const T = {
     tagline: "Diagnose car issues & find trusted garages",
     navIssues: "Issues",
     navGarages: "Garages",
-    homeHeading: "How can we help?",
-    homeSub: "Choose the service you need",
+    homeHeading: "What's wrong with your car?",
+    homeSub: "Tap a system to see common issues",
     lightsGuideTile: "Warning Lights Guide",
     lightsGuideHeading: "Dashboard Warning Lights",
     lightsGuideSub: "Tap any light to learn what it means and how to fix it",
@@ -2186,8 +2339,8 @@ const T = {
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
     navIssues: "الأعطال",
     navGarages: "الورش",
-    homeHeading: "إزاي نقدر نساعدك؟",
-    homeSub: "اختار الخدمة اللي محتاجها",
+    homeHeading: "ما هي مشكلة سيارتك؟",
+    homeSub: "اضغط على أحد الأنظمة لرؤية الأعطال الشائعة",
     lightsGuideTile: "دليل لمبات التحذير",
     lightsGuideHeading: "لمبات لوحة القيادة",
     lightsGuideSub: "اضغط على أي لمبة لمعرفة معناها وطريقة حلها",
@@ -2564,7 +2717,7 @@ function HomeView({ lang, t, onOpenSection }) {
   );
 }
 
-function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
+function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenObdCode }) {
   const [query, setQuery] = useState("");
   const [expandedCode, setExpandedCode] = useState(null);
 
@@ -2655,7 +2808,7 @@ function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
                     }}
                   >
                     <button
-                      onClick={() => setExpandedCode(isOpen ? null : code)}
+                      onClick={() => onOpenObdCode(code)}
                       className="w-full flex items-center gap-3"
                       style={{
                         padding: "11px 13px",
@@ -2760,6 +2913,62 @@ function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue }) {
             onClick={() => onOpenCategory(cat)}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+
+function ObdCodeView({ lang, t, code, onOpenIssue, onBack, isRTL }) {
+  const entry = OBD_CODES[code];
+  if (!entry) return null;
+  const info = entry[lang];
+  const related = entry.relatedIssue ? ISSUES[entry.relatedIssue]?.[lang] : null;
+
+  return (
+    <div className="pb-6">
+      <BackHeader label={t.navIssues} onBack={onBack} isRTL={isRTL} />
+      <div className="px-5">
+        <div style={{ color: C.amber, fontFamily: "monospace", fontWeight: 800, fontSize: 22, marginBottom: 5 }}>
+          {code}
+        </div>
+        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 8px" }}>
+          {info.title}
+        </h1>
+        <div
+          style={{
+            background: C.panel,
+            border: `1px solid ${C.panelLine}`,
+            borderRadius: 14,
+            padding: "14px 15px",
+            marginBottom: 14,
+          }}
+        >
+          <div style={{ color: C.creamDim, fontSize: 11.5, fontWeight: 700, marginBottom: 5 }}>
+            {t.faultCodeMeaning}
+          </div>
+          <p style={{ color: C.cream, fontSize: 13, lineHeight: 1.65, margin: 0 }}>{info.meaning}</p>
+        </div>
+
+        {related && (
+          <button
+            onClick={() => onOpenIssue(entry.relatedIssue)}
+            style={{
+              width: "100%",
+              background: `${C.blue}14`,
+              border: `1px solid ${C.blue}55`,
+              borderRadius: 14,
+              padding: "13px 15px",
+              color: C.blue,
+              fontSize: 12.5,
+              fontWeight: 700,
+              cursor: "pointer",
+              textAlign: lang === "ar" ? "right" : "left",
+            }}
+          >
+            {t.faultCodeViewGuide}: {related.title}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -4604,12 +4813,14 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
    App
 --------------------------------------------------------------- */
 export default function App() {
+  const initialRoute = routeFromPath(typeof window !== "undefined" ? window.location.pathname : "/");
   const [lang, setLang] = useState("en");
-  const [view, setView] = useState("home"); // home | category | issue | garages
-  const [activeCategory, setActiveCategory] = useState(null);
-  const [activeIssueId, setActiveIssueId] = useState(null);
+  const [view, setView] = useState(initialRoute.view);
+  const [activeCategory, setActiveCategory] = useState(initialRoute.activeCategory || null);
+  const [activeIssueId, setActiveIssueId] = useState(initialRoute.activeIssueId || null);
+  const [activeObdCode, setActiveObdCode] = useState(initialRoute.activeObdCode || null);
   const [country, setCountry] = useState("uae");
-  const [carMode, setCarMode] = useState("browse"); // browse | add | submitted
+  const [carMode, setCarMode] = useState(initialRoute.carMode || "browse"); // browse | add | submitted
   const [selectedCar, setSelectedCar] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showGarageForm, setShowGarageForm] = useState(false);
@@ -4624,17 +4835,20 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
-  // --- Browser back-button support -------------------------------
-  // Each time the user drills into a deeper screen we push a history
-  // entry. The hardware/browser back button then fires "popstate",
-  // and we step the in-app view back one level instead of leaving
-  // the page entirely.
-  function navPush(replace) {
+  // --- URL routing + browser back-button support -----------------
+  function navPush(path, replace = false) {
     try {
-      if (replace) window.history.replaceState({ t: Date.now() }, "");
-      else window.history.pushState({ t: Date.now() }, "");
+      const method = replace ? "replaceState" : "pushState";
+      window.history[method]({ t: Date.now() }, "", path);
+      const route = routeFromPath(path);
+      setView(route.view);
+      setActiveCategory(route.activeCategory || null);
+      setActiveIssueId(route.activeIssueId || null);
+      setActiveObdCode(route.activeObdCode || null);
+      setCarMode(route.carMode || "browse");
     } catch (e) {}
   }
+
   const goBack = () => {
     try {
       window.history.back();
@@ -4643,72 +4857,55 @@ export default function App() {
 
   useEffect(() => {
     function handlePopState() {
-      if (view === "cars" && selectedCar) {
-        setSelectedCar(null);
-        return;
-      }
-      if (view === "cars" && carMode !== "browse") {
-        setCarMode("browse");
-        return;
-      }
-      if (view === "issue") {
-        setView("category");
-        return;
-      }
-      if (view === "category" || view === "guide") {
-        setView("fix");
-        setActiveCategory(null);
-        setActiveIssueId(null);
-        return;
-      }
-      if (view !== "home") {
-        setView("home");
-        return;
-      }
-      // already at the top level — let the browser handle it naturally
+      const route = routeFromPath(window.location.pathname);
+      setView(route.view);
+      setActiveCategory(route.activeCategory || null);
+      setActiveIssueId(route.activeIssueId || null);
+      setActiveObdCode(route.activeObdCode || null);
+      setCarMode(route.carMode || "browse");
+      setSelectedCar(null);
     }
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [view, selectedCar, carMode]);
+  }, []);
+
+  useEffect(() => {
+    applySeoMeta({ lang, view, activeIssueId, activeCategory, activeObdCode });
+  }, [lang, view, activeIssueId, activeCategory, activeObdCode]);
 
   const isRTL = lang === "ar";
   const t = T[lang];
   const bodyFont = isRTL ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif";
 
   function goHome() {
-    setView("home");
-    setActiveCategory(null);
-    setActiveIssueId(null);
+    navPush("/");
   }
   function openCategory(cat) {
-    setActiveCategory(cat);
-    setView("category");
-    navPush();
+    navPush(routePathForCategory(cat));
   }
   function openGuide() {
-    setView("guide");
-    navPush();
+    navPush("/guide");
   }
   function openIssue(id) {
-    setActiveIssueId(id);
-    setView("issue");
-    navPush();
+    navPush(routePathForIssue(id));
+  }
+  function openObdCode(code) {
+    navPush(`/obd/${String(code).toUpperCase()}`);
   }
   function openCarAdd() {
     setCarMode("add");
-    navPush();
+    navPush("/cars/add");
   }
   function carSubmitted() {
     setCarMode("submitted");
-    navPush(true);
+    navPush("/cars/submitted", true);
   }
   function selectCar(car) {
     setSelectedCar(car);
-    navPush();
+    navPush("/cars");
   }
   function openSection(id) {
-    setView(id);
-    navPush();
+    navPush(id === "home" ? "/" : `/${id}`);
   }
   function toggleMenu() {
     setMenuOpen((m) => !m);
@@ -4776,8 +4973,19 @@ export default function App() {
                 onOpenCategory={openCategory}
                 onOpenGuide={openGuide}
                 onOpenIssue={openIssue}
+                onOpenObdCode={openObdCode}
               />
             </>
+          )}
+          {view === "obd" && activeObdCode && (
+            <ObdCodeView
+              lang={lang}
+              t={t}
+              code={activeObdCode}
+              onOpenIssue={openIssue}
+              onBack={goBack}
+              isRTL={isRTL}
+            />
           )}
           {view === "guide" && (
             <LightsGuideView
