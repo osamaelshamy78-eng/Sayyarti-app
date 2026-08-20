@@ -4578,20 +4578,53 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
           style={{ overflowX: "auto", scrollSnapType: "x mandatory" }}
         >
           {photos.map((url, i) => (
-            <img
+            <div
               key={i}
-              src={url}
-              alt=""
               style={{
+                position: "relative",
                 width: "85%",
                 height: 220,
-                objectFit: "cover",
-                borderRadius: 14,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
               }}
-              onError={(e) => (e.target.style.opacity = 0.3)}
-            />
+            >
+              <img
+                src={url}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 14,
+                  display: "block",
+                }}
+                onError={(e) => (e.target.style.opacity = 0.3)}
+              />
+              {car.status === "sold" && i === 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) rotate(-12deg)",
+                    color: C.red,
+                    border: `3px solid ${C.red}`,
+                    background: "rgba(20,23,28,0.82)",
+                    padding: "8px 20px",
+                    borderRadius: 8,
+                    fontSize: 22,
+                    fontWeight: 900,
+                    letterSpacing: 1.5,
+                    whiteSpace: "nowrap",
+                    textTransform: "uppercase",
+                    zIndex: 2,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {t.soldBadge}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       ) : null}
@@ -4817,6 +4850,30 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
                     onError={(e) => (e.target.style.display = "none")}
                   />
+                  {c.status === "sold" && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%) rotate(-12deg)",
+                        color: C.red,
+                        border: `3px solid ${C.red}`,
+                        background: "rgba(20,23,28,0.82)",
+                        padding: "7px 18px",
+                        borderRadius: 8,
+                        fontSize: 20,
+                        fontWeight: 900,
+                        letterSpacing: 1.5,
+                        whiteSpace: "nowrap",
+                        textTransform: "uppercase",
+                        zIndex: 2,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {t.soldBadge}
+                    </div>
+                  )}
                   {c.photo_urls && c.photo_urls.length > 1 && (
                     <span
                       style={{
