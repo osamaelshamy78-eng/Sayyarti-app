@@ -4578,20 +4578,54 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
           style={{ overflowX: "auto", scrollSnapType: "x mandatory" }}
         >
           {photos.map((url, i) => (
-            <img
+            <div
               key={i}
-              src={url}
-              alt=""
               style={{
+                position: "relative",
                 width: "85%",
                 height: 220,
-                objectFit: "cover",
-                borderRadius: 14,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
               }}
-              onError={(e) => (e.target.style.opacity = 0.3)}
-            />
+            >
+              <img
+                src={url}
+                alt=""
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  borderRadius: 14,
+                  display: "block",
+                }}
+                onError={(e) => (e.target.style.opacity = 0.3)}
+              />
+              {car.status === "sold" && (
+                <div
+                  aria-label={t.soldBadge}
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%) rotate(-12deg)",
+                    border: `3px solid ${C.red}`,
+                    color: C.red,
+                    background: "rgba(10,11,13,0.78)",
+                    borderRadius: 10,
+                    padding: "8px 22px",
+                    fontSize: 24,
+                    fontWeight: 900,
+                    letterSpacing: 2,
+                    textTransform: lang === "en" ? "uppercase" : "none",
+                    whiteSpace: "nowrap",
+                    zIndex: 3,
+                    pointerEvents: "none",
+                  }}
+                >
+                  {t.soldBadge}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       ) : null}
@@ -4817,6 +4851,31 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
                     onError={(e) => (e.target.style.display = "none")}
                   />
+                  {c.status === "sold" && (
+                    <div
+                      aria-label={t.soldBadge}
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%) rotate(-12deg)",
+                        border: `3px solid ${C.red}`,
+                        color: C.red,
+                        background: "rgba(10,11,13,0.78)",
+                        borderRadius: 10,
+                        padding: "8px 22px",
+                        fontSize: 24,
+                        fontWeight: 900,
+                        letterSpacing: 2,
+                        textTransform: lang === "en" ? "uppercase" : "none",
+                        whiteSpace: "nowrap",
+                        zIndex: 3,
+                        pointerEvents: "none",
+                      }}
+                    >
+                      {t.soldBadge}
+                    </div>
+                  )}
                   {c.photo_urls && c.photo_urls.length > 1 && (
                     <span
                       style={{
@@ -5115,7 +5174,35 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           {listings.map((c) => (
             <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
               {(c.photo_url || c.photo_urls?.[0]) && (
-                <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                <div style={{ position: "relative" }}>
+                  <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                  {c.status === "sold" && (
+                    <div
+                      aria-label={t.soldBadge}
+                      style={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%) rotate(-14deg)",
+                        border: `4px solid ${C.red}`,
+                        color: C.red,
+                        background: "rgba(10,11,13,0.88)",
+                        borderRadius: 12,
+                        padding: "8px 28px",
+                        fontSize: 28,
+                        fontWeight: 950,
+                        letterSpacing: 2.5,
+                        textTransform: lang === "en" ? "uppercase" : "none",
+                        whiteSpace: "nowrap",
+                        zIndex: 20,
+                        pointerEvents: "none",
+                        boxShadow: `0 0 0 2px rgba(10,11,13,0.45), 0 4px 14px rgba(0,0,0,0.45)`,
+                      }}
+                    >
+                      {t.soldBadge}
+                    </div>
+                  )}
+                </div>
               )}
               <div style={{ padding: "11px 12px" }}>
                 <div className="flex items-start justify-between gap-2">
