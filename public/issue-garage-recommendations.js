@@ -43,16 +43,32 @@
   function addIssueButton() {
     const id = issueId(); if (!id) return;
     if (document.querySelector("[data-karaji-issue-garages]")) return;
-    const h1 = document.querySelector("h1");
-    if (!h1) return;
+
+    // IssueView uses an <h2> for the issue title, not <h1>.
+    const heading = document.querySelector("h1, h2");
+    if (!heading) return;
+
     const b = document.createElement("button");
     b.dataset.karajiIssueGarages = "1";
     b.type = "button";
     const ar = lang() === "ar";
     b.textContent = ar ? "ابحث عن جراج مناسب للعطل" : "Find a garage for this issue";
-    Object.assign(b.style, {width:"100%",marginTop:"12px",padding:"12px 14px",borderRadius:"12px",border:"0",background:"#F5B942",color:"#14171C",fontWeight:"800",cursor:"pointer"});
+    Object.assign(b.style, {
+      width: "100%",
+      marginTop: "12px",
+      marginBottom: "16px",
+      padding: "12px 14px",
+      borderRadius: "12px",
+      border: "0",
+      background: "#F5B942",
+      color: "#14171C",
+      fontWeight: "800",
+      cursor: "pointer",
+      display: "block"
+    });
     b.onclick = () => { location.href = `/garages?issue=${encodeURIComponent(id)}`; };
-    h1.parentElement?.appendChild(b);
+
+    heading.insertAdjacentElement("afterend", b);
   }
 
   function filterGarages() {
