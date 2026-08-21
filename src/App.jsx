@@ -2377,7 +2377,7 @@ const T = {
     adminRank: "Rank",
     adminYear: "AED/year",
     adminApprove: "Approve",
-    adminReject: "Reject",
+    adminReject: "Decline & Delete",
     adminNoCars: "No cars.",
     soldBadge: "SOLD",
     faultCodeSearchLabel: "Search a Fault Code",
@@ -2513,7 +2513,7 @@ const T = {
     adminRank: "الترتيب",
     adminYear: "درهم/سنة",
     adminApprove: "اعتماد",
-    adminReject: "رفض",
+    adminReject: "رفض وحذف",
     adminNoCars: "لا توجد سيارات.",
     soldBadge: "تم البيع",
     faultCodeSearchLabel: "دور برمز العطل",
@@ -4357,7 +4357,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
 
   async function rejectPhoto(item) {
     if (!supabase || !user) return;
-    const ok = window.confirm(lang === "ar" ? "هل تريد رفض طلب شراء الرصيد؟" : "Reject this photo diagnosis purchase request?");
+    const ok = window.confirm(lang === "ar" ? "هل تريد رفض وحذف طلب شراء الرصيد نهائيًا؟" : "Decline and permanently delete this photo diagnosis request?");
     if (!ok) return;
     setBusyId(item.id);
     setLoginError("");
