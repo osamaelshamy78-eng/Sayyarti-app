@@ -162,7 +162,7 @@ export default function PhotoDiagnosisView({ lang }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.trim(),
-          issueDescription: issueDescription.trim(),
+          description: issueDescription.trim(),
           imagesBase64,
           imageBase64: imagesBase64[0],
           mediaType: "image/jpeg",
