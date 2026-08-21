@@ -42,7 +42,11 @@ export default function PhotoDiagnosisView({ lang }) {
     if (!file) return;
 
     if (file.type.startsWith("video/") && file.size > 30 * 1024 * 1024) {
-      setError(isAr ? "الفيديو كبير جدًا. اختر فيديو أقصر أو أصغر من 30 ميجابايت." : "Video is too large. Choose a shorter video or one under 30 MB.");
+      setError(
+        isAr
+          ? "الفيديو كبير جدًا. اختر فيديو قصير أو أصغر من 30 ميجابايت."
+          : "Video is too large. Choose a short video or one under 30 MB."
+      );
       return;
     }
 
@@ -59,51 +63,78 @@ export default function PhotoDiagnosisView({ lang }) {
       reader.readAsDataURL(file);
     });
 
-  // Videos are intentionally kept lightweight: the current AI endpoint accepts
-  // an image, so we extract the first frame from the selected short video.
-  const videoFirstFrame = (file) =>
+  const canvasFrameToFile = (video, time, index) =>
+    new Promise((resolve, reject) => {
+      const handleSeeked = () => {
+        try {
+          const max = 720;
+          const width = video.videoWidth || 640;
+          const height = video.videoHeight || 360;
+          const scale = Math.min(1, max / Math.max(width, height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(width * scale));
+          canvas.height = Math.max(1, Math.round(height * scale));
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              video.removeEventListener("seeked", handleSeeked);
+              if (!blob) return reject(new Error("Could not extract video frame"));
+              resolve(new File([blob], `video-frame-${index + 1}.jpg`, { type: "image/jpeg" }));
+            },
+            "image/jpeg",
+            0.68
+          );
+        } catch (err) {
+          video.removeEventListener("seeked", handleSeeked);
+          reject(err);
+        }
+      };
+      video.addEventListener("seeked", handleSeeked, { once: true });
+      video.currentTime = time;
+    });
+
+  // A video is analyzed through representative frames sampled across its full duration,
+  // not just the first frame. This keeps the request small while allowing the AI to see changes.
+  const extractVideoFrames = (file) =>
     new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
       const video = document.createElement("video");
       video.muted = true;
       video.playsInline = true;
       video.preload = "metadata";
-      video.onloadeddata = () => {
+
+      const cleanup = () => URL.revokeObjectURL(url);
+
+      video.onloadedmetadata = async () => {
         try {
-          video.currentTime = 0;
-        } catch (e) {
-          cleanup();
-          reject(e);
-        }
-      };
-      video.onseeked = () => {
-        try {
-          const canvas = document.createElement("canvas");
-          const max = 1280;
-          const scale = Math.min(1, max / Math.max(video.videoWidth || 1, video.videoHeight || 1));
-          canvas.width = Math.max(1, Math.round((video.videoWidth || 640) * scale));
-          canvas.height = Math.max(1, Math.round((video.videoHeight || 360) * scale));
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob(
-            (blob) => {
-              cleanup();
-              if (!blob) return reject(new Error("Could not extract video frame"));
-              resolve(new File([blob], "video-frame.jpg", { type: "image/jpeg" }));
-            },
-            "image/jpeg",
-            0.82
+          const duration = Number(video.duration || 0);
+          if (!Number.isFinite(duration) || duration <= 0) throw new Error("Invalid video duration");
+
+          const frameCount = Math.min(6, Math.max(3, Math.ceil(duration / 2)));
+          const times = Array.from({ length: frameCount }, (_, i) =>
+            frameCount === 1 ? 0 : (duration * i) / (frameCount - 1)
           );
-        } catch (e) {
+          const safeTimes = times.map((t) => Math.max(0, Math.min(duration - 0.05, t)));
+          const files = [];
+
+          for (let i = 0; i < safeTimes.length; i += 1) {
+            files.push(await canvasFrameToFile(video, safeTimes[i], i));
+          }
+
           cleanup();
-          reject(e);
+          resolve(files);
+        } catch (err) {
+          cleanup();
+          reject(err);
         }
       };
+
       video.onerror = () => {
         cleanup();
         reject(new Error("Could not read video"));
       };
-      const cleanup = () => URL.revokeObjectURL(url);
+
       video.src = url;
       video.load();
     });
@@ -123,18 +154,20 @@ export default function PhotoDiagnosisView({ lang }) {
     setResult(null);
 
     try {
-      const imageFile = mediaFile.type.startsWith("video/")
-        ? await videoFirstFrame(mediaFile)
-        : mediaFile;
-      const imageBase64 = await fileToBase64(imageFile);
+      const isVideo = mediaFile.type.startsWith("video/");
+      const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [mediaFile];
+      const imagesBase64 = await Promise.all(imageFiles.map(fileToBase64));
 
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.trim(),
-          imageBase64,
+          imagesBase64,
+          imageBase64: imagesBase64[0],
           mediaType: "image/jpeg",
+          mediaKind: isVideo ? "video" : "image",
+          frameCount: imagesBase64.length,
         }),
       });
 
@@ -150,8 +183,8 @@ export default function PhotoDiagnosisView({ lang }) {
     } catch (err) {
       setError(
         isAr
-          ? "تعذر قراءة الملف. جرّب صورة أو فيديو أصغر."
-          : "Could not read the file. Try a smaller photo or video."
+          ? "تعذر قراءة الملف. جرّب فيديو قصير أو صورة أصغر."
+          : "Could not read the file. Try a short video or a smaller photo."
       );
     } finally {
       setLoading(false);
@@ -176,9 +209,7 @@ export default function PhotoDiagnosisView({ lang }) {
 
   const endCapturePress = () => {
     clearLongPressTimer();
-    if (!longPressTriggeredRef.current) {
-      cameraInputRef.current?.click();
-    }
+    if (!longPressTriggeredRef.current) cameraInputRef.current?.click();
   };
 
   const cancelCapturePress = () => {
@@ -193,28 +224,22 @@ export default function PhotoDiagnosisView({ lang }) {
       </h1>
       <p className="text-sm text-gray-400 mb-6">
         {isAr
-          ? "ارفع صورة من جهازك، أو اضغط ضغطة على الالتقاط للصورة واضغط مطولًا لتسجيل فيديو قصير."
-          : "Upload from your device, tap Capture for a photo, or press and hold Capture to record a short video."}
+          ? "ارفع صورة أو فيديو قصير من جهازك، أو اضغط على الالتقاط للصورة واضغط مطولًا للفيديو."
+          : "Upload a photo or short video, tap Capture for a photo, or press and hold for video."}
       </p>
 
       <div className="mb-5 bg-gray-50 border rounded-lg p-4">
-        <h2 className="font-semibold text-sm mb-2">
-          {isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}
-        </h2>
+        <h2 className="font-semibold text-sm mb-2">{isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}</h2>
         <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4" : "pl-4"}`}>
           <li>{isAr ? "اختر صورة أو فيديو من الجهاز، أو التقط صورة بالكاميرا" : "Choose a photo or video from the device, or take a photo with the camera"}</li>
           <li>{isAr ? "اضغط مطولًا على زر الالتقاط لتسجيل فيديو قصير" : "Press and hold Capture to record a short video"}</li>
-          <li>{isAr ? "الذكاء الاصطناعي يحلل الصورة أو أول لقطة من الفيديو" : "AI analyzes the photo or the first video frame"}</li>
+          <li>{isAr ? "الذكاء الاصطناعي يحلل مجموعة لقطات من الفيديو عبر مدته، وليس أول لقطة فقط" : "For video, AI analyzes multiple frames sampled across the video, not only the first frame"}</li>
           <li>{isAr ? "كل تحليل يخصم كريدت واحد" : "Each analysis uses one credit"}</li>
         </ol>
         <p className="text-xs text-gray-400 mt-2">
-          {isAr
-            ? "التشخيص استرشادي ولا يغني عن فحص ميكانيكي حقيقي."
-            : "This diagnosis is advisory only and doesn't replace a real mechanic's inspection."}
+          {isAr ? "التشخيص استرشادي ولا يغني عن فحص ميكانيكي حقيقي." : "This diagnosis is advisory only and doesn't replace a real mechanic's inspection."}
         </p>
-        <h3 className="font-semibold text-sm mt-4 mb-2">
-          {isAr ? "أسعار الرصيد" : "Credit pricing"}
-        </h3>
+        <h3 className="font-semibold text-sm mt-4 mb-2">{isAr ? "أسعار الرصيد" : "Credit pricing"}</h3>
         <div className="space-y-1">
           {PACKAGES.map((pkg) => (
             <div key={pkg.credits} className="flex justify-between text-sm text-gray-600">
@@ -229,47 +254,21 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">
-          {isAr ? "كود الرصيد" : "Credit code"}
-        </label>
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"}
-          className="w-full border rounded-lg px-3 py-2"
-        />
+        <label className="block text-sm font-medium mb-1">{isAr ? "كود الرصيد" : "Credit code"}</label>
+        <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"} className="w-full border rounded-lg px-3 py-2" />
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">
-          {isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}
-        </label>
-
+        <label className="block text-sm font-medium mb-2">{isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}</label>
         <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => galleryInputRef.current?.click()}
-            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
-          >
+          <button type="button" onClick={() => galleryInputRef.current?.click()} className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800">
             📁 {isAr ? "من الجهاز" : "Device"}
             <span className="block mt-1 font-normal text-gray-500">{isAr ? "صورة أو فيديو" : "Photo or video"}</span>
           </button>
 
-          <button
-            type="button"
-            onPointerDown={startCapturePress}
-            onPointerUp={endCapturePress}
-            onPointerCancel={cancelCapturePress}
-            onPointerLeave={cancelCapturePress}
-            onContextMenu={(e) => e.preventDefault()}
-            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800 select-none touch-none"
-            aria-label={isAr ? "التقاط صورة أو تسجيل فيديو" : "Capture photo or record video"}
-          >
+          <button type="button" onPointerDown={startCapturePress} onPointerUp={endCapturePress} onPointerCancel={cancelCapturePress} onPointerLeave={cancelCapturePress} onContextMenu={(e) => e.preventDefault()} className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800 select-none touch-none" aria-label={isAr ? "التقاط صورة أو تسجيل فيديو" : "Capture photo or record video"}>
             📷 {isAr ? "التقاط" : "Capture"}
-            <span className="block mt-1 font-normal text-gray-500">
-              {isAr ? "ضغطة: صورة • مطول: فيديو" : "Tap: photo • Hold: video"}
-            </span>
+            <span className="block mt-1 font-normal text-gray-500">{isAr ? "ضغطة: صورة • مطول: فيديو" : "Tap: photo • Hold: video"}</span>
           </button>
         </div>
 
@@ -283,20 +282,12 @@ export default function PhotoDiagnosisView({ lang }) {
             <div className="mt-1">{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div>
           </div>
         )}
-        {mediaFile?.type.startsWith("video/") && mediaPreview && (
-          <video src={mediaPreview} controls playsInline className="mt-3 w-full max-h-64 object-contain rounded-lg border bg-black" />
-        )}
-        {mediaFile?.type.startsWith("image/") && mediaPreview && (
-          <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-contain rounded-lg border" />
-        )}
+        {mediaFile?.type.startsWith("video/") && mediaPreview && <video src={mediaPreview} controls playsInline className="mt-3 w-full max-h-64 object-contain rounded-lg border bg-black" />}
+        {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-contain rounded-lg border" />}
       </div>
 
-      <button
-        onClick={handleAnalyze}
-        disabled={loading}
-        className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50"
-      >
-        {loading ? (isAr ? "جاري التحليل..." : "Analyzing...") : isAr ? "حلل الصورة / الفيديو" : "Analyze photo / video"}
+      <button onClick={handleAnalyze} disabled={loading} className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50">
+        {loading ? (isAr ? "جاري تحليل الملف..." : "Analyzing...") : isAr ? "حلل الصورة / الفيديو" : "Analyze photo / video"}
       </button>
 
       {error && <div className="mt-4 bg-red-50 text-red-700 border border-red-200 rounded-lg p-3 text-sm">{error}</div>}
@@ -305,9 +296,7 @@ export default function PhotoDiagnosisView({ lang }) {
         <div className="mt-4 bg-gray-50 border rounded-lg p-4">
           <h2 className="font-semibold mb-2">{isAr ? "نتيجة التحليل" : "Diagnosis"}</h2>
           <p className="whitespace-pre-wrap text-sm">{result}</p>
-          {creditsRemaining !== null && (
-            <p className="text-xs text-gray-500 mt-3">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</p>
-          )}
+          {creditsRemaining !== null && <p className="text-xs text-gray-500 mt-3">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</p>}
         </div>
       )}
 
