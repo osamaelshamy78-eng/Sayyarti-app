@@ -37,14 +37,17 @@ export default function CarFormMediaWrapper(props) {
     };
 
     const renderVideoPreviews = () => {
-      const mediaFiles = mediaFilesRef.current;
-      if (!mediaFiles.length) return;
+      if (!mediaFilesRef.current.length) return;
 
-      const thumbnails = Array.from(root.querySelectorAll("img")).filter((img) => img.width === 72 || img.height === 72);
-      mediaFiles.forEach((file, index) => {
-        if (!file.type.startsWith("video/")) return;
-        const img = thumbnails[index];
-        if (!img || img.dataset.videoPreview === "true") return;
+      const images = Array.from(root.querySelectorAll("img"));
+      images.forEach((img) => {
+        const src = img.getAttribute("src") || img.src;
+        const index = mediaUrlsRef.current.indexOf(src);
+        if (index < 0) return;
+
+        const file = mediaFilesRef.current[index];
+        if (!file || !file.type.startsWith("video/")) return;
+        if (img.dataset.videoPreview === "true") return;
 
         const video = document.createElement("video");
         video.dataset.videoPreview = "true";
@@ -58,8 +61,17 @@ export default function CarFormMediaWrapper(props) {
         video.style.objectFit = "cover";
         video.style.borderRadius = "10px";
         video.style.border = "1px solid #2A2F38";
-        video.setAttribute("aria-label", "Video preview");
-        img.replaceWith(video);
+        video.setAttribute("aria-label", props.lang === "ar" ? "معاينة الفيديو" : "Video preview");
+
+        const badge = document.createElement("span");
+        badge.textContent = props.lang === "ar" ? "فيديو" : "VIDEO";
+        badge.style.cssText = "position:absolute;left:4px;bottom:4px;padding:2px 5px;border-radius:5px;background:rgba(0,0,0,.72);color:#fff;font-size:8px;font-weight:800;line-height:1";
+
+        const wrapper = img.parentElement;
+        if (wrapper) {
+          img.replaceWith(video);
+          wrapper.appendChild(badge);
+        }
       });
     };
 
@@ -71,13 +83,14 @@ export default function CarFormMediaWrapper(props) {
       const remaining = Math.max(0, MAX_MEDIA - mediaFilesRef.current.length);
       const accepted = files.slice(0, remaining);
 
-      for (const file of accepted) {
+      accepted.forEach((file) => {
         mediaFilesRef.current.push(file);
         mediaUrlsRef.current.push(URL.createObjectURL(file));
-      }
+      });
 
       requestAnimationFrame(renderVideoPreviews);
       setTimeout(renderVideoPreviews, 50);
+      setTimeout(renderVideoPreviews, 250);
     };
 
     root.addEventListener("change", onChangeCapture, true);
@@ -87,7 +100,9 @@ export default function CarFormMediaWrapper(props) {
       renderVideoPreviews();
     });
     observer.observe(root, { childList: true, subtree: true });
+
     syncMediaInput();
+    renderVideoPreviews();
 
     return () => {
       root.removeEventListener("change", onChangeCapture, true);
