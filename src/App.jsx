@@ -2327,8 +2327,10 @@ const T = {
     carNoDb:
       "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
     adminTitle: "Karajy Admin",
+    adminMenuLabel: "Dashboard",
+    adminRememberMe: "Remember me / Stay signed in",
     adminSubtitle: "Manage car listings",
-    adminEmail: "Admin email",
+    adminEmail: "Username / Email",
     adminPassword: "Password",
     adminLogin: "Sign in",
     adminLogout: "Sign out",
@@ -2462,11 +2464,13 @@ const T = {
     carNoDb: "سوق السيارات لسه مش متصل بقاعدة البيانات. بعد إعداد Supabase هتظهر الإعلانات هنا.",
     adminTitle: "إدارة كراجي",
     adminSubtitle: "إدارة إعلانات السيارات",
-    adminEmail: "البريد الإلكتروني",
+    adminEmail: "اسم المستخدم / البريد الإلكتروني",
     adminPassword: "كلمة المرور",
     adminLogin: "تسجيل الدخول",
     adminLogout: "تسجيل الخروج",
     adminLoginRequired: "الدخول مخصص للإدارة فقط",
+    adminMenuLabel: "لوحة التحكم",
+    adminRememberMe: "تذكرني / البقاء مسجّل الدخول",
     adminInvalid: "هذا الحساب غير مصرح له بإدارة الإعلانات.",
     adminLoading: "جاري تحميل لوحة الإدارة...",
     adminNoListings: "لا توجد إعلانات.",
@@ -2642,7 +2646,7 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
             }}
           >
             <ShieldCheck size={16} color={C.amber} strokeWidth={2} />
-            <span style={{ flex: 1 }}>{t.adminLogin}</span>
+            <span style={{ flex: 1 }}>{t.adminMenuLabel}</span>
           </button>
 
           <button
@@ -4158,6 +4162,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem("karajy_admin_remember") === "1");
   const [tab, setTab] = useState("photo");
   const [cars, setCars] = useState([]);
   const [garageRequests, setGarageRequests] = useState([]);
@@ -4186,6 +4191,18 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       const { data } = await supabase.auth.getUser();
       const currentUser = data?.user || null;
       if (!currentUser) {
+        if (active) {
+          setUser(null);
+          setChecking(false);
+        }
+        return;
+      }
+      // Remember-me controls whether the admin session survives a full reload.
+      // Without the flag, an existing Supabase session from a previous visit is cleared.
+      const remembered = localStorage.getItem("karajy_admin_remember") === "1";
+      const currentVisit = sessionStorage.getItem("karajy_admin_session") === "1";
+      if (!remembered && !currentVisit) {
+        await supabase.auth.signOut();
         if (active) {
           setUser(null);
           setChecking(false);
@@ -4279,6 +4296,13 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       setLoginError(t.adminInvalid);
       return;
     }
+    if (rememberMe) {
+      localStorage.setItem("karajy_admin_remember", "1");
+      sessionStorage.removeItem("karajy_admin_session");
+    } else {
+      localStorage.removeItem("karajy_admin_remember");
+      sessionStorage.setItem("karajy_admin_session", "1");
+    }
     setUser(data?.user || null);
   }
 
@@ -4328,6 +4352,25 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (row?.code) {
       setGeneratedCodes((prev) => ({ ...prev, [item.id]: row.code }));
     }
+    await loadAll();
+  }
+
+  async function rejectPhoto(item) {
+    if (!supabase || !user) return;
+    const ok = window.confirm(lang === "ar" ? "هل تريد رفض طلب شراء الرصيد؟" : "Reject this photo diagnosis purchase request?");
+    if (!ok) return;
+    setBusyId(item.id);
+    setLoginError("");
+    const { error } = await supabase.rpc("set_photo_diagnosis_status", {
+      p_request_id: item.id,
+      p_status: "rejected",
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    setGeneratedCodes((prev) => { const next = { ...prev }; delete next[item.id]; return next; });
     await loadAll();
   }
 
@@ -4544,6 +4587,8 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
 
   async function logout() {
     if (supabase) await supabase.auth.signOut();
+    localStorage.removeItem("karajy_admin_remember");
+    sessionStorage.removeItem("karajy_admin_session");
     setUser(null);
     setCars([]);
     setGarageRequests([]);
@@ -4586,6 +4631,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
             onChange={(e) => setEmail(e.target.value)} style={fieldStyle} />
           <input type="password" autoComplete="current-password" placeholder={t.adminPassword} value={password}
             onChange={(e) => setPassword(e.target.value)} style={fieldStyle} />
+          <label style={{ display: "flex", alignItems: "center", gap: 8, color: C.creamDim, fontSize: 12, margin: "2px 0 12px", cursor: "pointer" }}>
+            <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: C.amber }} />
+            <span>{t.adminRememberMe}</span>
+          </label>
           {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
           <button type="submit" style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}>
             {t.adminLogin}
@@ -4641,7 +4690,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                 <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>{t.adminPhotoRequest}</div>
                 <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>WhatsApp: {p.whatsapp_number}</div>
                 <div style={{ color: C.creamDim, fontSize: 12 }}>{t.adminPackage}: {p.package_credits} {t.adminDiagnosis} — {p.package_price} AED</div>
-                <div style={{ color: p.status === "approved" ? "#7BC67B" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
+                <div style={{ color: p.status === "approved" ? "#7BC67B" : p.status === "rejected" ? "#F06A5F" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
                   {t.adminStatus}: {p.status}
                 </div>
                 {p.receipt_url && (
@@ -4661,10 +4710,16 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                   </div>
                 )}
                 {!code && p.status === "pending" && (
-                  <button disabled={busyId === p.id} onClick={() => approvePhoto(p)}
-                    style={{ width: "100%", marginTop: 10, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
-                    {busyId === p.id ? t.adminApproving : t.adminApproveGenerate}
-                  </button>
+                  <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                    <button disabled={busyId === p.id} onClick={() => approvePhoto(p)}
+                      style={{ flex: 1, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                      {busyId === p.id ? t.adminApproving : t.adminApproveGenerate}
+                    </button>
+                    <button disabled={busyId === p.id} onClick={() => rejectPhoto(p)}
+                      style={{ flex: 1, background: "transparent", color: "#F06A5F", border: "1px solid #F06A5F66", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                      {t.adminReject}
+                    </button>
+                  </div>
                 )}
               </div>
             );
