@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import { startAdminPhotoRequestEnhancer } from "./AdminPhotoRequestEnhancer";
 import { startCarMediaEnhancer } from "./CarMediaEnhancer";
+import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
 
 const App = React.lazy(() => import("./App.jsx"));
 
@@ -26,3 +27,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 startAdminPhotoRequestEnhancer();
 startCarMediaEnhancer();
+startAdminCarDeleteEnhancer();
