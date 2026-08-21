@@ -7,55 +7,33 @@ function isCarsPage() {
   return p.includes("car") || p.includes("sell");
 }
 
-function getFileInputs(root = document) {
-  return Array.from(root.querySelectorAll?.('input[type="file"]') || []).filter((input) => {
-    const accept = input.getAttribute("accept") || "";
-    return accept.includes("image");
-  });
-}
+function replaceLocalVideoPreviews(root = document) {
+  const images = root.querySelectorAll?.('img[src^="blob:"]') || [];
+  images.forEach(async (img) => {
+    if (img.dataset.karajiLocalVideoChecked === "1") return;
+    img.dataset.karajiLocalVideoChecked = "1";
 
-function findPreviewContainer(input) {
-  let node = input.parentElement;
-  for (let i = 0; i < 8 && node; i += 1, node = node.parentElement) {
-    const images = node.querySelectorAll?.("img") || [];
-    const files = Array.from(input.files || []);
-    if (files.length && images.length >= files.length) return node;
-  }
-  return null;
-}
+    const src = img.currentSrc || img.src || "";
+    if (!src.startsWith("blob:")) return;
 
-function replaceLocalVideoPreviews(input) {
-  const files = Array.from(input.files || []);
-  const videoFiles = files.filter((file) => VIDEO_TYPES.has(file.type) || VIDEO_EXT.test(file.name || ""));
-  if (!videoFiles.length) return;
+    try {
+      const response = await fetch(src);
+      const blob = await response.blob();
+      if (!VIDEO_TYPES.has(blob.type)) return;
+      if (!img.isConnected) return;
 
-  const container = findPreviewContainer(input);
-  if (!container) return;
-  const images = Array.from(container.querySelectorAll("img"));
-
-  videoFiles.forEach((file) => {
-    const index = files.indexOf(file);
-    const img = images[index];
-    if (!img || img.dataset.karajiVideoPreview === "1") return;
-
-    const video = document.createElement("video");
-    video.controls = true;
-    video.playsInline = true;
-    video.preload = "metadata";
-    video.src = URL.createObjectURL(file);
-    video.dataset.karajiVideoPreview = "1";
-    video.dataset.karajiVideoObjectUrl = video.src;
-    video.setAttribute("aria-label", "Car video preview");
-    video.style.cssText = img.getAttribute("style") || "width:72px;height:72px;object-fit:cover;display:block;border-radius:10px;";
-
-    const wrapper = img.parentElement;
-    if (wrapper) {
-      wrapper.dataset.karajiVideoPreviewWrapper = "1";
-      wrapper.style.cursor = "pointer";
-      wrapper.title = "Play video preview";
-      wrapper.replaceChild(video, img);
-    } else {
+      const video = document.createElement("video");
+      video.src = src;
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = "metadata";
+      video.muted = true;
+      video.setAttribute("aria-label", "Short car video preview");
+      video.style.cssText = "width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid #2A2F38;background:#0F1115;display:block;";
+      video.dataset.karajiLocalVideoPreview = "1";
       img.replaceWith(video);
+    } catch (error) {
+      console.debug("Karaji: could not inspect local media preview", error);
     }
   });
 }
@@ -63,43 +41,42 @@ function replaceLocalVideoPreviews(input) {
 function enhanceCarUpload(root = document) {
   if (!isCarsPage()) return;
 
-  const inputs = getFileInputs(root);
+  const inputs = root.querySelectorAll?.('input[type="file"]') || [];
   inputs.forEach((input) => {
-    if (input.dataset.karajiCarMediaEnhanced !== "1") {
-      input.dataset.karajiCarMediaEnhanced = "1";
-      input.setAttribute("accept", "image/*,video/mp4,video/webm,video/quicktime,video/x-m4v");
+    const accept = input.getAttribute("accept") || "";
+    if (!accept.includes("image")) return;
+    if (input.dataset.karajiCarMediaEnhanced === "1") return;
 
-      input.addEventListener("change", (event) => {
-        const files = Array.from(event.target.files || []);
-        const oversized = files.find((file) => {
-          const isVideo = VIDEO_TYPES.has(file.type) || VIDEO_EXT.test(file.name || "");
-          return isVideo && file.size > MAX_VIDEO_BYTES;
-        });
-        if (oversized) {
-          event.target.value = "";
-          window.alert("Short car videos must be 15 MB or smaller.");
-          return;
-        }
+    input.dataset.karajiCarMediaEnhanced = "1";
+    input.setAttribute("accept", "image/*,video/mp4,video/webm,video/quicktime,video/x-m4v");
 
-        const label = input.closest("label");
-        if (label && !label.querySelector("[data-karaji-video-hint]")) {
-          const hint = document.createElement("span");
-          hint.dataset.karajiVideoHint = "1";
-          hint.textContent = "Photo or short video (max 15 MB)";
-          hint.style.cssText = "display:block;width:100%;margin-top:5px;text-align:center;font-size:10px;color:#B9B2A0;line-height:1.2;";
-          label.appendChild(hint);
-        }
+    input.addEventListener("change", (event) => {
+      const files = Array.from(event.target.files || []);
+      const oversized = files.find((file) => VIDEO_TYPES.has(file.type) && file.size > MAX_VIDEO_BYTES);
+      if (oversized) {
+        event.target.value = "";
+        window.alert("Short car videos must be 15 MB or smaller.");
+        return;
+      }
 
-        // React creates its blob previews just after the change event.
-        // Run a few times so the video thumbnail is replaced after React renders.
-        [0, 60, 180, 400].forEach((delay) => setTimeout(() => replaceLocalVideoPreviews(input), delay));
-      }, { capture: true });
-    }
-
-    replaceLocalVideoPreviews(input);
+      const label = input.closest("label");
+      if (label && !label.querySelector("[data-karaji-video-hint]")) {
+        const hint = document.createElement("span");
+        hint.dataset.karajiVideoHint = "1";
+        hint.textContent = "Photo or short video (max 15 MB)";
+        hint.style.cssText = "display:block;width:100%;margin-top:5px;text-align:center;font-size:10px;color:#B9B2A0;line-height:1.2;";
+        label.appendChild(hint);
+      }
+    }, { capture: true });
   });
 
-  // Also handle already-published listing cards/details when the stored URL is a video.
+  // The React car form creates object URLs and currently renders every
+  // selected file as <img>. Detect local video blobs and replace only those
+  // previews with a native video player. This keeps image previews untouched.
+  replaceLocalVideoPreviews(root);
+
+  // React currently previews uploaded listing media with <img>. Replace
+  // remote video URLs with a native player when a listing is displayed.
   const mediaNodes = root.querySelectorAll?.("img") || [];
   mediaNodes.forEach((img) => {
     const src = img.currentSrc || img.src || "";
