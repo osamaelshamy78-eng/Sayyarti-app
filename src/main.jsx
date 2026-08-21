@@ -1,6 +1,7 @@
 import React, { Component, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
+import { startAdminPhotoRequestEnhancer } from "./AdminPhotoRequestEnhancer";
 
 const App = React.lazy(() => import("./App.jsx"));
 
@@ -21,3 +22,5 @@ function StartupFallback() { return <div style={{minHeight:"100vh",display:"grid
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AppErrorBoundary><Suspense fallback={<StartupFallback />}><App /></Suspense></AppErrorBoundary>
 );
+
+startAdminPhotoRequestEnhancer();
