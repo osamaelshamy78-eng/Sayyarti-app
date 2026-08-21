@@ -2261,6 +2261,7 @@ const T = {
   en: {
     wordmark: "Karaji",
     tagline: "Diagnose car issues & find trusted garages",
+    navHome: "Home",
     navIssues: "Issues",
     navGarages: "Garages",
     homeHeading: "What's wrong with your car?",
@@ -2398,6 +2399,7 @@ const T = {
   ar: {
     wordmark: "كراجي",
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
+    navHome: "الرئيسية",
     navIssues: "الأعطال",
     navGarages: "الورش",
     homeHeading: "ما هي مشكلة سيارتك؟",
@@ -2679,7 +2681,7 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
 
 function BottomNav({ lang, t, view, setView }) {
   const items = [
-    { id: "home", label: t.navIssues, icon: Gauge },
+    { id: "home", label: t.navHome, icon: Gauge },
     { id: "garages", label: t.navGarages, icon: MapPin },
     { id: "maintenance", label: t.navMaintenance, icon: Droplet },
     { id: "cars", label: t.navCars, icon: Car },
