@@ -72,3 +72,5 @@ This is a responsive web app. To publish to the App Store / Google Play as a nat
 2. **Rebuild the UI** in React Native or Flutter (more work, but fully native feel)
 
 Either way you'll need an Apple Developer Program membership ($99/yr) and a Google Play Console account ($25 one-time) to publish.
+
+<!-- deployment checkpoint -->
