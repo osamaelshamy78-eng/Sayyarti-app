@@ -15,20 +15,37 @@ async function loadRequests() {
   if (!supabase || busy) return;
   busy = true;
   try {
-    const { data } = await supabase.rpc("get_photo_diagnosis_requests");
-    requests = data || [];
+    const { data, error } = await supabase.rpc("get_photo_diagnosis_requests");
+    if (!error) {
+      requests = (data || []).slice().sort((a, b) =>
+        new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+      );
+    }
   } finally { busy = false; }
+}
+
+function requestFor(card) {
+  const phone = phoneFrom(card);
+  if (!phone) return null;
+
+  // Phone numbers are not unique, so matching by phone alone is unsafe.
+  // Match the card by its occurrence among cards with the same phone,
+  // while the RPC results are ordered newest-first like the admin list.
+  const cards = Array.from(document.querySelectorAll("div")).filter(isRequestCard);
+  const samePhoneCards = cards.filter(c => phoneFrom(c) === phone);
+  const cardIndex = samePhoneCards.indexOf(card);
+  if (cardIndex < 0) return null;
+
+  const samePhoneRequests = requests.filter(r =>
+    String(r.whatsapp_number || "").replace(/\D/g, "") === phone
+  );
+  return samePhoneRequests[cardIndex] || null;
 }
 
 function cardFor(button) {
   let n = button?.parentElement;
   for (let i = 0; n && i < 8; i++, n = n.parentElement) if (isRequestCard(n)) return n;
   return null;
-}
-
-function requestFor(card) {
-  const phone = phoneFrom(card);
-  return requests.find(r => String(r.whatsapp_number || "").replace(/\D/g, "") === phone) || null;
 }
 
 function addDeleteButton(card, request) {
@@ -78,8 +95,6 @@ function enhance() {
     addDeleteButton(card, request);
   });
 
-  // Rejected requests have no WhatsApp/code button. Pick only the smallest
-  // matching div so we never attach a delete button to the whole admin page.
   const candidates = Array.from(document.querySelectorAll("div")).filter(isRequestCard);
   candidates.forEach(el => {
     const hasSmallerCard = Array.from(el.querySelectorAll("div")).some(isRequestCard);
