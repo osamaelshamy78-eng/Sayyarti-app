@@ -8,7 +8,6 @@
     cream: "#F2ECDD",
     dim: "#B9B2A0",
     amber: "#F5B942",
-    blue: "#4C7EA8",
   };
 
   function isArabic() {
@@ -97,8 +96,7 @@
 
     const title = document.createElement("h2");
     title.textContent = ar ? "عن كراجي" : "About Karaji";
-    Object.assign(title.style, { margin: "0 42px 10px 0", color: C.amber, fontSize: "24px" });
-    if (ar) title.style.margin = "0 0 10px 42px";
+    Object.assign(title.style, { margin: ar ? "0 0 10px 42px" : "0 42px 10px 0", color: C.amber, fontSize: "24px" });
 
     const p1 = document.createElement("p");
     p1.textContent = ar
@@ -137,145 +135,89 @@
     document.body.appendChild(modal);
   }
 
-  function navigateHome() {
-    if (window.location.pathname !== "/") window.location.href = "/";
-    else window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  function addNativeMenuItem(menu, key) {
+    if (menu.querySelector(`[data-karaji-menu-item="${key}"]`)) return;
 
-  function openGarageAdd() {
-    const button = findGarageButton();
-    if (button) {
-      button.click();
-      return;
-    }
-    window.location.href = "/garages";
-  }
-
-  function addMenu() {
-    if (document.getElementById("karaji-top-menu")) return;
-
-    const existingHeaderButton = Array.from(document.querySelectorAll("button")).find((button) => {
-      const r = button.getBoundingClientRect();
-      return r.top >= 0 && r.top < 380 && r.right > window.innerWidth * 0.72 && r.width >= 34 && r.width <= 90 && r.height >= 34 && r.height <= 90;
-    });
-
-    const wrap = document.createElement("div");
-    wrap.id = "karaji-top-menu";
-    Object.assign(wrap.style, {
-      position: existingHeaderButton ? "relative" : "fixed",
-      zIndex: "100001",
-      display: "inline-flex",
-      flexDirection: "column",
-      alignItems: "flex-end",
-      ...(existingHeaderButton ? {} : { top: "92px", right: "16px" }),
-    });
-
-    const trigger = document.createElement("button");
-    trigger.type = "button";
-    trigger.setAttribute("aria-label", "More / المزيد");
-    trigger.textContent = "⋮";
-    Object.assign(trigger.style, {
-      width: "44px",
-      height: "44px",
-      borderRadius: "12px",
-      border: `1px solid ${C.line}`,
-      background: C.panel,
-      color: C.amber,
-      fontSize: "24px",
-      fontWeight: "800",
+    const ar = isArabic();
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.dataset.karajiMenuItem = key;
+    Object.assign(btn.style, {
+      display: "flex",
+      width: "100%",
+      padding: "12px 16px",
+      background: "none",
+      border: "none",
+      borderTop: `1px solid ${C.line}`,
+      color: C.cream,
+      fontSize: "13px",
+      fontWeight: 600,
+      textAlign: ar ? "right" : "left",
       cursor: "pointer",
-      boxShadow: "0 8px 26px rgba(0,0,0,.18)",
+      flexDirection: ar ? "row-reverse" : "row",
+      gap: "8px",
+      boxSizing: "border-box",
     });
 
-    const panel = document.createElement("div");
-    Object.assign(panel.style, {
-      display: "none",
-      marginTop: "8px",
-      width: "210px",
-      background: C.panel,
-      border: `1px solid ${C.line}`,
-      borderRadius: "14px",
-      padding: "7px",
-      boxShadow: "0 16px 45px rgba(0,0,0,.38)",
-    });
+    const icon = document.createElement("span");
+    icon.textContent = key === "legal" ? "⚖" : "ⓘ";
+    icon.style.color = C.amber;
+    icon.style.fontSize = "16px";
+    icon.style.width = "18px";
+    icon.style.flex = "0 0 18px";
+    icon.style.textAlign = "center";
 
-    const menuItems = [
-      {
-        ar: "الداشبورد",
-        en: "Dashboard",
-        action: navigateHome,
-      },
-      {
-        ar: "ضيف جراجك",
-        en: "Add Your Garage",
-        action: openGarageAdd,
-      },
-      {
-        ar: "قانوني",
-        en: "Legal",
-        action: () => { window.location.href = "/legal/"; },
-      },
-      {
-        ar: "عن التطبيق",
-        en: "About the App",
-        action: openAbout,
-      },
-    ];
+    const label = document.createElement("span");
+    label.style.flex = "1";
+    label.textContent = key === "legal"
+      ? (ar ? "قانوني" : "Legal")
+      : (ar ? "عن التطبيق" : "About the App");
 
-    menuItems.forEach((item) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      const ar = isArabic();
-      btn.textContent = ar ? item.ar : item.en;
-      Object.assign(btn.style, {
-        width: "100%",
-        textAlign: ar ? "right" : "left",
-        padding: "11px 12px",
-        border: "0",
-        borderRadius: "10px",
-        background: "transparent",
-        color: C.cream,
-        fontSize: "13px",
-        cursor: "pointer",
-      });
-      btn.onmouseenter = () => { btn.style.background = `${C.amber}12`; btn.style.color = C.amber; };
-      btn.onmouseleave = () => { btn.style.background = "transparent"; btn.style.color = C.cream; };
-      btn.onclick = () => {
-        panel.style.display = "none";
-        item.action();
-      };
-      panel.appendChild(btn);
-    });
-
-    trigger.onclick = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      panel.style.display = panel.style.display === "none" ? "block" : "none";
+    btn.append(icon, label);
+    btn.onmouseenter = () => { btn.style.background = `${C.amber}12`; btn.style.color = C.amber; };
+    btn.onmouseleave = () => { btn.style.background = "none"; btn.style.color = C.cream; };
+    btn.onclick = () => {
+      if (key === "legal") window.location.href = "/legal/";
+      else openAbout();
     };
 
-    wrap.append(trigger, panel);
-
-    if (existingHeaderButton && existingHeaderButton.parentElement) {
-      existingHeaderButton.parentElement.insertBefore(wrap, existingHeaderButton);
-    } else {
-      document.body.appendChild(wrap);
-    }
-
-    document.addEventListener("click", (event) => {
-      if (!wrap.contains(event.target)) panel.style.display = "none";
-    });
+    menu.appendChild(btn);
   }
 
-  function removeOldLegalBadge() {
-    const old = document.getElementById("karaji-legal-entry");
+  function findNativeMenu() {
+    const garageBtn = findGarageButton();
+    if (!garageBtn) return null;
+
+    let menu = garageBtn.parentElement;
+    while (menu && menu !== document.body) {
+      const directButtons = Array.from(menu.children).filter((child) => child.tagName === "BUTTON");
+      const hasGarage = directButtons.some((b) => /add your garage|أضف جراجك|ضيف جراجك/i.test(b.textContent || ""));
+      const hasDashboard = directButtons.some((b) => /dashboard|admin|الإدارة|لوحة التحكم/i.test(b.textContent || ""));
+      if (hasGarage && hasDashboard) return menu;
+      menu = menu.parentElement;
+    }
+    return null;
+  }
+
+  function syncNativeMenu() {
+    const menu = findNativeMenu();
+    if (!menu) return;
+    addNativeMenuItem(menu, "legal");
+    addNativeMenuItem(menu, "about");
+  }
+
+  function removeLegacyDuplicateMenu() {
+    const old = document.getElementById("karaji-top-menu");
     if (old) old.remove();
+    const oldBadge = document.getElementById("karaji-legal-entry");
+    if (oldBadge) oldBadge.remove();
   }
 
   function run() {
     if (!document.body) return;
     replaceText(document.body);
-    removeOldLegalBadge();
-    addMenu();
+    removeLegacyDuplicateMenu();
+    syncNativeMenu();
   }
 
   const observer = new MutationObserver(run);
