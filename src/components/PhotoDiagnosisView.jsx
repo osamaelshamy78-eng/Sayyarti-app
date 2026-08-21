@@ -23,6 +23,8 @@ export default function PhotoDiagnosisView({ lang }) {
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const videoInputRef = useRef(null);
+  const longPressTimerRef = useRef(null);
+  const longPressTriggeredRef = useRef(false);
 
   useEffect(() => {
     if (!mediaFile) {
@@ -156,6 +158,34 @@ export default function PhotoDiagnosisView({ lang }) {
     }
   };
 
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  const startCapturePress = () => {
+    longPressTriggeredRef.current = false;
+    clearLongPressTimer();
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      videoInputRef.current?.click();
+    }, 650);
+  };
+
+  const endCapturePress = () => {
+    clearLongPressTimer();
+    if (!longPressTriggeredRef.current) {
+      cameraInputRef.current?.click();
+    }
+  };
+
+  const cancelCapturePress = () => {
+    clearLongPressTimer();
+    longPressTriggeredRef.current = true;
+  };
+
   return (
     <div className="max-w-lg mx-auto p-4 pb-24" dir={isAr ? "rtl" : "ltr"}>
       <h1 className="text-2xl font-bold mb-2 text-white">
@@ -163,8 +193,8 @@ export default function PhotoDiagnosisView({ lang }) {
       </h1>
       <p className="text-sm text-gray-400 mb-6">
         {isAr
-          ? "ارفع صورة من جهازك، التقط صورة بالكاميرا، أو اختر فيديو قصير. الفيديو يتم تحليل أول لقطة منه."
-          : "Upload a photo, take a photo with your camera, or choose a short video. Videos are analyzed using the first frame."}
+          ? "ارفع صورة من جهازك، أو اضغط ضغطة على الالتقاط للصورة واضغط مطولًا لتسجيل فيديو قصير."
+          : "Upload from your device, tap Capture for a photo, or press and hold Capture to record a short video."}
       </p>
 
       <div className="mb-5 bg-gray-50 border rounded-lg p-4">
@@ -172,8 +202,8 @@ export default function PhotoDiagnosisView({ lang }) {
           {isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}
         </h2>
         <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4" : "pl-4"}`}>
-          <li>{isAr ? "اختر صورة من الجهاز أو التقط صورة بالكاميرا" : "Choose a photo from the device or take one with the camera"}</li>
-          <li>{isAr ? "ممكن كمان تختار فيديو قصير للمشكلة" : "You can also choose a short video of the problem"}</li>
+          <li>{isAr ? "اختر صورة أو فيديو من الجهاز، أو التقط صورة بالكاميرا" : "Choose a photo or video from the device, or take a photo with the camera"}</li>
+          <li>{isAr ? "اضغط مطولًا على زر الالتقاط لتسجيل فيديو قصير" : "Press and hold Capture to record a short video"}</li>
           <li>{isAr ? "الذكاء الاصطناعي يحلل الصورة أو أول لقطة من الفيديو" : "AI analyzes the photo or the first video frame"}</li>
           <li>{isAr ? "كل تحليل يخصم كريدت واحد" : "Each analysis uses one credit"}</li>
         </ol>
@@ -216,31 +246,34 @@ export default function PhotoDiagnosisView({ lang }) {
           {isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}
         </label>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => galleryInputRef.current?.click()}
             className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
           >
             📁 {isAr ? "من الجهاز" : "Device"}
+            <span className="block mt-1 font-normal text-gray-500">{isAr ? "صورة أو فيديو" : "Photo or video"}</span>
           </button>
+
           <button
             type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
+            onPointerDown={startCapturePress}
+            onPointerUp={endCapturePress}
+            onPointerCancel={cancelCapturePress}
+            onPointerLeave={cancelCapturePress}
+            onContextMenu={(e) => e.preventDefault()}
+            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800 select-none touch-none"
+            aria-label={isAr ? "التقاط صورة أو تسجيل فيديو" : "Capture photo or record video"}
           >
-            📷 {isAr ? "الكاميرا" : "Camera"}
-          </button>
-          <button
-            type="button"
-            onClick={() => videoInputRef.current?.click()}
-            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
-          >
-            🎥 {isAr ? "فيديو قصير" : "Short video"}
+            📷 {isAr ? "التقاط" : "Capture"}
+            <span className="block mt-1 font-normal text-gray-500">
+              {isAr ? "ضغطة: صورة • مطول: فيديو" : "Tap: photo • Hold: video"}
+            </span>
           </button>
         </div>
 
-        <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleMediaChange} className="hidden" />
+        <input ref={galleryInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleMediaChange} className="hidden" />
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleMediaChange} className="hidden" />
         <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment" onChange={handleMediaChange} className="hidden" />
 
