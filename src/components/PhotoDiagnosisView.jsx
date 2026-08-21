@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import BuyCreditForm from "./BuyCreditForm";
 
 const EDGE_FUNCTION_URL =
@@ -20,6 +20,9 @@ export default function PhotoDiagnosisView({ lang }) {
   const [error, setError] = useState(null);
   const [creditsRemaining, setCreditsRemaining] = useState(null);
   const [buyOpen, setBuyOpen] = useState(false);
+  const galleryInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const videoInputRef = useRef(null);
 
   useEffect(() => {
     if (!mediaFile) {
@@ -33,7 +36,14 @@ export default function PhotoDiagnosisView({ lang }) {
 
   const handleMediaChange = (e) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+
+    if (file.type.startsWith("video/") && file.size > 30 * 1024 * 1024) {
+      setError(isAr ? "الفيديو كبير جدًا. اختر فيديو أقصر أو أصغر من 30 ميجابايت." : "Video is too large. Choose a shorter video or one under 30 MB.");
+      return;
+    }
+
     setMediaFile(file);
     setError(null);
     setResult(null);
@@ -47,9 +57,8 @@ export default function PhotoDiagnosisView({ lang }) {
       reader.readAsDataURL(file);
     });
 
-  // If the user selects a video, use its first frame as the image sent to
-  // the existing image-analysis endpoint. The video itself is never sent
-  // as a large upload, keeping the analysis lightweight on mobile.
+  // Videos are intentionally kept lightweight: the current AI endpoint accepts
+  // an image, so we extract the first frame from the selected short video.
   const videoFirstFrame = (file) =>
     new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
@@ -154,8 +163,8 @@ export default function PhotoDiagnosisView({ lang }) {
       </h1>
       <p className="text-sm text-gray-400 mb-6">
         {isAr
-          ? "ارفع صورة أو فيديو قصير من جهازك وخد تشخيصًا أوليًا. عند اختيار فيديو يتم تحليل أول لقطة منه."
-          : "Upload a photo or a short video from your device. For videos, the first frame is analyzed."}
+          ? "ارفع صورة من جهازك، التقط صورة بالكاميرا، أو اختر فيديو قصير. الفيديو يتم تحليل أول لقطة منه."
+          : "Upload a photo, take a photo with your camera, or choose a short video. Videos are analyzed using the first frame."}
       </p>
 
       <div className="mb-5 bg-gray-50 border rounded-lg p-4">
@@ -163,7 +172,8 @@ export default function PhotoDiagnosisView({ lang }) {
           {isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}
         </h2>
         <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4" : "pl-4"}`}>
-          <li>{isAr ? "اختر صورة أو فيديو قصير من جهازك" : "Choose a photo or short video from your device"}</li>
+          <li>{isAr ? "اختر صورة من الجهاز أو التقط صورة بالكاميرا" : "Choose a photo from the device or take one with the camera"}</li>
+          <li>{isAr ? "ممكن كمان تختار فيديو قصير للمشكلة" : "You can also choose a short video of the problem"}</li>
           <li>{isAr ? "الذكاء الاصطناعي يحلل الصورة أو أول لقطة من الفيديو" : "AI analyzes the photo or the first video frame"}</li>
           <li>{isAr ? "كل تحليل يخصم كريدت واحد" : "Each analysis uses one credit"}</li>
         </ol>
@@ -202,25 +212,49 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">
-          {isAr ? "الصورة أو الفيديو" : "Photo or video"}
+        <label className="block text-sm font-medium mb-2">
+          {isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}
         </label>
-        <input
-          type="file"
-          accept="image/*,video/mp4,video/webm,video/quicktime"
-          onChange={handleMediaChange}
-          className="w-full"
-        />
+
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
+          >
+            📁 {isAr ? "من الجهاز" : "Device"}
+          </button>
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
+          >
+            📷 {isAr ? "الكاميرا" : "Camera"}
+          </button>
+          <button
+            type="button"
+            onClick={() => videoInputRef.current?.click()}
+            className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800"
+          >
+            🎥 {isAr ? "فيديو قصير" : "Short video"}
+          </button>
+        </div>
+
+        <input ref={galleryInputRef} type="file" accept="image/*" onChange={handleMediaChange} className="hidden" />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleMediaChange} className="hidden" />
+        <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment" onChange={handleMediaChange} className="hidden" />
+
         {mediaFile && (
-          <div className="mt-2 text-xs text-gray-500">
-            {mediaFile.name} · {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
+          <div className="mt-3 rounded-xl border bg-white p-3 text-xs text-gray-600">
+            <div className="font-semibold text-gray-800 break-all">{mediaFile.name}</div>
+            <div className="mt-1">{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div>
           </div>
         )}
         {mediaFile?.type.startsWith("video/") && mediaPreview && (
-          <video src={mediaPreview} controls className="mt-3 w-full max-h-64 object-contain rounded-lg border" />
+          <video src={mediaPreview} controls playsInline className="mt-3 w-full max-h-64 object-contain rounded-lg border bg-black" />
         )}
         {mediaFile?.type.startsWith("image/") && mediaPreview && (
-          <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-cover rounded-lg border" />
+          <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-contain rounded-lg border" />
         )}
       </div>
 
@@ -229,7 +263,7 @@ export default function PhotoDiagnosisView({ lang }) {
         disabled={loading}
         className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50"
       >
-        {loading ? (isAr ? "جاري التحليل..." : "Analyzing...") : isAr ? "حلل الملف" : "Analyze File"}
+        {loading ? (isAr ? "جاري التحليل..." : "Analyzing...") : isAr ? "حلل الصورة / الفيديو" : "Analyze photo / video"}
       </button>
 
       {error && <div className="mt-4 bg-red-50 text-red-700 border border-red-200 rounded-lg p-3 text-sm">{error}</div>}
