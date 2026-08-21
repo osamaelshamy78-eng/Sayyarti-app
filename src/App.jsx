@@ -26,6 +26,7 @@ import {
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
 import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
+import CarForm from "./components/CarForm";
 
 /* ---------------------------------------------------------------
    Design tokens
@@ -3881,27 +3882,45 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
 function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSelectCar, onBack }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   useEffect(() => {
     let active = true;
+    let timer;
     async function load() {
       if (!supabase) {
         setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from("car_listings")
-        .select("*")
-        .in("status", ["approved", "sold"])
-        .order("created_at", { ascending: false });
-      if (active) {
+      setLoading(true);
+      setLoadError("");
+      const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Car listings request timed out")), 10000);
+      });
+      try {
+        const query = supabase
+          .from("car_listings")
+          .select("*")
+          .in("status", ["approved", "sold"])
+          .order("created_at", { ascending: false });
+        const { data, error } = await Promise.race([query, timeout]);
+        if (!active) return;
+        if (error) throw error;
         setListings(data || []);
-        setLoading(false);
+      } catch (err) {
+        if (active) {
+          setListings([]);
+          setLoadError(err?.message || "Could not load car listings.");
+        }
+      } finally {
+        clearTimeout(timer);
+        if (active) setLoading(false);
       }
     }
     load();
     return () => {
       active = false;
+      clearTimeout(timer);
     };
   }, [mode]);
 
@@ -4003,6 +4022,18 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
         <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
           {t.carLoading}
         </p>
+      ) : loadError ? (
+        <div style={{ marginTop: 20, textAlign: "center" }}>
+          <p style={{ color: C.red, fontSize: 13, marginBottom: 10 }}>
+            {lang === "ar" ? "تعذر تحميل السيارات حاليًا." : "Could not load car listings right now."}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ background: C.amber, border: "none", borderRadius: 10, padding: "9px 14px", color: C.asphalt, fontWeight: 700, cursor: "pointer" }}
+          >
+            {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+          </button>
+        </div>
       ) : listings.length === 0 ? (
         <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
           {t.carEmpty}
