@@ -13,6 +13,7 @@ const PACKAGES = [
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
   const [code, setCode] = useState(() => localStorage.getItem("pd_code") || "");
+  const [issueDescription, setIssueDescription] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -94,8 +95,6 @@ export default function PhotoDiagnosisView({ lang }) {
       video.currentTime = time;
     });
 
-  // A video is analyzed through representative frames sampled across its full duration,
-  // not just the first frame. This keeps the request small while allowing the AI to see changes.
   const extractVideoFrames = (file) =>
     new Promise((resolve, reject) => {
       const url = URL.createObjectURL(file);
@@ -163,6 +162,7 @@ export default function PhotoDiagnosisView({ lang }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           code: code.trim(),
+          issueDescription: issueDescription.trim(),
           imagesBase64,
           imageBase64: imagesBase64[0],
           mediaType: "image/jpeg",
@@ -259,6 +259,19 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div className="mb-4">
+        <label className="block text-sm font-medium mb-1">
+          {isAr ? "وصف العطل" : "Issue description"}
+        </label>
+        <textarea
+          value={issueDescription}
+          onChange={(e) => setIssueDescription(e.target.value)}
+          placeholder={isAr ? "اكتب وصف العطل بالتفصيل" : "Describe the issue in detail"}
+          rows={4}
+          className="w-full border rounded-lg px-3 py-2 resize-y"
+        />
+      </div>
+
+      <div className="mb-4">
         <label className="block text-sm font-medium mb-2">{isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}</label>
         <div className="grid grid-cols-2 gap-2">
           <button type="button" onClick={() => galleryInputRef.current?.click()} className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800">
@@ -294,13 +307,13 @@ export default function PhotoDiagnosisView({ lang }) {
 
       {result && (
         <div className="mt-4 bg-gray-50 border rounded-lg p-4">
-          <h2 className="font-semibold mb-2">{isAr ? "نتيجة التحليل" : "Diagnosis"}</h2>
-          <p className="whitespace-pre-wrap text-sm">{result}</p>
-          {creditsRemaining !== null && <p className="text-xs text-gray-500 mt-3">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</p>}
+          <h2 className="font-semibold mb-2">{isAr ? "نتيجة التشخيص" : "Diagnosis result"}</h2>
+          <pre className="whitespace-pre-wrap text-sm text-gray-700">{result}</pre>
+          {creditsRemaining !== null && <div className="mt-3 text-xs text-gray-500">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}
         </div>
       )}
 
-      <BuyCreditForm isOpen={buyOpen} onClose={() => setBuyOpen(false)} lang={lang} />
+      {buyOpen && <BuyCreditForm lang={lang} onClose={() => setBuyOpen(false)} />}
     </div>
   );
 }
