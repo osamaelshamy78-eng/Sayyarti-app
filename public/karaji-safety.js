@@ -206,6 +206,78 @@
     addNativeMenuItem(menu, "about");
   }
 
+  function addGarageNetworkCta() {
+    if (window.location.pathname !== "/garages") return;
+    if (document.getElementById("karaji-garage-network-cta")) return;
+
+    const ar = isArabic();
+    const headings = Array.from(document.querySelectorAll("h1,h2,h3")).filter((el) => {
+      const text = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      return text === "garage directory" || text === "دليل الورش" || text.includes("ورش قريبة") || text.includes("جراجات");
+    });
+    const anchor = headings[0];
+    if (!anchor || !anchor.parentElement) return;
+
+    const wrap = document.createElement("div");
+    wrap.id = "karaji-garage-network-cta";
+    Object.assign(wrap.style, {
+      margin: "0 0 18px 0",
+      padding: "15px 16px",
+      background: `linear-gradient(135deg, ${C.panel}, ${C.asphalt})`,
+      border: `1px solid ${C.line}`,
+      borderRadius: "14px",
+      direction: ar ? "rtl" : "ltr",
+      boxShadow: "0 8px 24px rgba(0,0,0,.16)",
+    });
+
+    const title = document.createElement("div");
+    title.textContent = ar ? "صاحب جراج؟ خلّي أصحاب السيارات يلاقوك" : "Own a garage? Let car owners find you";
+    Object.assign(title.style, {
+      color: C.cream,
+      fontSize: "15px",
+      fontWeight: "700",
+      marginBottom: "5px",
+      lineHeight: "1.45",
+    });
+
+    const text = document.createElement("div");
+    text.textContent = ar
+      ? "أضف جراجك إلى دليل كراجي مجانًا، وعرّف أصحاب السيارات بخدماتك وموقعك وبيانات التواصل."
+      : "Add your garage to the Karaji directory for free and let car owners discover your services, location and contact details.";
+    Object.assign(text.style, {
+      color: C.dim,
+      fontSize: "12px",
+      lineHeight: "1.7",
+      marginBottom: "10px",
+    });
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = ar ? "+ ضيف جراجك مجانًا" : "+ Add Your Garage Free";
+    Object.assign(button.style, {
+      border: "none",
+      borderRadius: "10px",
+      padding: "9px 13px",
+      background: C.amber,
+      color: C.asphalt,
+      fontWeight: "800",
+      fontSize: "12px",
+      cursor: "pointer",
+      width: "100%",
+    });
+    button.onclick = () => {
+      const candidate = findGarageButton();
+      if (candidate) {
+        candidate.click();
+        return;
+      }
+      window.location.href = "/garages";
+    };
+
+    wrap.append(title, text, button);
+    anchor.parentElement.insertBefore(wrap, anchor);
+  }
+
   function removeLegacyDuplicateMenu() {
     const old = document.getElementById("karaji-top-menu");
     if (old) old.remove();
@@ -218,6 +290,7 @@
     replaceText(document.body);
     removeLegacyDuplicateMenu();
     syncNativeMenu();
+    addGarageNetworkCta();
   }
 
   const observer = new MutationObserver(run);
