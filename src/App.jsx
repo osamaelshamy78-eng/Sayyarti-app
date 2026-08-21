@@ -2347,6 +2347,14 @@ const T = {
     adminCarsTab: "Cars",
     adminManageGaragesTab: "Manage Garages",
     adminMaintenanceTab: "Maintenance Centers",
+    adminMediaTab: "Fault Media",
+    adminAddMedia: "Add fault photo/video",
+    adminMediaIssue: "Fault",
+    adminMediaLanguage: "Language",
+    adminMediaFile: "Photo / video",
+    adminMediaUpload: "Upload media",
+    adminMediaLimit: "Video: max 8 MB and 30 seconds. Images are compressed automatically.",
+    adminMediaEmpty: "No uploaded fault media yet.",
     adminAddGarage: "Add Garage",
     adminAddMaintenance: "Add Maintenance Center",
     adminDelete: "Delete",
@@ -2473,6 +2481,14 @@ const T = {
     adminCarsTab: "السيارات",
     adminManageGaragesTab: "إدارة الجراجات",
     adminMaintenanceTab: "مراكز الصيانة",
+    adminMediaTab: "صور وفيديو الأعطال",
+    adminAddMedia: "إضافة صورة / فيديو للعطل",
+    adminMediaIssue: "العطل",
+    adminMediaLanguage: "اللغة",
+    adminMediaFile: "الصورة / الفيديو",
+    adminMediaUpload: "رفع الملف",
+    adminMediaLimit: "الفيديو: حد أقصى 8 ميجابايت و30 ثانية. الصور يتم ضغطها تلقائيًا.",
+    adminMediaEmpty: "لا توجد وسائط مرفوعة للأعطال.",
     adminAddGarage: "إضافة جراج",
     adminAddMaintenance: "إضافة مركز صيانة",
     adminDelete: "حذف",
@@ -3236,6 +3252,26 @@ function Section({ label, color, children }) {
 
 function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRTL }) {
   const issue = ISSUES[issueId][lang];
+  const [media, setMedia] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    async function loadIssueMedia() {
+      if (!supabase) return;
+      const { data } = await supabase
+        .from("issue_media")
+        .select("id,media_type,url,title,sort_order,created_at")
+        .eq("issue_id", issueId)
+        .eq("lang", lang)
+        .eq("is_active", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (active) setMedia(data || []);
+    }
+    loadIssueMedia();
+    return () => { active = false; };
+  }, [issueId, lang]);
+
   return (
     <div className="pb-6">
       <BackHeader label={categoryLabel} onBack={onBack} isRTL={isRTL} />
@@ -3338,6 +3374,22 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
             ))}
           </ol>
         </Section>
+
+        {media.length > 0 && (
+          <Section label={lang === "ar" ? "فيديو وصور الإصلاح" : "Repair photos & videos"} color={C.blue}>
+            <div className="flex flex-col gap-3">
+              {media.map((m) => (
+                <div key={m.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 12, overflow: "hidden" }}>
+                  {m.media_type === "video" ? (
+                    <video src={m.url} controls playsInline preload="metadata" style={{ width: "100%", maxHeight: 230, background: "#000", display: "block" }} />
+                  ) : (
+                    <img src={m.url} alt={m.title || issue.title} loading="lazy" style={{ width: "100%", maxHeight: 230, objectFit: "cover", display: "block" }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
 
         <button
           onClick={() =>
@@ -4116,6 +4168,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [garagePhotoFile, setGaragePhotoFile] = useState(null);
   const [maintenancePhotoFile, setMaintenancePhotoFile] = useState(null);
   const [maintenanceForm, setMaintenanceForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaIssueId, setMediaIssueId] = useState(Object.keys(ISSUES)[0] || "");
+  const [mediaLang, setMediaLang] = useState(lang);
+  const [issueMedia, setIssueMedia] = useState([]);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
   const [generatedCodes, setGeneratedCodes] = useState({});
@@ -4155,9 +4211,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         }
         return;
       }
-      await supabase.auth.signOut();
+      // Never sign the user out during a background permission check.
+      // The server-side RPCs still enforce admin permissions for every mutation.
       if (active) {
-        setUser(null);
+        setUser(currentUser);
         setLoginError(t.adminInvalid);
         setChecking(false);
       }
@@ -4175,23 +4232,26 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
       supabase.from("garage_listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
       supabase.from("maintenance_centers").select("*").order("country").order("created_at", { ascending: false }),
+      supabase.from("issue_media").select("*").order("sort_order").order("created_at", { ascending: false }),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
     if (photosRes.error) setLoginError(photosRes.error.message);
     if (adminGaragesRes.error) setLoginError(adminGaragesRes.error.message);
     if (maintenanceRes.error) setLoginError(maintenanceRes.error.message);
+    if (mediaRes.error) setLoginError(mediaRes.error.message);
     setCars(carsRes.data || []);
     setGarageRequests(garagesRes.data || []);
     setPhotoRequests(photosRes.data || []);
     setAdminGarages(adminGaragesRes.data || []);
     setMaintenanceCenters(maintenanceRes.data || []);
+    setIssueMedia(mediaRes.data || []);
     setLoading(false);
   }
 
@@ -4354,6 +4414,134 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     await loadAll();
   }
 
+  async function compressImageForUpload(file) {
+    if (!file || !file.type.startsWith("image/")) return file;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    try {
+      await new Promise((resolve, reject) => { img.onload = resolve; img.onerror = reject; img.src = url; });
+      const max = 1280;
+      const scale = Math.min(1, max / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+      canvas.height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.78));
+      if (!blob) return file;
+      return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.jpg`, { type: "image/jpeg" });
+    } finally { URL.revokeObjectURL(url); }
+  }
+
+  async function compressVideoForUpload(file) {
+    if (!file || !file.type.startsWith("video/") || file.size <= 4 * 1024 * 1024) return file;
+    if (typeof MediaRecorder === "undefined") return file;
+    const video = document.createElement("video");
+    video.muted = true;
+    video.playsInline = true;
+    const src = URL.createObjectURL(file);
+    video.src = src;
+    await new Promise((resolve, reject) => {
+      video.onloadedmetadata = resolve;
+      video.onerror = reject;
+    });
+    if (Number.isFinite(video.duration) && video.duration > 30) {
+      URL.revokeObjectURL(src);
+      throw new Error(lang === "ar" ? "الفيديو يجب ألا يتجاوز 30 ثانية." : "Video must be 30 seconds or less.");
+    }
+    if (!video.captureStream || !HTMLCanvasElement.prototype.captureStream) {
+      URL.revokeObjectURL(src);
+      return file;
+    }
+    const scale = Math.min(1, 854 / Math.max(video.videoWidth || 854, video.videoHeight || 480));
+    const width = Math.max(320, Math.round((video.videoWidth || 854) * scale));
+    const height = Math.max(180, Math.round((video.videoHeight || 480) * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    const canvasStream = canvas.captureStream(24);
+    const sourceStream = video.captureStream();
+    sourceStream.getAudioTracks().forEach((track) => canvasStream.addTrack(track));
+    const mimeCandidates = ["video/webm;codecs=vp8,opus", "video/webm"];
+    const mimeType = mimeCandidates.find((m) => MediaRecorder.isTypeSupported(m)) || "";
+    const chunks = [];
+    const recorder = new MediaRecorder(canvasStream, mimeType ? { mimeType, videoBitsPerSecond: 700000 } : undefined);
+    recorder.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
+    const stopped = new Promise((resolve) => { recorder.onstop = resolve; });
+    let raf = 0;
+    const draw = () => {
+      if (video.ended || video.paused) return;
+      ctx.drawImage(video, 0, 0, width, height);
+      raf = requestAnimationFrame(draw);
+    };
+    await video.play();
+    recorder.start(250);
+    draw();
+    await new Promise((resolve) => setTimeout(resolve, Math.min(30000, Math.max(1000, video.duration * 1000 + 100))));
+    cancelAnimationFrame(raf);
+    if (recorder.state !== "inactive") recorder.stop();
+    await stopped;
+    sourceStream.getTracks().forEach((track) => track.stop());
+    canvasStream.getTracks().forEach((track) => track.stop());
+    video.pause();
+    URL.revokeObjectURL(src);
+    const blob = new Blob(chunks, { type: mimeType || "video/webm" });
+    if (!blob.size || blob.size >= file.size) return file;
+    return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webm`, { type: blob.type || "video/webm" });
+  }
+
+  async function addIssueMedia() {
+    if (!supabase || !user || !mediaFile || !mediaIssueId) return;
+    setBusyId("new-media");
+    setLoginError("");
+    try {
+      let file = mediaFile;
+      if (file.type.startsWith("video/")) {
+        const probe = document.createElement("video");
+        const probeUrl = URL.createObjectURL(file);
+        await new Promise((resolve, reject) => {
+          probe.onloadedmetadata = resolve;
+          probe.onerror = reject;
+          probe.src = probeUrl;
+        });
+        URL.revokeObjectURL(probeUrl);
+        if (Number.isFinite(probe.duration) && probe.duration > 30) throw new Error(lang === "ar" ? "الفيديو يجب ألا يتجاوز 30 ثانية." : "Video must be 30 seconds or less.");
+        file = await compressVideoForUpload(file);
+        if (file.size > 8 * 1024 * 1024) throw new Error(lang === "ar" ? "الفيديو بعد الضغط ما زال أكبر من 8 ميجابايت. استخدم فيديو أقصر أو بجودة 480p." : "The video is still larger than 8 MB after compression. Use a shorter 480p video.");
+      } else if (file.type.startsWith("image/")) {
+        file = await compressImageForUpload(file);
+      } else {
+        throw new Error(lang === "ar" ? "اختر صورة أو فيديو فقط." : "Choose an image or video only.");
+      }
+      const ext = file.name.split(".").pop()?.toLowerCase() || (file.type.startsWith("video/") ? "mp4" : "jpg");
+      const path = `issues/${mediaIssueId}/${mediaLang}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("fault-media").upload(path, file, { upsert: false, contentType: file.type });
+      if (uploadError) throw uploadError;
+      const url = supabase.storage.from("fault-media").getPublicUrl(path).data.publicUrl;
+      const { error } = await supabase.from("issue_media").insert({
+        issue_id: mediaIssueId, lang: mediaLang, media_type: file.type.startsWith("video/") ? "video" : "image",
+        url, title: ISSUES[mediaIssueId]?.[mediaLang]?.title || null, file_size_bytes: file.size, sort_order: 0, is_active: true
+      });
+      if (error) throw error;
+      setMediaFile(null);
+      await loadAll();
+    } catch (error) {
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function deleteIssueMedia(item) {
+    if (!supabase || !user || !window.confirm(lang === "ar" ? "حذف هذه الصورة/الفيديو؟" : "Delete this photo/video?")) return;
+    setBusyId(item.id);
+    const { error } = await supabase.from("issue_media").delete().eq("id", item.id);
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    await loadAll();
+  }
+
   async function logout() {
     if (supabase) await supabase.auth.signOut();
     setUser(null);
@@ -4362,6 +4550,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setPhotoRequests([]);
     setAdminGarages([]);
     setMaintenanceCenters([]);
+    setIssueMedia([]);
   }
 
   const fieldStyle = {
@@ -4431,6 +4620,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           ["cars", t.adminCarsTab, cars.length],
           ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
           ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
+          ["media", t.adminMediaTab, issueMedia.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
             style={{ minWidth: 105, background: tab === id ? C.amber : C.panel, color: tab === id ? C.asphalt : C.cream, border: `1px solid ${tab === id ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 7px", fontSize: 10.5, fontWeight: 800 }}>
@@ -4556,6 +4746,33 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               <div style={{padding:12}}>
                 <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
                 <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+              </div>
+            </div>)}
+          </div>
+        </div>
+      ) : tab === "media" ? (
+        <div>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMedia}</div>
+            <select value={mediaIssueId} onChange={e=>setMediaIssueId(e.target.value)} style={fieldStyle}>
+              {Object.keys(ISSUES).map(id => <option key={id} value={id}>{ISSUES[id]?.en?.title || id}</option>)}
+            </select>
+            <select value={mediaLang} onChange={e=>setMediaLang(e.target.value)} style={fieldStyle}>
+              <option value="en">English</option><option value="ar">العربية</option>
+            </select>
+            <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={e=>setMediaFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
+            {mediaFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{mediaFile.name} · {(mediaFile.size/1024/1024).toFixed(2)} MB</div>}
+            <div style={{ color:C.creamDim, fontSize:10.5, lineHeight:1.5, marginBottom:10 }}>{t.adminMediaLimit}</div>
+            <button disabled={!mediaFile || busyId === "new-media"} onClick={addIssueMedia} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-media" ? "..." : t.adminMediaUpload}</button>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {issueMedia.length === 0 && <p style={{ color:C.creamDim, textAlign:"center", fontSize:13 }}>{t.adminMediaEmpty}</p>}
+            {issueMedia.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+              {m.media_type === "video" ? <video src={m.url} controls preload="metadata" style={{width:"100%",maxHeight:180,background:"#000"}} /> : <img src={m.url} alt={m.title || m.issue_id} style={{width:"100%",height:140,objectFit:"cover",display:"block"}} />}
+              <div style={{padding:10}}>
+                <div style={{color:C.cream,fontWeight:800,fontSize:12}}>{ISSUES[m.issue_id]?.[m.lang]?.title || m.issue_id}</div>
+                <div style={{color:C.creamDim,fontSize:10.5,marginTop:3}}>{m.lang.toUpperCase()} · {m.media_type} · {m.file_size_bytes ? `${(m.file_size_bytes/1024/1024).toFixed(2)} MB` : ""}</div>
+                <button disabled={busyId===m.id} onClick={()=>deleteIssueMedia(m)} style={{width:"100%",marginTop:8,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:8,fontWeight:800}}><Trash2 size={13} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
           </div>
