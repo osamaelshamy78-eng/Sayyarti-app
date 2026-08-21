@@ -32,6 +32,11 @@
     });
   }
 
+  function isPaidGarageLabel(value) {
+    const text = (value || "").replace(/\s+/g, " ").trim().toLowerCase();
+    return /^(\+\s*)?(add your garage|أضف جراجك|ضيف جراجك)$/.test(text);
+  }
+
   function findGarageButton() {
     const candidates = Array.from(document.querySelectorAll("button, a"));
     return candidates.find((el) => {
@@ -93,8 +98,7 @@
     if(!menu)return;
     Array.from(menu.children).filter(el=>el.tagName==="BUTTON").forEach((el)=>{
       if(el.dataset.karajiMenuItem)return;
-      const text=(el.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
-      if(text==="add your garage"||text==="أضف جراجك"||text==="ضيف جراجك"){
+      if(isPaidGarageLabel(el.textContent)){
         el.style.display="none";
         el.setAttribute("data-karaji-hidden-paid-garage","true");
       }
@@ -146,8 +150,10 @@
     const newCta=document.getElementById("karaji-garage-network-cta"); if(!newCta)return;
     Array.from(document.querySelectorAll("button, a")).forEach(el=>{
       if(newCta.contains(el))return;
-      const text=(el.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
-      if(text==="add your garage"||text==="أضف جراجك"||text==="ضيف جراجك"){el.style.display="none";el.setAttribute("data-karaji-hidden-old-garage","true");}
+      if(isPaidGarageLabel(el.textContent)){
+        el.style.display="none";
+        el.setAttribute("data-karaji-hidden-old-garage","true");
+      }
     });
   }
 
