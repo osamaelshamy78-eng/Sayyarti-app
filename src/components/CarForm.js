@@ -40,7 +40,7 @@ export default function CarFormMediaWrapper(props) {
       const mediaFiles = mediaFilesRef.current;
       if (!mediaFiles.length) return;
 
-      const thumbnails = Array.from(root.querySelectorAll('img')).filter((img) => img.width === 72 || img.height === 72);
+      const thumbnails = Array.from(root.querySelectorAll("img")).filter((img) => img.width === 72 || img.height === 72);
       mediaFiles.forEach((file, index) => {
         if (!file.type.startsWith("video/")) return;
         const img = thumbnails[index];
@@ -98,9 +98,9 @@ export default function CarFormMediaWrapper(props) {
     };
   }, [props.lang]);
 
-  return (
-    <div ref={rootRef} style={{ width: "100%" }}>
-      <OriginalCarForm {...props} />
-    </div>
+  return React.createElement(
+    "div",
+    { ref: rootRef, style: { width: "100%" } },
+    React.createElement(OriginalCarForm, props)
   );
 }
