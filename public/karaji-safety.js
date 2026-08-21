@@ -64,9 +64,24 @@
     if(menu.querySelector(`[data-karaji-menu-item="${key}"]`))return;
     const ar=isArabic(),btn=document.createElement("button"); btn.type="button"; btn.dataset.karajiMenuItem=key;
     Object.assign(btn.style,{display:"flex",width:"100%",padding:"12px 16px",background:"none",border:"none",borderTop:`1px solid ${C.line}`,color:C.cream,fontSize:"13px",fontWeight:600,textAlign:ar?"right":"left",cursor:"pointer",flexDirection:ar?"row-reverse":"row",gap:"8px",boxSizing:"border-box"});
-    const icon=document.createElement("span"); icon.textContent=key==="legal"?"⚖":"ⓘ"; icon.style.color=C.amber; icon.style.fontSize="16px"; icon.style.width="18px"; icon.style.flex="0 0 18px"; icon.style.textAlign="center";
-    const label=document.createElement("span"); label.style.flex="1"; label.textContent=key==="legal"?(ar?"قانوني":"Legal"):(ar?"عن التطبيق":"About the App");
-    btn.append(icon,label); btn.onmouseenter=()=>{btn.style.background=`${C.amber}12`;btn.style.color=C.amber;}; btn.onmouseleave=()=>{btn.style.background="none";btn.style.color=C.cream;}; btn.onclick=()=>{if(key==="legal")window.location.href="/legal/";else openAbout();}; menu.appendChild(btn);
+    const icon=document.createElement("span");
+    icon.textContent=key==="legal"?"⚖":key==="about"?"ⓘ":key==="sellCar"?"🚗":"+";
+    icon.style.color=C.amber; icon.style.fontSize="16px"; icon.style.width="18px"; icon.style.flex="0 0 18px"; icon.style.textAlign="center";
+    const label=document.createElement("span"); label.style.flex="1";
+    label.textContent=key==="legal"?(ar?"قانوني":"Legal")
+      :key==="about"?(ar?"عن التطبيق":"About the App")
+      :key==="sellCar"?(ar?"عرض السيارة للبيع":"List Your Car for Sale")
+      :(ar?"أضف جراجك مجانًا":"Add Your Garage Free");
+    btn.append(icon,label);
+    btn.onmouseenter=()=>{btn.style.background=`${C.amber}12`;btn.style.color=C.amber;};
+    btn.onmouseleave=()=>{btn.style.background="none";btn.style.color=C.cream;};
+    btn.onclick=()=>{
+      if(key==="legal") window.location.href="/legal/";
+      else if(key==="about") openAbout();
+      else if(key==="sellCar") window.location.href="/cars/add";
+      else window.location.href="/free-garage/";
+    };
+    menu.appendChild(btn);
   }
 
   function findNativeMenu(){
@@ -74,7 +89,43 @@
     while(menu&&menu!==document.body){const directButtons=Array.from(menu.children).filter(c=>c.tagName==="BUTTON"); const hasGarage=directButtons.some(b=>/add your garage|أضف جراجك|ضيف جراجك/i.test(b.textContent||"")); const hasDashboard=directButtons.some(b=>/dashboard|admin|الإدارة|لوحة التحكم/i.test(b.textContent||"")); if(hasGarage&&hasDashboard)return menu; menu=menu.parentElement;} return null;
   }
 
-  function syncNativeMenu(){const menu=findNativeMenu();if(!menu)return;addNativeMenuItem(menu,"legal");addNativeMenuItem(menu,"about");}
+  function hidePaidMenuGarageButton(menu){
+    if(!menu)return;
+    Array.from(menu.children).filter(el=>el.tagName==="BUTTON").forEach((el)=>{
+      if(el.dataset.karajiMenuItem)return;
+      const text=(el.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
+      if(text==="add your garage"||text==="أضف جراجك"||text==="ضيف جراجك"){
+        el.style.display="none";
+        el.setAttribute("data-karaji-hidden-paid-garage","true");
+      }
+    });
+  }
+
+  function syncNativeMenu(){
+    const menu=findNativeMenu();
+    if(!menu)return;
+    hidePaidMenuGarageButton(menu);
+    addNativeMenuItem(menu,"freeGarage");
+    addNativeMenuItem(menu,"sellCar");
+    addNativeMenuItem(menu,"legal");
+    addNativeMenuItem(menu,"about");
+  }
+
+  function closeMenuOnOutsideClick(){
+    document.addEventListener("pointerdown",(event)=>{
+      const menu=findNativeMenu();
+      if(!menu || !document.body.contains(menu))return;
+      if(menu.contains(event.target))return;
+      const parent=menu.parentElement;
+      const toggle=Array.from(parent?.querySelectorAll("button")||[]).find((button)=>{
+        const text=(button.textContent||"").trim();
+        const r=button.getBoundingClientRect();
+        return !text && r.width<=42 && r.height<=42;
+      });
+      if(toggle && toggle.contains(event.target))return;
+      toggle?.click();
+    },true);
+  }
 
   function addGarageNetworkCta(){
     if(window.location.pathname!=="/garages")return;
@@ -87,7 +138,7 @@
     const title=document.createElement("div"); title.textContent=ar?"صاحب جراج؟ خلّي أصحاب السيارات يلاقوك":"Own a garage? Let car owners find you"; Object.assign(title.style,{color:C.cream,fontSize:"15px",fontWeight:"700",marginBottom:"5px",lineHeight:"1.45"});
     const text=document.createElement("div"); text.textContent=ar?"أضف جراجك إلى دليل كراجي مجانًا، وعرّف أصحاب السيارات بخدماتك وموقعك وبيانات التواصل.":"Add your garage to the Karaji directory for free and let car owners discover your services, location and contact details."; Object.assign(text.style,{color:C.dim,fontSize:"12px",lineHeight:"1.7",marginBottom:"10px"});
     const button=document.createElement("button"); button.type="button"; button.textContent=ar?"+ ضيف جراجك مجانًا":"+ Add Your Garage Free"; Object.assign(button.style,{border:"none",borderRadius:"10px",padding:"9px 13px",background:C.amber,color:C.asphalt,fontWeight:"800",fontSize:"12px",cursor:"pointer",width:"100%"});
-    button.onclick=()=>{const candidate=findGarageButton();if(candidate){candidate.click();return;}window.location.href="/garages";}; wrap.append(title,text,button); anchor.parentElement.insertBefore(wrap,anchor);
+    button.onclick=()=>{window.location.href="/free-garage/";}; wrap.append(title,text,button); anchor.parentElement.insertBefore(wrap,anchor);
   }
 
   function hideOldGaragePageButton(){
@@ -102,5 +153,7 @@
 
   function removeLegacyDuplicateMenu(){const old=document.getElementById("karaji-top-menu");if(old)old.remove();const oldBadge=document.getElementById("karaji-legal-entry");if(oldBadge)oldBadge.remove();}
   function run(){if(!document.body)return;replaceText(document.body);removeLegacyDuplicateMenu();syncNativeMenu();addGarageNetworkCta();hideOldGaragePageButton();}
-  const observer=new MutationObserver(run); observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true}); if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
+  const observer=new MutationObserver(run); observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  closeMenuOnOutsideClick();
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
 })();
