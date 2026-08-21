@@ -9,12 +9,12 @@
     nodes.forEach((textNode) => {
       const value = textNode.nodeValue || "";
       const next = value
-        .replace(/Trusted garages/g, "Garage directory")
-        .replace(/trusted garages/g, "garage directory")
-        .replace(/ورش موثوقة/g, "دليل الورش")
-        .replace(/اعثر على ورش موثوقة/g, "اعثر على ورش قريبة")
         .replace(/Diagnose car issues & find trusted garages/g, "Diagnose car issues & find nearby garages")
-        .replace(/شخّص مشاكل سيارتك واعثر على ورش موثوقة/g, "شخّص مشاكل سيارتك واعثر على ورش قريبة");
+        .replace(/Trusted garages/g, "Garage directory")
+        .replace(/trusted garages/g, "nearby garages")
+        .replace(/شخّص مشاكل سيارتك واعثر على ورش موثوقة/g, "شخّص مشاكل سيارتك واعثر على ورش قريبة")
+        .replace(/اعثر على ورش موثوقة/g, "اعثر على ورش قريبة")
+        .replace(/ورش موثوقة/g, "دليل الورش");
       if (next !== value) textNode.nodeValue = next;
     });
   }
