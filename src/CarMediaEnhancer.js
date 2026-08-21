@@ -7,33 +7,54 @@ function isCarsPage() {
   return p.includes("car") || p.includes("sell");
 }
 
-function replaceLocalVideoPreviews(root = document) {
-  const images = root.querySelectorAll?.('img[src^="blob:"]') || [];
-  images.forEach(async (img) => {
-    if (img.dataset.karajiLocalVideoChecked === "1") return;
-    img.dataset.karajiLocalVideoChecked = "1";
+function isVideoFile(file) {
+  return !!file && (VIDEO_TYPES.has(file.type) || VIDEO_EXT.test(file.name || ""));
+}
 
-    const src = img.currentSrc || img.src || "";
-    if (!src.startsWith("blob:")) return;
+function findPreviewContainer(input) {
+  let node = input.parentElement;
+  const files = Array.from(input.files || []);
+  for (let i = 0; i < 10 && node; i += 1, node = node.parentElement) {
+    const images = node.querySelectorAll?.("img") || [];
+    if (files.length && images.length >= files.length) return node;
+  }
+  return null;
+}
 
-    try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      if (!VIDEO_TYPES.has(blob.type)) return;
-      if (!img.isConnected) return;
+function replaceVideoImagesForInput(input) {
+  const files = Array.from(input.files || []);
+  const videoFiles = files.filter(isVideoFile);
+  if (!videoFiles.length) return;
 
-      const video = document.createElement("video");
-      video.src = src;
-      video.controls = true;
-      video.playsInline = true;
-      video.preload = "metadata";
-      video.muted = true;
-      video.setAttribute("aria-label", "Short car video preview");
-      video.style.cssText = "width:72px;height:72px;border-radius:10px;object-fit:cover;border:1px solid #2A2F38;background:#0F1115;display:block;";
-      video.dataset.karajiLocalVideoPreview = "1";
+  const container = findPreviewContainer(input);
+  if (!container) return;
+
+  const images = Array.from(container.querySelectorAll("img"));
+  files.forEach((file, index) => {
+    if (!isVideoFile(file)) return;
+    const img = images[index];
+    if (!img || img.dataset.karajiVideoPreview === "1") return;
+
+    const src = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.src = src;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "auto";
+    video.muted = true;
+    video.setAttribute("aria-label", "Short car video preview");
+    video.dataset.karajiVideoPreview = "1";
+    video.dataset.karajiVideoObjectUrl = src;
+    video.style.cssText = img.getAttribute("style") || "width:72px;height:72px;object-fit:cover;display:block;border-radius:10px;border:1px solid #2A2F38;background:#0F1115;";
+    video.addEventListener("loadedmetadata", () => video.load(), { once: true });
+
+    const wrapper = img.parentElement;
+    if (wrapper) {
+      wrapper.style.cursor = "pointer";
+      wrapper.title = "Play video preview";
+      wrapper.replaceChild(video, img);
+    } else {
       img.replaceWith(video);
-    } catch (error) {
-      console.debug("Karaji: could not inspect local media preview", error);
     }
   });
 }
@@ -45,38 +66,40 @@ function enhanceCarUpload(root = document) {
   inputs.forEach((input) => {
     const accept = input.getAttribute("accept") || "";
     if (!accept.includes("image")) return;
-    if (input.dataset.karajiCarMediaEnhanced === "1") return;
 
-    input.dataset.karajiCarMediaEnhanced = "1";
-    input.setAttribute("accept", "image/*,video/mp4,video/webm,video/quicktime,video/x-m4v");
+    if (input.dataset.karajiCarMediaEnhanced !== "1") {
+      input.dataset.karajiCarMediaEnhanced = "1";
+      input.setAttribute("accept", "image/*,video/mp4,video/webm,video/quicktime,video/x-m4v");
 
-    input.addEventListener("change", (event) => {
-      const files = Array.from(event.target.files || []);
-      const oversized = files.find((file) => VIDEO_TYPES.has(file.type) && file.size > MAX_VIDEO_BYTES);
-      if (oversized) {
-        event.target.value = "";
-        window.alert("Short car videos must be 15 MB or smaller.");
-        return;
-      }
+      input.addEventListener("change", (event) => {
+        const files = Array.from(event.target.files || []);
+        const oversized = files.find((file) => isVideoFile(file) && file.size > MAX_VIDEO_BYTES);
+        if (oversized) {
+          event.target.value = "";
+          window.alert("Short car videos must be 15 MB or smaller.");
+          return;
+        }
 
-      const label = input.closest("label");
-      if (label && !label.querySelector("[data-karaji-video-hint]")) {
-        const hint = document.createElement("span");
-        hint.dataset.karajiVideoHint = "1";
-        hint.textContent = "Photo or short video (max 15 MB)";
-        hint.style.cssText = "display:block;width:100%;margin-top:5px;text-align:center;font-size:10px;color:#B9B2A0;line-height:1.2;";
-        label.appendChild(hint);
-      }
-    }, { capture: true });
+        const label = input.closest("label");
+        if (label && !label.querySelector("[data-karaji-video-hint]")) {
+          const hint = document.createElement("span");
+          hint.dataset.karajiVideoHint = "1";
+          hint.textContent = "Photo or short video (max 15 MB)";
+          hint.style.cssText = "display:block;width:100%;margin-top:5px;text-align:center;font-size:10px;color:#B9B2A0;line-height:1.2;";
+          label.appendChild(hint);
+        }
+
+        // React renders its thumbnails asynchronously. Retry after each render.
+        [0, 50, 120, 250, 500, 900].forEach((delay) => {
+          setTimeout(() => replaceVideoImagesForInput(input), delay);
+        });
+      }, { capture: true });
+    }
+
+    replaceVideoImagesForInput(input);
   });
 
-  // The React car form creates object URLs and currently renders every
-  // selected file as <img>. Detect local video blobs and replace only those
-  // previews with a native video player. This keeps image previews untouched.
-  replaceLocalVideoPreviews(root);
-
-  // React currently previews uploaded listing media with <img>. Replace
-  // remote video URLs with a native player when a listing is displayed.
+  // Replace remote video URLs in published listings/details.
   const mediaNodes = root.querySelectorAll?.("img") || [];
   mediaNodes.forEach((img) => {
     const src = img.currentSrc || img.src || "";
