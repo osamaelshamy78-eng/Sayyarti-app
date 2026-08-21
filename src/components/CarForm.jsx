@@ -15,11 +15,71 @@ const C = {
 };
 
 const MAX_PHOTOS = 6;
+const OTHER = "Other";
+
+const CAR_MODELS = {
+  Toyota: ["Corolla", "Camry", "Yaris", "Yaris Cross", "Avanza", "Rush", "Fortuner", "Land Cruiser", "Land Cruiser Prado", "Hilux", "RAV4", "Highlander", "Prius", "C-HR", "Avalon", "Innova", "86", "Supra", "Coaster"],
+  Honda: ["Civic", "Accord", "City", "Jazz", "CR-V", "HR-V", "BR-V", "Pilot", "Odyssey", "Fit"],
+  Nissan: ["Sunny", "Altima", "Maxima", "Sentra", "Patrol", "Patrol Safari", "X-Trail", "Kicks", "Juke", "Pathfinder", "Navara", "Urvan", "GT-R", "370Z"],
+  Hyundai: ["Accent", "Elantra", "Sonata", "Tucson", "Santa Fe", "Creta", "Kona", "i10", "i20", "i30", "Palisade", "Staria", "Veloster", "Azera"],
+  Kia: ["Picanto", "Rio", "Cerato", "K5", "Sportage", "Sorento", "Seltos", "Carnival", "Soul", "Stinger", "Telluride", "Niro"],
+  "Mercedes-Benz": ["A-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "GLA", "GLB", "GLC", "GLE", "GLS", "G-Class", "V-Class", "Maybach", "AMG GT"],
+  BMW: ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "6 Series", "7 Series", "8 Series", "X1", "X2", "X3", "X4", "X5", "X6", "X7", "Z4", "M2", "M3", "M4", "M5"],
+  Audi: ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8", "TT", "RS6", "RS7", "e-tron"],
+  Volkswagen: ["Golf", "Polo", "Jetta", "Passat", "Tiguan", "Touareg", "Teramont", "T-Roc", "Arteon", "ID.4", "Beetle"],
+  Chevrolet: ["Aveo", "Cruze", "Malibu", "Impala", "Camaro", "Corvette", "Captiva", "Trailblazer", "Tahoe", "Suburban", "Silverado", "Spark", "Traverse"],
+  Ford: ["Fiesta", "Focus", "Fusion", "Mustang", "EcoSport", "Escape", "Edge", "Explorer", "Expedition", "F-150", "Ranger", "Taurus", "Territory"],
+  Mitsubishi: ["Attrage", "Lancer", "Mirage", "ASX", "Eclipse Cross", "Outlander", "Pajero", "Pajero Sport", "L200", "Xpander"],
+  Mazda: ["Mazda2", "Mazda3", "Mazda6", "CX-3", "CX-5", "CX-9", "CX-30", "MX-5"],
+  Lexus: ["ES", "IS", "LS", "GS", "RC", "LC", "UX", "NX", "RX", "GX", "LX"],
+  "Land Rover": ["Range Rover", "Range Rover Sport", "Range Rover Evoque", "Range Rover Velar", "Discovery", "Discovery Sport", "Defender"],
+  Jeep: ["Wrangler", "Grand Cherokee", "Cherokee", "Compass", "Renegade", "Gladiator"],
+  Peugeot: ["208", "301", "308", "508", "2008", "3008", "5008", "Partner"],
+  Renault: ["Symbol", "Logan", "Duster", "Kadjar", "Koleos", "Megane", "Clio", "Captur"],
+  Opel: ["Corsa", "Astra", "Insignia", "Grandland", "Mokka"],
+  Fiat: ["500", "Tipo", "Panda", "Punto", "Doblo"],
+  Suzuki: ["Alto", "Swift", "Ciaz", "Baleno", "Vitara", "Grand Vitara", "Jimny", "Ertiga", "Celerio"],
+  Subaru: ["Impreza", "Legacy", "Outback", "Forester", "XV", "BRZ", "WRX"],
+  Volvo: ["S60", "S90", "V60", "V90", "XC40", "XC60", "XC90"],
+  Porsche: ["911", "718 Cayman", "718 Boxster", "Panamera", "Macan", "Cayenne", "Taycan"],
+  Jaguar: ["XE", "XF", "XJ", "F-Type", "E-Pace", "F-Pace", "I-Pace"],
+  Mini: ["Cooper", "Cooper S", "Countryman", "Clubman"],
+  Chrysler: ["300", "Pacifica"],
+  Dodge: ["Charger", "Challenger", "Durango", "Journey"],
+  GMC: ["Yukon", "Yukon XL", "Sierra", "Terrain", "Acadia"],
+  Cadillac: ["Escalade", "CT4", "CT5", "XT4", "XT5", "XT6"],
+  Infiniti: ["Q50", "Q60", "QX50", "QX60", "QX80"],
+  Acura: ["ILX", "TLX", "RDX", "MDX"],
+  Skoda: ["Fabia", "Octavia", "Superb", "Kodiaq", "Karoq"],
+  Seat: ["Ibiza", "Leon", "Ateca", "Tarraco"],
+  Citroen: ["C3", "C4", "C5 Aircross"],
+  Genesis: ["G70", "G80", "G90", "GV70", "GV80"],
+  Bentley: ["Continental GT", "Flying Spur", "Bentayga"],
+  "Rolls-Royce": ["Ghost", "Phantom", "Cullinan", "Wraith", "Dawn"],
+  Maserati: ["Ghibli", "Quattroporte", "Levante", "GranTurismo"],
+  Ferrari: ["Roma", "Portofino", "F8", "SF90", "296"],
+  Lamborghini: ["Huracan", "Aventador", "Urus"],
+  "Aston Martin": ["Vantage", "DB11", "DBS", "DBX"],
+  McLaren: ["570S", "720S", "GT", "Artura"],
+  Tesla: ["Model 3", "Model S", "Model X", "Model Y"],
+  BYD: ["Han", "Tang", "Song", "Atto 3", "Seal", "Dolphin"],
+  MG: ["MG3", "MG5", "MG6", "ZS", "HS", "RX5", "RX8", "GT"],
+  Changan: ["Alsvin", "Eado", "CS35", "CS55", "CS75", "CS85"],
+  Geely: ["Emgrand", "Coolray", "Azkarra", "Okavango"],
+  Haval: ["H6", "Jolion", "H9", "Dargo"],
+  Chery: ["Tiggo 2", "Tiggo 4", "Tiggo 7", "Tiggo 8", "Arrizo 5", "Arrizo 6"],
+  Isuzu: ["D-Max", "MU-X"],
+  [OTHER]: [],
+};
+
+const CAR_MAKES = [...Object.keys(CAR_MODELS).filter((m) => m !== OTHER).sort(), OTHER];
 
 export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, onSubmitted }) {
   const [form, setForm] = React.useState({
     make: "",
+    makeOther: "",
     model: "",
+    modelOther: "",
     year: "",
     price: "",
     mileage: "",
@@ -41,6 +101,16 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
   function set(key) {
     return (e) => setForm((cur) => ({ ...cur, [key]: e.target.value }));
   }
+
+  function setMake(e) {
+    const value = e.target.value;
+    setForm((cur) => ({ ...cur, make: value, model: "", modelOther: "" }));
+  }
+
+  const modelOptions = form.make && form.make !== OTHER ? CAR_MODELS[form.make] || [] : [];
+  const effectiveMake = form.make === OTHER ? form.makeOther.trim() : form.make;
+  const effectiveModel =
+    form.model === OTHER || !form.make || form.make === OTHER ? form.modelOther.trim() : form.model;
 
   function addPhotos(fileList) {
     const files = Array.from(fileList || []).slice(0, MAX_PHOTOS - photos.length);
@@ -73,7 +143,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
   }
 
   function validate() {
-    if (!form.make.trim() || !form.model.trim()) return lang === "ar" ? "من فضلك اكتب الماركة والموديل" : "Please enter the make and model";
+    if (!effectiveMake || !effectiveModel) return lang === "ar" ? "من فضلك اختر الماركة والموديل" : "Please choose the make and model";
     if (!form.chassis.trim()) return lang === "ar" ? "رقم الشاصية مطلوب" : "Chassis number (VIN) is required";
     if (!form.phone.trim()) return lang === "ar" ? "رقم الهاتف مطلوب" : "Phone number is required";
     return "";
@@ -92,7 +162,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
     try {
       const photoUrls = photos.length ? await uploadPhotos() : [];
       const { error } = await supabase.from("car_listings").insert({
-        make_model: `${form.make.trim()} ${form.model.trim()}`.trim(),
+        make_model: `${effectiveMake} ${effectiveModel}`.trim(),
         year: form.year || null,
         price: form.price || null,
         mileage: form.mileage || null,
@@ -154,10 +224,53 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
       <form onSubmit={handleSubmit} dir={isRTL ? "rtl" : "ltr"} className="px-5">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Field label={t.carMake}>
-            <input style={inputStyle} value={form.make} onChange={set("make")} />
+            <select style={inputStyle} value={form.make} onChange={setMake}>
+              <option value="">—</option>
+              {CAR_MAKES.map((m) => (
+                <option key={m} value={m}>{m === OTHER ? (lang === "ar" ? "أخرى" : "Other") : m}</option>
+              ))}
+            </select>
+            {form.make === OTHER && (
+              <input
+                style={{ ...inputStyle, marginTop: 8 }}
+                value={form.makeOther}
+                onChange={set("makeOther")}
+                placeholder={lang === "ar" ? "اكتب الماركة" : "Type the make"}
+              />
+            )}
           </Field>
           <Field label={t.carModelType}>
-            <input style={inputStyle} value={form.model} onChange={set("model")} />
+            {form.make && form.make !== OTHER ? (
+              <>
+                <select style={inputStyle} value={form.model} onChange={set("model")}>
+                  <option value="">—</option>
+                  {modelOptions.map((mo) => (
+                    <option key={mo} value={mo}>{mo}</option>
+                  ))}
+                  <option value={OTHER}>{lang === "ar" ? "أخرى" : "Other"}</option>
+                </select>
+                {form.model === OTHER && (
+                  <input
+                    style={{ ...inputStyle, marginTop: 8 }}
+                    value={form.modelOther}
+                    onChange={set("modelOther")}
+                    placeholder={lang === "ar" ? "اكتب الموديل" : "Type the model"}
+                  />
+                )}
+              </>
+            ) : (
+              <input
+                style={inputStyle}
+                value={form.modelOther}
+                onChange={set("modelOther")}
+                placeholder={
+                  !form.make
+                    ? (lang === "ar" ? "اختر الماركة أولاً" : "Choose a make first")
+                    : (lang === "ar" ? "اكتب الموديل" : "Type the model")
+                }
+                disabled={!form.make}
+              />
+            )}
           </Field>
         </div>
 
