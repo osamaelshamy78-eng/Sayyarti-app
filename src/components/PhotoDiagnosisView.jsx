@@ -10,6 +10,18 @@ const PACKAGES = [
   { credits: 25, price: 50, labelAr: "موفرة", labelEn: "Saver" },
 ];
 
+const C = {
+  asphalt: "#14171C",
+  panel: "#1D2129",
+  line: "#2A2F38",
+  cream: "#F2ECDD",
+  dim: "#B9B2A0",
+  amber: "#F5B942",
+  blue: "#4C7EA8",
+  red: "#E4432B",
+  green: "#61A56B",
+};
+
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
   const [code, setCode] = useState(() => localStorage.getItem("pd_code") || "");
@@ -102,7 +114,6 @@ export default function PhotoDiagnosisView({ lang }) {
       video.muted = true;
       video.playsInline = true;
       video.preload = "metadata";
-
       const cleanup = () => URL.revokeObjectURL(url);
 
       video.onloadedmetadata = async () => {
@@ -217,101 +228,145 @@ export default function PhotoDiagnosisView({ lang }) {
     longPressTriggeredRef.current = true;
   };
 
+  const openGarages = () => window.history.pushState({}, "", "/garages") || window.dispatchEvent(new PopStateEvent("popstate"));
+  const openYouTube = () =>
+    window.open(
+      `https://www.youtube.com/results?search_query=${encodeURIComponent(issueDescription || "car problem diagnosis")}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+
   return (
-    <div className="max-w-lg mx-auto p-4 pb-24" dir={isAr ? "rtl" : "ltr"}>
-      <h1 className="text-2xl font-bold mb-2 text-white">
-        {isAr ? "تشخيص بالصورة" : "Photo Diagnosis"}
-      </h1>
-      <p className="text-sm text-gray-400 mb-6">
-        {isAr
-          ? "ارفع صورة أو فيديو قصير من جهازك، أو اضغط على الالتقاط للصورة واضغط مطولًا للفيديو."
-          : "Upload a photo or short video, tap Capture for a photo, or press and hold for video."}
-      </p>
-
-      <div className="mb-5 bg-gray-50 border rounded-lg p-4">
-        <h2 className="font-semibold text-sm mb-2">{isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}</h2>
-        <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4" : "pl-4"}`}>
-          <li>{isAr ? "اختر صورة أو فيديو من الجهاز، أو التقط صورة بالكاميرا" : "Choose a photo or video from the device, or take a photo with the camera"}</li>
-          <li>{isAr ? "اضغط مطولًا على زر الالتقاط لتسجيل فيديو قصير" : "Press and hold Capture to record a short video"}</li>
-          <li>{isAr ? "الذكاء الاصطناعي يحلل مجموعة لقطات من الفيديو عبر مدته، وليس أول لقطة فقط" : "For video, AI analyzes multiple frames sampled across the video, not only the first frame"}</li>
-          <li>{isAr ? "كل تحليل يخصم كريدت واحد" : "Each analysis uses one credit"}</li>
-        </ol>
-        <p className="text-xs text-gray-400 mt-2">
-          {isAr ? "التشخيص استرشادي ولا يغني عن فحص ميكانيكي حقيقي." : "This diagnosis is advisory only and doesn't replace a real mechanic's inspection."}
-        </p>
-        <h3 className="font-semibold text-sm mt-4 mb-2">{isAr ? "أسعار الرصيد" : "Credit pricing"}</h3>
-        <div className="space-y-1">
-          {PACKAGES.map((pkg) => (
-            <div key={pkg.credits} className="flex justify-between text-sm text-gray-600">
-              <span>{isAr ? pkg.labelAr : pkg.labelEn} — {isAr ? `${pkg.credits} تشخيص` : `${pkg.credits} diagnoses`}</span>
-              <span className="font-semibold text-gray-800">{pkg.price} {isAr ? "درهم" : "AED"}</span>
-            </div>
-          ))}
+    <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+        <div>
+          <div style={{ color: C.amber, fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", marginBottom: 5 }}>
+            KARAJY AI
+          </div>
+          <h1 style={{ margin: 0, fontSize: 24, lineHeight: 1.2, fontWeight: 800 }}>
+            {isAr ? "خلّي كراجي يفهم المشكلة" : "Let Karaji understand the problem"}
+          </h1>
+          <p style={{ color: C.dim, fontSize: 12.5, margin: "6px 0 0", lineHeight: 1.5 }}>
+            {isAr ? "صورة أو فيديو + وصفك + كود العطل = تشخيص أوضح وخطوة تالية." : "Photo or video + your description + fault code = clearer diagnosis and a next step."}
+          </p>
         </div>
-        <button onClick={() => setBuyOpen(true)} className="w-full mt-3 bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm">
-          {isAr ? "اشترِ رصيد" : "Buy credit"}
-        </button>
+        <div style={{ minWidth: 72, padding: "8px 10px", borderRadius: 999, background: `${C.amber}16`, border: `1px solid ${C.amber}55`, textAlign: "center" }}>
+          <div style={{ color: C.dim, fontSize: 9.5 }}>{isAr ? "الرصيد" : "Credits"}</div>
+          <div style={{ color: C.amber, fontSize: 17, fontWeight: 900 }}>{creditsRemaining ?? "—"}</div>
+        </div>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">{isAr ? "كود الرصيد" : "Credit code"}</label>
-        <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"} className="w-full border rounded-lg px-3 py-2" />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7, marginBottom: 14 }}>
+        {[
+          ["01", isAr ? "ارفع" : "Upload"],
+          ["02", isAr ? "حلّل" : "Analyze"],
+          ["03", isAr ? "تحرّك" : "Act"],
+        ].map(([n, label], i) => (
+          <div key={n} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 9px" }}>
+            <div style={{ color: i === 2 && result ? C.green : C.amber, fontSize: 10, fontWeight: 900 }}>{n}</div>
+            <div style={{ color: C.dim, fontSize: 10.5, marginTop: 2 }}>{label}</div>
+          </div>
+        ))}
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">
-          {isAr ? "وصف العطل" : "Issue description"}
-        </label>
-        <textarea
-          value={issueDescription}
-          onChange={(e) => setIssueDescription(e.target.value)}
-          placeholder={isAr ? "اكتب وصف العطل بالتفصيل" : "Describe the issue in detail"}
-          rows={4}
-          className="w-full border rounded-lg px-3 py-2 resize-y"
-        />
-      </div>
+      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>
+          {isAr ? "1. ارفع أو صوّر المشكلة" : "1. Upload or capture the problem"}
+        </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">{isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}</label>
-        <div className="grid grid-cols-2 gap-2">
-          <button type="button" onClick={() => galleryInputRef.current?.click()} className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800">
-            📁 {isAr ? "من الجهاز" : "Device"}
-            <span className="block mt-1 font-normal text-gray-500">{isAr ? "صورة أو فيديو" : "Photo or video"}</span>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <button type="button" onClick={() => galleryInputRef.current?.click()} style={{ border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream, borderRadius: 12, padding: "12px 8px", cursor: "pointer" }}>
+            <div style={{ fontSize: 21 }}>↥</div>
+            <div style={{ fontSize: 12, fontWeight: 800, marginTop: 3 }}>{isAr ? "من الجهاز" : "From device"}</div>
+            <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "صورة أو فيديو" : "Photo or video"}</div>
           </button>
 
-          <button type="button" onPointerDown={startCapturePress} onPointerUp={endCapturePress} onPointerCancel={cancelCapturePress} onPointerLeave={cancelCapturePress} onContextMenu={(e) => e.preventDefault()} className="rounded-xl border border-gray-200 bg-white py-3 px-2 text-xs font-semibold text-gray-800 select-none touch-none" aria-label={isAr ? "التقاط صورة أو تسجيل فيديو" : "Capture photo or record video"}>
-            📷 {isAr ? "التقاط" : "Capture"}
-            <span className="block mt-1 font-normal text-gray-500">{isAr ? "ضغطة: صورة • مطول: فيديو" : "Tap: photo • Hold: video"}</span>
+          <button type="button" onPointerDown={startCapturePress} onPointerUp={endCapturePress} onPointerCancel={cancelCapturePress} onPointerLeave={cancelCapturePress} onContextMenu={(e) => e.preventDefault()} style={{ border: `1px solid ${C.amber}66`, background: `${C.amber}0D`, color: C.cream, borderRadius: 12, padding: "12px 8px", cursor: "pointer", userSelect: "none", touchAction: "none" }}>
+            <div style={{ fontSize: 21 }}>●</div>
+            <div style={{ fontSize: 12, fontWeight: 800, marginTop: 3 }}>{isAr ? "التقاط" : "Capture"}</div>
+            <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "ضغطة صورة • مطول فيديو" : "Tap photo • hold video"}</div>
           </button>
         </div>
 
-        <input ref={galleryInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleMediaChange} className="hidden" />
-        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleMediaChange} className="hidden" />
-        <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment" onChange={handleMediaChange} className="hidden" />
+        <input ref={galleryInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleMediaChange} hidden />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleMediaChange} hidden />
+        <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment" onChange={handleMediaChange} hidden />
 
         {mediaFile && (
-          <div className="mt-3 rounded-xl border bg-white p-3 text-xs text-gray-600">
-            <div className="font-semibold text-gray-800 break-all">{mediaFile.name}</div>
-            <div className="mt-1">{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div>
+          <div style={{ marginTop: 10, borderRadius: 11, background: C.asphalt, border: `1px solid ${C.line}`, padding: 10 }}>
+            <div style={{ color: C.cream, fontSize: 11.5, fontWeight: 700, overflowWrap: "anywhere" }}>{mediaFile.name}</div>
+            <div style={{ color: C.dim, fontSize: 10.5, marginTop: 3 }}>{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div>
           </div>
         )}
-        {mediaFile?.type.startsWith("video/") && mediaPreview && <video src={mediaPreview} controls playsInline className="mt-3 w-full max-h-64 object-contain rounded-lg border bg-black" />}
-        {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-contain rounded-lg border" />}
+        {mediaFile?.type.startsWith("video/") && mediaPreview && <video src={mediaPreview} controls playsInline style={{ marginTop: 10, width: "100%", maxHeight: 245, objectFit: "contain", borderRadius: 12, background: "#000", display: "block" }} />}
+        {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" style={{ marginTop: 10, width: "100%", maxHeight: 245, objectFit: "contain", borderRadius: 12, background: "#0B0D10", display: "block" }} />}
       </div>
 
-      <button onClick={handleAnalyze} disabled={loading} className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50">
-        {loading ? (isAr ? "جاري تحليل الملف..." : "Analyzing...") : isAr ? "حلل الصورة / الفيديو" : "Analyze photo / video"}
+      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "2. قول لنا إيه اللي حصل" : "2. Tell us what happened"}</div>
+        <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "مثال: العربية بتنتش عند التسارع وظهرت اللمبة من يومين..." : "Example: the car jerks under acceleration and the warning light appeared two days ago..."} rows={4} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", minHeight: 94, borderRadius: 11, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream, padding: "11px 12px", outline: "none", fontFamily: "inherit", fontSize: 12.5 }} />
+      </div>
+
+      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "3. كود العطل" : "3. Fault code"}</div>
+        <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: P0300" : "e.g. P0300"} style={{ width: "100%", boxSizing: "border-box", borderRadius: 11, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream, padding: "11px 12px", outline: "none", fontFamily: "monospace", fontSize: 13.5, direction: "ltr" }} />
+        <div style={{ color: C.dim, fontSize: 10, marginTop: 6 }}>{isAr ? "الكود يساعد الذكاء الاصطناعي على تضييق الاحتمالات." : "The code helps the AI narrow the likely causes."}</div>
+      </div>
+
+      <div style={{ background: `${C.blue}14`, border: `1px solid ${C.blue}44`, borderRadius: 12, padding: "10px 12px", marginBottom: 12 }}>
+        <div style={{ color: C.cream, fontSize: 11.5, fontWeight: 800, marginBottom: 4 }}>{isAr ? "نصيحة مهمة" : "Important"}</div>
+        <div style={{ color: C.dim, fontSize: 10.5, lineHeight: 1.55 }}>{isAr ? "التشخيص إرشادي وليس بديلًا عن فحص فني مؤهل، خصوصًا في مشاكل الفرامل والوقود والحرارة والوسائد الهوائية." : "This is guidance, not a substitute for a qualified inspection—especially for brakes, fuel, overheating or airbag issues."}</div>
+      </div>
+
+      <button onClick={handleAnalyze} disabled={loading} style={{ width: "100%", border: "none", borderRadius: 13, padding: "14px 16px", cursor: loading ? "wait" : "pointer", background: loading ? `${C.amber}55` : C.amber, color: C.asphalt, fontSize: 14, fontWeight: 900, boxShadow: `0 8px 28px ${C.amber}18` }}>
+        {loading ? (isAr ? "جاري تحليل الصورة / الفيديو…" : "Analyzing photo / video…") : isAr ? "حلّل المشكلة" : "Analyze the problem"}
       </button>
 
-      {error && <div className="mt-4 bg-red-50 text-red-700 border border-red-200 rounded-lg p-3 text-sm">{error}</div>}
+      {error && <div style={{ marginTop: 12, background: `${C.red}12`, border: `1px solid ${C.red}55`, color: C.cream, borderRadius: 12, padding: "11px 12px", fontSize: 11.5, lineHeight: 1.5 }}>{error}</div>}
 
       {result && (
-        <div className="mt-4 bg-gray-50 border rounded-lg p-4">
-          <h2 className="font-semibold mb-2">{isAr ? "نتيجة التشخيص" : "Diagnosis result"}</h2>
-          <pre className="whitespace-pre-wrap text-sm text-gray-700">{result}</pre>
-          {creditsRemaining !== null && <div className="mt-3 text-xs text-gray-500">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}
+        <div style={{ marginTop: 14 }}>
+          <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.07em", marginBottom: 7 }}>{isAr ? "نتيجة التشخيص" : "DIAGNOSIS RESULT"}</div>
+          <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14 }}>
+            <pre style={{ whiteSpace: "pre-wrap", margin: 0, color: C.cream, fontSize: 12.5, lineHeight: 1.75, fontFamily: "inherit" }}>{result}</pre>
+            {creditsRemaining !== null && <div style={{ marginTop: 10, paddingTop: 9, borderTop: `1px solid ${C.line}`, color: C.dim, fontSize: 10.5 }}>{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}
+          </div>
+
+          <div style={{ marginTop: 10, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <button onClick={openGarages} style={{ border: `1px solid ${C.amber}66`, background: `${C.amber}0D`, color: C.cream, borderRadius: 11, padding: "11px 8px", cursor: "pointer" }}>
+              <div style={{ fontSize: 17 }}>⌖</div>
+              <div style={{ fontSize: 11.5, fontWeight: 800, marginTop: 3 }}>{isAr ? "هات جراج قريب" : "Find a nearby garage"}</div>
+              <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "انتقل للورش" : "Open garages"}</div>
+            </button>
+            <button onClick={openYouTube} style={{ border: `1px solid ${C.blue}66`, background: `${C.blue}12`, color: C.cream, borderRadius: 11, padding: "11px 8px", cursor: "pointer" }}>
+              <div style={{ fontSize: 17 }}>▶</div>
+              <div style={{ fontSize: 11.5, fontWeight: 800, marginTop: 3 }}>{isAr ? "شوف طريقة الإصلاح" : "Watch repair videos"}</div>
+              <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "فيديوهات مرتبطة" : "Related videos"}</div>
+            </button>
+          </div>
+
+          <div style={{ marginTop: 10, background: `${C.green}12`, border: `1px solid ${C.green}44`, borderRadius: 11, padding: "10px 12px", color: C.dim, fontSize: 10.5, lineHeight: 1.55 }}>
+            <strong style={{ color: C.cream }}>{isAr ? "الخطوة التالية:" : "Next step:"}</strong>{" "}
+            {isAr ? "استخدم نتيجة التشخيص كدليل أولي، ثم اختَر الفيديو أو الجراج المناسب قبل اتخاذ قرار الإصلاح." : "Use the result as a first guide, then choose a repair video or garage before deciding what to do."}
+          </div>
         </div>
       )}
+
+      <div style={{ marginTop: 16, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12 }}>
+        <div style={{ color: C.cream, fontSize: 12, fontWeight: 800, marginBottom: 7 }}>{isAr ? "الرصيد" : "Credits"}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6 }}>
+          {PACKAGES.map((pkg) => (
+            <button key={pkg.credits} onClick={() => setBuyOpen(true)} style={{ border: `1px solid ${C.line}`, background: C.asphalt, borderRadius: 9, padding: "8px 6px", cursor: "pointer", color: C.cream }}>
+              <div style={{ color: C.amber, fontSize: 12.5, fontWeight: 900 }}>{pkg.credits}</div>
+              <div style={{ color: C.dim, fontSize: 8.8, marginTop: 2 }}>{isAr ? "تشخيص" : "diagnoses"}</div>
+              <div style={{ fontSize: 10, fontWeight: 800, marginTop: 4 }}>{pkg.price} AED</div>
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setBuyOpen(true)} style={{ width: "100%", marginTop: 8, border: `1px solid ${C.amber}66`, background: "transparent", color: C.amber, borderRadius: 9, padding: 9, cursor: "pointer", fontSize: 11.5, fontWeight: 800 }}>
+          {isAr ? "شراء رصيد" : "Buy credits"}
+        </button>
+      </div>
 
       {buyOpen && <BuyCreditForm lang={lang} onClose={() => setBuyOpen(false)} />}
     </div>
