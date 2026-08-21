@@ -4,6 +4,7 @@ import "./index.css";
 import { startAdminPhotoRequestEnhancer } from "./AdminPhotoRequestEnhancer";
 import { startCarMediaEnhancer } from "./CarMediaEnhancer";
 import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
+import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 
 const App = React.lazy(() => import("./App.jsx"));
 
@@ -28,3 +29,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 startAdminPhotoRequestEnhancer();
 startCarMediaEnhancer();
 startAdminCarDeleteEnhancer();
+startKeyboardBehaviorFix();
