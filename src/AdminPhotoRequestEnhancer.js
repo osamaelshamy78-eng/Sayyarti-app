@@ -78,8 +78,12 @@ function enhance() {
     addDeleteButton(card, request);
   });
 
-  document.querySelectorAll("div").forEach(el => {
-    if (!isRequestCard(el) || el.querySelector("[data-karaji-delete]")) return;
+  // Rejected requests have no WhatsApp/code button. Pick only the smallest
+  // matching div so we never attach a delete button to the whole admin page.
+  const candidates = Array.from(document.querySelectorAll("div")).filter(isRequestCard);
+  candidates.forEach(el => {
+    const hasSmallerCard = Array.from(el.querySelectorAll("div")).some(isRequestCard);
+    if (hasSmallerCard || el.querySelector("[data-karaji-delete]")) return;
     addDeleteButton(el, requestFor(el));
   });
 }
