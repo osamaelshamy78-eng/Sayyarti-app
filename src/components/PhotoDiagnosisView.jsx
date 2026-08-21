@@ -152,15 +152,7 @@ export default function PhotoDiagnosisView({ lang }) {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          code: code.trim(),
-          description: issueDescription.trim(),
-          imagesBase64,
-          imageBase64: imagesBase64[0],
-          mediaType: "image/jpeg",
-          mediaKind: isVideo ? "video" : "image",
-          frameCount: imagesBase64.length,
-        }),
+        body: JSON.stringify({ code: code.trim(), description: issueDescription.trim(), imagesBase64, imageBase64: imagesBase64[0], mediaType: "image/jpeg", mediaKind: isVideo ? "video" : "image", frameCount: imagesBase64.length }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -229,25 +221,13 @@ export default function PhotoDiagnosisView({ lang }) {
         <p className="text-xs text-gray-400 mt-2">{isAr ? "التشخيص استرشادي ولا يغني عن فحص ميكانيكي حقيقي." : "This diagnosis is advisory only and doesn't replace a real mechanic's inspection."}</p>
         <h3 className="font-semibold text-sm mt-4 mb-2">{isAr ? "أسعار الرصيد" : "Credit pricing"}</h3>
         <div className="space-y-1">
-          {PACKAGES.map((pkg) => (
-            <div key={pkg.credits} className="flex justify-between text-sm text-gray-600">
-              <span>{isAr ? pkg.labelAr : pkg.labelEn} — {isAr ? `${pkg.credits} تشخيص` : `${pkg.credits} diagnoses`}</span>
-              <span className="font-semibold text-gray-800">{pkg.price} {isAr ? "درهم" : "AED"}</span>
-            </div>
-          ))}
+          {PACKAGES.map((pkg) => <div key={pkg.credits} className="flex justify-between text-sm text-gray-600"><span>{isAr ? pkg.labelAr : pkg.labelEn} — {isAr ? `${pkg.credits} تشخيص` : `${pkg.credits} diagnoses`}</span><span className="font-semibold text-gray-800">{pkg.price} {isAr ? "درهم" : "AED"}</span></div>)}
         </div>
         <button onClick={() => setBuyOpen(true)} className="w-full mt-3 bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm">{isAr ? "اشترِ رصيد" : "Buy credit"}</button>
       </div>
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">{isAr ? "كود الرصيد" : "Credit code"}</label>
-        <input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"} className="w-full border rounded-lg px-3 py-2" />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">{isAr ? "وصف العطل" : "Issue description"}</label>
-        <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "اكتب وصف العطل بالتفصيل" : "Describe the issue in detail"} rows={4} className="w-full border rounded-lg px-3 py-2 resize-y" />
-      </div>
+      <div className="mb-4"><label className="block text-sm font-medium mb-1">{isAr ? "كود الرصيد" : "Credit code"}</label><input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"} className="w-full border rounded-lg px-3 py-2" /></div>
+      <div className="mb-4"><label className="block text-sm font-medium mb-1">{isAr ? "وصف العطل" : "Issue description"}</label><textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "اكتب وصف العطل بالتفصيل" : "Describe the issue in detail"} rows={4} className="w-full border rounded-lg px-3 py-2 resize-y" /></div>
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">{isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}</label>
@@ -268,19 +248,11 @@ export default function PhotoDiagnosisView({ lang }) {
 
       {result && (
         <>
-          <div className="mt-4 bg-gray-50 border rounded-lg p-4">
-            <h2 className="font-semibold mb-2">{isAr ? "نتيجة التشخيص" : "Diagnosis result"}</h2>
-            <pre className="whitespace-pre-wrap text-sm text-gray-700">{result}</pre>
-            {creditsRemaining !== null && <div className="mt-3 text-xs text-gray-500">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}
-          </div>
-
+          <div className="mt-4 bg-gray-50 border rounded-lg p-4"><h2 className="font-semibold mb-2">{isAr ? "نتيجة التشخيص" : "Diagnosis result"}</h2><pre className="whitespace-pre-wrap text-sm text-gray-700">{result}</pre>{creditsRemaining !== null && <div className="mt-3 text-xs text-gray-500">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}</div>
           {actionProfile && (
             <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-center gap-2 mb-2"><span className="text-lg">🧭</span><h2 className="font-bold text-gray-900 text-base">{isAr ? "طيب تعمل إيه دلوقتي؟" : "What should you do next?"}</h2></div>
-              <div className={`rounded-xl p-3 mb-3 ${actionProfile.urgent ? "bg-red-50 border border-red-200" : "bg-amber-50 border border-amber-200"}`}>
-                <div className={`text-sm font-semibold ${actionProfile.urgent ? "text-red-800" : "text-amber-800"}`}>{isAr ? "مستوى التنبيه" : "Safety note"}</div>
-                <p className={`text-xs leading-5 mt-1 ${actionProfile.urgent ? "text-red-700" : "text-amber-700"}`}>{actionProfile.driveLabel}</p>
-              </div>
+              <div className={`rounded-xl p-3 mb-3 ${actionProfile.urgent ? "bg-red-50 border border-red-200" : "bg-amber-50 border border-amber-200"}`}><div className={`text-sm font-semibold ${actionProfile.urgent ? "text-red-800" : "text-amber-800"}`}>{isAr ? "مستوى التنبيه" : "Safety note"}</div><p className={`text-xs leading-5 mt-1 ${actionProfile.urgent ? "text-red-700" : "text-amber-700"}`}>{actionProfile.driveLabel}</p></div>
               <div className="grid grid-cols-1 gap-2">
                 <button onClick={openVideoSearch} className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 px-3 text-sm font-semibold text-gray-900 flex items-center justify-center gap-2">▶️ {isAr ? "شوف فيديوهات مرتبطة بالعطل" : "Watch repair videos"}</button>
                 <button onClick={openMaps} className="w-full rounded-xl bg-blue-600 py-3 px-3 text-sm font-semibold text-white flex items-center justify-center gap-2">📍 {isAr ? "دور على جراج قريب" : "Find a nearby garage"}</button>
@@ -291,7 +263,6 @@ export default function PhotoDiagnosisView({ lang }) {
           )}
         </>
       )}
-
       {buyOpen && <BuyCreditForm lang={lang} onClose={() => setBuyOpen(false)} />}
     </div>
   );
