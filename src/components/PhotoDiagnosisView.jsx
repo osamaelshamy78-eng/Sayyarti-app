@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import BuyCreditForm from "./BuyCreditForm"; // عدّل المسار ده لو حفظت الملف في مكان تاني
 
 const EDGE_FUNCTION_URL =
@@ -22,8 +22,6 @@ export default function PhotoDiagnosisView({ lang }) {
   const [error, setError] = useState(null);
   const [creditsRemaining, setCreditsRemaining] = useState(null);
   const [buyOpen, setBuyOpen] = useState(false);
-  const cameraInputRef = useRef(null);
-  const galleryInputRef = useRef(null);
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -163,52 +161,16 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">
+        <label className="block text-sm font-medium mb-1">
           {isAr ? "صورة المشكلة" : "Photo"}
         </label>
-
-        {/* Camera: opens the device camera directly on supported phones */}
         <input
-          ref={cameraInputRef}
           type="file"
           accept="image/*"
           capture="environment"
           onChange={handleImageChange}
-          className="hidden"
+          className="w-full"
         />
-
-        {/* Gallery/device: opens the normal file/photo picker */}
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="hidden"
-        />
-
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            className="w-full border border-gray-300 bg-white text-gray-800 font-semibold py-3 rounded-lg"
-          >
-            {isAr ? "📷 التقاط صورة" : "📷 Take photo"}
-          </button>
-          <button
-            type="button"
-            onClick={() => galleryInputRef.current?.click()}
-            className="w-full border border-gray-300 bg-white text-gray-800 font-semibold py-3 rounded-lg"
-          >
-            {isAr ? "🖼️ اختيار من الجهاز" : "🖼️ Choose from device"}
-          </button>
-        </div>
-
-        {imageFile && (
-          <p className="text-xs text-gray-400 mt-2 truncate">
-            {isAr ? `الصورة المختارة: ${imageFile.name}` : `Selected: ${imageFile.name}`}
-          </p>
-        )}
-
         {imagePreview && (
           <img
             src={imagePreview}

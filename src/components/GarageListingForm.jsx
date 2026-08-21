@@ -27,7 +27,7 @@ const RANK_LABELS = {
   0: "ترتيب عادي",
 };
 
-export default function GarageListingForm({ isOpen, onClose }) {
+export default function GarageListingForm({ isOpen, onClose, country = "uae" }) {
   const [step, setStep] = useState(1); // 1: بيانات الجراج, 2: الترتيب والدفع
   const [takenRanks, setTakenRanks] = useState([]);
   const [loadingRanks, setLoadingRanks] = useState(true);
@@ -165,30 +165,32 @@ export default function GarageListingForm({ isOpen, onClose }) {
       const photoUrl = await uploadFile(photoFile, "garage-photos");
       const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
 
-      // إرسال الطلب عبر RPC آمن: السعر والحالة يتم تحديدهما داخل Supabase.
-      const { error: insertError } = await supabase.rpc("submit_garage_listing", {
+      // الإرسال يتم من خلال RPC آمن؛ السعر والحالة والرتبة يتم التحقق منها داخل Supabase.
+      const { data: requestId, error: submitError } = await supabase.rpc("submit_garage_listing", {
         p_garage_name: form.garage_name,
         p_owner_name: form.owner_name,
         p_phone: form.phone,
         p_address: form.address,
         p_lat: form.lat,
         p_lng: form.lng,
-        p_map_link: form.map_link,
+        p_map_link: form.map_link || null,
         p_rank: form.rank,
         p_photo_url: photoUrl,
         p_receipt_url: receiptUrl,
-        p_country: "uae",
+        p_country: country,
       });
 
-      if (insertError) {
-        if (insertError.code === "23505") {
+      if (submitError) {
+        const msg = String(submitError.message || "");
+        if (msg.toLowerCase().includes("rank") || msg.includes("duplicate") || submitError.code === "23505") {
           setError("للأسف تم حجز هذا الترتيب للتو من مستخدم آخر، من فضلك اختر ترتيب آخر");
           await fetchTakenRanks();
-          setSubmitting(false);
           return;
         }
-        throw insertError;
+        throw submitError;
       }
+
+      if (!requestId) throw new Error("لم يتم إنشاء طلب الجراج");
 
       sendNotificationEmail(form);
       setSuccess(true);
