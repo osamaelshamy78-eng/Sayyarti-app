@@ -32,15 +32,22 @@
     });
   }
 
+  function normalizedText(value) {
+    return (value || "").replace(/\s+/g, " ").trim().toLowerCase();
+  }
+
+  // The paid button can contain two plus signs because one comes from
+  // the icon and another is part of the label: "++ Add Your Garage".
+  // Keep the FREE version visible; hide only the exact paid CTA.
   function isPaidGarageLabel(value) {
-    const text = (value || "").replace(/\s+/g, " ").trim().toLowerCase();
-    return /^(\+\s*)?(add your garage|أضف جراجك|ضيف جراجك)$/.test(text);
+    const text = normalizedText(value);
+    return /^(?:\+\s*)+(add your garage|أضف جراجك|ضيف جراجك)$/.test(text);
   }
 
   function findGarageButton() {
     const candidates = Array.from(document.querySelectorAll("button, a"));
     return candidates.find((el) => {
-      const text = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const text = normalizedText(el.textContent);
       return text.includes("add your garage") || text.includes("أضف جراجك") || text.includes("ضيف جراجك");
     });
   }
@@ -96,10 +103,23 @@
 
   function hidePaidMenuGarageButton(menu){
     if(!menu)return;
-    Array.from(menu.children).filter(el=>el.tagName==="BUTTON").forEach((el)=>{
+    Array.from(menu.querySelectorAll("button, a")).forEach((el)=>{
       if(el.dataset.karajiMenuItem)return;
       if(isPaidGarageLabel(el.textContent)){
-        el.style.display="none";
+        el.style.setProperty("display","none","important");
+        el.setAttribute("data-karaji-hidden-paid-garage","true");
+      }
+    });
+  }
+
+  // Safety net: hide the paid CTA anywhere it is rendered, including
+  // React re-renders and menu/page variants. The FREE CTA is untouched.
+  function hidePaidGarageButtonsEverywhere(){
+    Array.from(document.querySelectorAll("button, a")).forEach((el)=>{
+      if(el.dataset.karajiMenuItem)return;
+      if(el.closest("#karaji-garage-network-cta"))return;
+      if(isPaidGarageLabel(el.textContent)){
+        el.style.setProperty("display","none","important");
         el.setAttribute("data-karaji-hidden-paid-garage","true");
       }
     });
@@ -151,14 +171,14 @@
     Array.from(document.querySelectorAll("button, a")).forEach(el=>{
       if(newCta.contains(el))return;
       if(isPaidGarageLabel(el.textContent)){
-        el.style.display="none";
+        el.style.setProperty("display","none","important");
         el.setAttribute("data-karaji-hidden-old-garage","true");
       }
     });
   }
 
   function removeLegacyDuplicateMenu(){const old=document.getElementById("karaji-top-menu");if(old)old.remove();const oldBadge=document.getElementById("karaji-legal-entry");if(oldBadge)oldBadge.remove();}
-  function run(){if(!document.body)return;replaceText(document.body);removeLegacyDuplicateMenu();syncNativeMenu();addGarageNetworkCta();hideOldGaragePageButton();}
+  function run(){if(!document.body)return;replaceText(document.body);removeLegacyDuplicateMenu();syncNativeMenu();addGarageNetworkCta();hideOldGaragePageButton();hidePaidGarageButtonsEverywhere();}
   const observer=new MutationObserver(run); observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   closeMenuOnOutsideClick();
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
