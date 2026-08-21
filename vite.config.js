@@ -1,9 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-// Compatibility shim for the current App.jsx: CAR_COUNTRIES is referenced by
-// the car marketplace views but is not declared in the source file. Inject it
-// at Vite transform time so the production build cannot crash at startup.
 const karajiCarCountries = [
   { code: "uae", en: "United Arab Emirates", ar: "الإمارات العربية المتحدة" },
   { code: "ksa", en: "Saudi Arabia", ar: "المملكة العربية السعودية" },
@@ -14,13 +11,18 @@ export default defineConfig({
   plugins: [
     react(),
     {
-      name: "karaji-car-countries-shim",
+      name: "karaji-compatibility-shim",
       transform(code, id) {
-        if (id.replaceAll("\\", "/").endsWith("/src/App.jsx") && !code.includes("const CAR_COUNTRIES")) {
-          return {
-            code: `const CAR_COUNTRIES = ${JSON.stringify(karajiCarCountries)};\n${code}`,
-            map: null,
-          };
+        const normalized = id.replaceAll("\\", "/");
+        if (normalized.endsWith("/src/App.jsx")) {
+          let next = code;
+          if (!next.includes("const CAR_COUNTRIES")) {
+            next = `const CAR_COUNTRIES = ${JSON.stringify(karajiCarCountries)};\n${next}`;
+          }
+          if (!next.includes('from "./components/CarForm"')) {
+            next = `import CarForm from "./components/CarForm.jsx";\n${next}`;
+          }
+          return { code: next, map: null };
         }
         return null;
       },
