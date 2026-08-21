@@ -125,7 +125,6 @@ export default function PhotoDiagnosisView({ lang }) {
     <div className="max-w-lg mx-auto p-4 pb-24" dir={isAr ? "rtl" : "ltr"}>
       <h1 className="text-2xl font-bold mb-2 text-white">{isAr ? "تشخيص بالصورة" : "Photo Diagnosis"}</h1>
       <p className="text-sm text-gray-400 mb-6">{isAr ? "ارفع صورة أو فيديو قصير من جهازك، أو اضغط على الالتقاط للصورة واضغط مطولًا للفيديو." : "Upload a photo or short video, tap Capture for a photo, or press and hold for video."}</p>
-
       <div className="mb-5 bg-gray-50 border rounded-lg p-4">
         <h2 className="font-semibold text-sm mb-2">{isAr ? "إزاي الخدمة شغالة؟" : "How does this work?"}</h2>
         <ol className={`text-sm text-gray-600 space-y-1 ${isAr ? "pr-4" : "pl-4"}`}>
@@ -139,10 +138,8 @@ export default function PhotoDiagnosisView({ lang }) {
         <div className="space-y-1">{PACKAGES.map((pkg) => <div key={pkg.credits} className="flex justify-between text-sm text-gray-600"><span>{isAr ? pkg.labelAr : pkg.labelEn} — {isAr ? `${pkg.credits} تشخيص` : `${pkg.credits} diagnoses`}</span><span className="font-semibold text-gray-800">{pkg.price} {isAr ? "درهم" : "AED"}</span></div>)}</div>
         <button onClick={() => setBuyOpen(true)} className="w-full mt-3 bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm">{isAr ? "اشترِ رصيد" : "Buy credit"}</button>
       </div>
-
       <div className="mb-4"><label className="block text-sm font-medium mb-1">{isAr ? "كود الرصيد" : "Credit code"}</label><input type="text" value={code} onChange={(e) => setCode(e.target.value)} placeholder={isAr ? "مثال: KRJ-XXXXX" : "e.g. KRJ-XXXXX"} className="w-full border rounded-lg px-3 py-2" /></div>
       <div className="mb-4"><label className="block text-sm font-medium mb-1">{isAr ? "وصف العطل" : "Issue description"}</label><textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "اكتب وصف العطل بالتفصيل" : "Describe the issue in detail"} rows={4} className="w-full border rounded-lg px-3 py-2 resize-y" /></div>
-
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">{isAr ? "ارفع أو صوّر المشكلة" : "Upload or capture the problem"}</label>
         <div className="grid grid-cols-2 gap-2">
@@ -156,10 +153,8 @@ export default function PhotoDiagnosisView({ lang }) {
         {mediaFile?.type.startsWith("video/") && mediaPreview && <video src={mediaPreview} controls playsInline className="mt-3 w-full max-h-64 object-contain rounded-lg border bg-black" />}
         {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" className="mt-3 w-full max-h-64 object-contain rounded-lg border" />}
       </div>
-
       <button onClick={handleAnalyze} disabled={loading} className="w-full bg-red-600 text-white font-semibold py-3 rounded-lg disabled:opacity-50">{loading ? (isAr ? "جاري تحليل الملف..." : "Analyzing...") : isAr ? "حلل الصورة / الفيديو" : "Analyze photo / video"}</button>
       {error && <div className="mt-4 bg-red-50 text-red-700 border border-red-200 rounded-lg p-3 text-sm">{error}</div>}
-
       {result && <>
         <div className="mt-4 bg-gray-50 border rounded-lg p-4"><h2 className="font-semibold mb-2">{isAr ? "نتيجة التشخيص" : "Diagnosis result"}</h2><pre className="whitespace-pre-wrap text-sm text-gray-700">{result}</pre>{creditsRemaining !== null && <div className="mt-3 text-xs text-gray-500">{isAr ? `الرصيد المتبقي: ${creditsRemaining}` : `Credits remaining: ${creditsRemaining}`}</div>}</div>
         {actionProfile && <div className="mt-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
