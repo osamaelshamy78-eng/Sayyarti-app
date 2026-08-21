@@ -21,6 +21,7 @@ import {
   LogOut,
   CheckCircle2,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -2344,6 +2345,12 @@ const T = {
     adminPhotosTab: "Photo Diagnosis",
     adminGaragesTab: "Garage Requests",
     adminCarsTab: "Cars",
+    adminManageGaragesTab: "Manage Garages",
+    adminMaintenanceTab: "Maintenance Centers",
+    adminAddGarage: "Add Garage",
+    adminAddMaintenance: "Add Maintenance Center",
+    adminDelete: "Delete",
+    adminCountry: "Country",
     adminRequestsCount: "requests",
     adminLoadingRequests: "Loading requests...",
     adminNoPhotoRequests: "No photo diagnosis requests.",
@@ -2464,6 +2471,12 @@ const T = {
     adminPhotosTab: "صور الأعطال",
     adminGaragesTab: "طلبات الجراجات",
     adminCarsTab: "السيارات",
+    adminManageGaragesTab: "إدارة الجراجات",
+    adminMaintenanceTab: "مراكز الصيانة",
+    adminAddGarage: "إضافة جراج",
+    adminAddMaintenance: "إضافة مركز صيانة",
+    adminDelete: "حذف",
+    adminCountry: "الدولة",
     adminRequestsCount: "طلب",
     adminLoadingRequests: "جاري تحميل الطلبات...",
     adminNoPhotoRequests: "لا توجد طلبات تشخيص صور.",
@@ -3353,7 +3366,16 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
 
 function GaragesView({ lang, t, country, setCountry, isRTL }) {
   const [showGarageForm, setShowGarageForm] = useState(false);
+  const [dbGarages, setDbGarages] = useState([]);
   const data = GARAGES[country];
+  useEffect(() => {
+    let active = true;
+    if (supabase) {
+      supabase.from("garage_directory").select("*").eq("country", country).order("rank", { ascending: true }).order("created_at", { ascending: false })
+        .then(({ data }) => { if (active) setDbGarages(data || []); });
+    }
+    return () => { active = false; };
+  }, [country]);
   return (
     <div className="px-5 pt-5 pb-6">
       <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
@@ -3452,6 +3474,14 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
             </div>
           </button>
         ))}
+        {dbGarages.map((g) => (
+          <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.garage_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, padding:"14px 16px", cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
+            <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.garage_name}</span><MapPin size={15} color={C.amber} /></div>
+            <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
+            <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+          </button>
+        ))}
+
       </div>
 
       <GarageListingForm
@@ -3648,956 +3678,32 @@ const MAINTENANCE_CENTERS = {
 };
 
 function MaintenanceView({ lang, t, country, setCountry, isRTL }) {
-  const data = MAINTENANCE_CENTERS[country] || MAINTENANCE_CENTERS.uae;
-  const maintenanceCountryCode = MAINTENANCE_CENTERS[country] ? country : "uae";
-  return (
-    <div className="px-5 pt-5 pb-6">
-      <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
-        {t.maintenanceHeading}
-      </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>
-        {t.maintenanceSub}
-      </p>
-
-      <div className="flex gap-2 mb-4">
-        {Object.keys(MAINTENANCE_CENTERS).map((code) => {
-          const active = code === maintenanceCountryCode;
-          return (
-            <button
-              key={code}
-              onClick={() => setCountry(code)}
-              style={{
-                flex: 1,
-                border: `1px solid ${active ? C.amber : C.panelLine}`,
-                background: active ? `${C.amber}18` : C.panel,
-                color: active ? C.amber : C.creamDim,
-                borderRadius: 10,
-                padding: "9px 6px",
-                fontSize: 11.5,
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
-            >
-              {MAINTENANCE_CENTERS[code][lang]}
-            </button>
-          );
-        })}
-      </div>
-
-      <div
-        className="flex items-start gap-2 mb-4"
-        style={{
-          background: `${C.blue}14`,
-          border: `1px solid ${C.blue}44`,
-          borderRadius: 10,
-          padding: "10px 12px",
-        }}
-      >
-        <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
-        <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>
-          {t.maintenanceNote}
-        </span>
-      </div>
-
-      <div className="flex flex-col gap-2.5">
-        {data.list.map((p, i) => (
-          <button
-            key={i}
-            onClick={() =>
-              window.open(
-                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  `${p.name} ${p.area.en} ${data.en}`
-                )}`,
-                "_blank"
-              )
-            }
-            className="w-full"
-            style={{
-              background: C.panel,
-              border: `1px solid ${C.panelLine}`,
-              borderRadius: 14,
-              padding: "14px 16px",
-              cursor: "pointer",
-              textAlign: isRTL ? "right" : "left",
-              display: "block",
-            }}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{p.name}</span>
-              <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
-            </div>
-            <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
-              {p.area[lang]}
-            </div>
-            <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
-              {p.note[lang]}
-            </div>
-            <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 600 }}>
-              {t.openInMaps}
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   Cars for Sale (Supabase-backed marketplace)
---------------------------------------------------------------- */
-const CAR_COUNTRIES = [
-  { code: "uae", en: "UAE", ar: "الإمارات" },
-  { code: "ksa", en: "Saudi Arabia", ar: "السعودية" },
-  { code: "egypt", en: "Egypt", ar: "مصر" },
-];
-
-const UAE_EMIRATES = [
-  { en: "Abu Dhabi", ar: "أبوظبي" },
-  { en: "Dubai", ar: "دبي" },
-  { en: "Sharjah", ar: "الشارقة" },
-  { en: "Ajman", ar: "عجمان" },
-  { en: "Umm Al Quwain", ar: "أم القيوين" },
-  { en: "Ras Al Khaimah", ar: "رأس الخيمة" },
-  { en: "Fujairah", ar: "الفجيرة" },
-];
-
-const CAR_MAKES = [
-  {
-    code: "toyota",
-    en: "Toyota",
-    ar: "تويوتا",
-    models: [
-      { en: "Corolla", ar: "كورولا" },
-      { en: "Camry", ar: "كامري" },
-      { en: "Land Cruiser", ar: "لاند كروزر" },
-      { en: "Yaris", ar: "يارس" },
-      { en: "Hilux", ar: "هايلوكس" },
-    ],
-  },
-  {
-    code: "hyundai",
-    en: "Hyundai",
-    ar: "هيونداي",
-    models: [
-      { en: "Elantra", ar: "النترا" },
-      { en: "Sonata", ar: "سوناتا" },
-      { en: "Tucson", ar: "توسان" },
-      { en: "Accent", ar: "أكسنت" },
-      { en: "Santa Fe", ar: "سنتافي" },
-    ],
-  },
-  {
-    code: "nissan",
-    en: "Nissan",
-    ar: "نيسان",
-    models: [
-      { en: "Sunny", ar: "صني" },
-      { en: "Altima", ar: "التيما" },
-      { en: "Patrol", ar: "باترول" },
-      { en: "X-Trail", ar: "إكستريل" },
-      { en: "Sentra", ar: "سنترا" },
-    ],
-  },
-  {
-    code: "kia",
-    en: "Kia",
-    ar: "كيا",
-    models: [
-      { en: "Cerato", ar: "سيراتو" },
-      { en: "Sportage", ar: "سبورتاج" },
-      { en: "Sorento", ar: "سورينتو" },
-      { en: "Picanto", ar: "بيكانتو" },
-      { en: "Rio", ar: "ريو" },
-    ],
-  },
-  {
-    code: "honda",
-    en: "Honda",
-    ar: "هوندا",
-    models: [
-      { en: "Civic", ar: "سيفيك" },
-      { en: "Accord", ar: "أكورد" },
-      { en: "CR-V", ar: "سي آر في" },
-      { en: "City", ar: "سيتي" },
-      { en: "Pilot", ar: "بايلوت" },
-    ],
-  },
-  {
-    code: "chevrolet",
-    en: "Chevrolet",
-    ar: "شيفروليه",
-    models: [
-      { en: "Malibu", ar: "ماليبو" },
-      { en: "Cruze", ar: "كروز" },
-      { en: "Tahoe", ar: "تاهو" },
-      { en: "Captiva", ar: "كابتيفا" },
-      { en: "Spark", ar: "سبارك" },
-    ],
-  },
-  {
-    code: "ford",
-    en: "Ford",
-    ar: "فورد",
-    models: [
-      { en: "Fusion", ar: "فيوجن" },
-      { en: "Explorer", ar: "إكسبلورر" },
-      { en: "F-150", ar: "إف 150" },
-      { en: "EcoSport", ar: "إيكوسبورت" },
-      { en: "Edge", ar: "إيدج" },
-    ],
-  },
-  {
-    code: "bmw",
-    en: "BMW",
-    ar: "بي إم دبليو",
-    models: [
-      { en: "3 Series", ar: "الفئة الثالثة" },
-      { en: "5 Series", ar: "الفئة الخامسة" },
-      { en: "X5", ar: "إكس 5" },
-      { en: "X3", ar: "إكس 3" },
-      { en: "7 Series", ar: "الفئة السابعة" },
-    ],
-  },
-  {
-    code: "mercedes",
-    en: "Mercedes-Benz",
-    ar: "مرسيدس بنز",
-    models: [
-      { en: "C-Class", ar: "سي كلاس" },
-      { en: "E-Class", ar: "إي كلاس" },
-      { en: "S-Class", ar: "إس كلاس" },
-      { en: "GLE", ar: "جي إل إي" },
-      { en: "GLC", ar: "جي إل سي" },
-    ],
-  },
-  {
-    code: "lexus",
-    en: "Lexus",
-    ar: "لكزس",
-    models: [
-      { en: "ES", ar: "إي إس" },
-      { en: "RX", ar: "آر إكس" },
-      { en: "LX", ar: "إل إكس" },
-      { en: "NX", ar: "إن إكس" },
-      { en: "GX", ar: "جي إكس" },
-    ],
-  },
-  {
-    code: "mitsubishi",
-    en: "Mitsubishi",
-    ar: "ميتسوبيشي",
-    models: [
-      { en: "Lancer", ar: "لانسر" },
-      { en: "Pajero", ar: "باجيرو" },
-      { en: "Outlander", ar: "أوتلاندر" },
-      { en: "ASX", ar: "إيه إس إكس" },
-      { en: "Attrage", ar: "أتراج" },
-    ],
-  },
-  {
-    code: "jeep",
-    en: "Jeep",
-    ar: "جيب",
-    models: [
-      { en: "Wrangler", ar: "رانجلر" },
-      { en: "Grand Cherokee", ar: "جراند شيروكي" },
-      { en: "Cherokee", ar: "شيروكي" },
-      { en: "Compass", ar: "كومباس" },
-      { en: "Renegade", ar: "رينيجيد" },
-    ],
-  },
-  {
-    code: "renault",
-    en: "Renault",
-    ar: "رينو",
-    models: [
-      { en: "Duster", ar: "داستر" },
-      { en: "Logan", ar: "لوجان" },
-      { en: "Koleos", ar: "كوليوس" },
-      { en: "Kadjar", ar: "كادجار" },
-      { en: "Symbol", ar: "سيمبول" },
-    ],
-  },
-  {
-    code: "mg",
-    en: "MG",
-    ar: "إم جي",
-    models: [
-      { en: "MG5", ar: "إم جي 5" },
-      { en: "MG6", ar: "إم جي 6" },
-      { en: "ZS", ar: "زد إس" },
-      { en: "HS", ar: "إتش إس" },
-      { en: "RX5", ar: "آر إكس 5" },
-    ],
-  },
-  {
-    code: "landrover",
-    en: "Land Rover",
-    ar: "لاند روفر",
-    models: [
-      { en: "Range Rover", ar: "رنج روفر" },
-      { en: "Discovery", ar: "ديسكفري" },
-      { en: "Defender", ar: "ديفندر" },
-      { en: "Evoque", ar: "إيفوك" },
-      { en: "Sport", ar: "سبورت" },
-    ],
-  },
-  {
-    code: "volkswagen",
-    en: "Volkswagen",
-    ar: "فولكس فاجن",
-    models: [
-      { en: "Golf", ar: "جولف" },
-      { en: "Jetta", ar: "جيتا" },
-      { en: "Passat", ar: "باسات" },
-      { en: "Tiguan", ar: "تيجوان" },
-      { en: "Teramont", ar: "تيرامونت" },
-    ],
-  },
-  {
-    code: "audi",
-    en: "Audi",
-    ar: "أودي",
-    models: [
-      { en: "A3", ar: "إيه 3" },
-      { en: "A4", ar: "إيه 4" },
-      { en: "A6", ar: "إيه 6" },
-      { en: "Q5", ar: "كيو 5" },
-      { en: "Q7", ar: "كيو 7" },
-    ],
-  },
-  {
-    code: "suzuki",
-    en: "Suzuki",
-    ar: "سوزوكي",
-    models: [
-      { en: "Swift", ar: "سويفت" },
-      { en: "Vitara", ar: "فيتارا" },
-      { en: "Baleno", ar: "بالينو" },
-      { en: "Ciaz", ar: "سياز" },
-      { en: "Jimny", ar: "جيمني" },
-    ],
-  },
-  {
-    code: "peugeot",
-    en: "Peugeot",
-    ar: "بيجو",
-    models: [
-      { en: "301", ar: "301" },
-      { en: "308", ar: "308" },
-      { en: "3008", ar: "3008" },
-      { en: "5008", ar: "5008" },
-      { en: "2008", ar: "2008" },
-    ],
-  },
-  {
-    code: "mazda",
-    en: "Mazda",
-    ar: "مازدا",
-    models: [
-      { en: "Mazda3", ar: "مازدا 3" },
-      { en: "Mazda6", ar: "مازدا 6" },
-      { en: "CX-5", ar: "سي إكس 5" },
-      { en: "CX-9", ar: "سي إكس 9" },
-      { en: "CX-3", ar: "سي إكس 3" },
-    ],
-  },
-  {
-    code: "gmc",
-    en: "GMC",
-    ar: "جي إم سي",
-    models: [
-      { en: "Yukon", ar: "يوكن" },
-      { en: "Sierra", ar: "سييرا" },
-      { en: "Terrain", ar: "تيرين" },
-      { en: "Acadia", ar: "أكاديا" },
-    ],
-  },
-  {
-    code: "infiniti",
-    en: "Infiniti",
-    ar: "إنفينيتي",
-    models: [
-      { en: "Q50", ar: "كيو 50" },
-      { en: "QX60", ar: "كيو إكس 60" },
-      { en: "QX80", ar: "كيو إكس 80" },
-      { en: "QX50", ar: "كيو إكس 50" },
-    ],
-  },
-  {
-    code: "volvo",
-    en: "Volvo",
-    ar: "فولفو",
-    models: [
-      { en: "S60", ar: "إس 60" },
-      { en: "S90", ar: "إس 90" },
-      { en: "XC60", ar: "إكس سي 60" },
-      { en: "XC90", ar: "إكس سي 90" },
-    ],
-  },
-  {
-    code: "skoda",
-    en: "Skoda",
-    ar: "سكودا",
-    models: [
-      { en: "Octavia", ar: "أوكتافيا" },
-      { en: "Superb", ar: "سوبيرب" },
-      { en: "Kodiaq", ar: "كودياك" },
-      { en: "Karoq", ar: "كاروك" },
-    ],
-  },
-  {
-    code: "chery",
-    en: "Chery",
-    ar: "شيري",
-    models: [
-      { en: "Tiggo 7", ar: "تيجو 7" },
-      { en: "Tiggo 8", ar: "تيجو 8" },
-      { en: "Arrizo 5", ar: "أريزو 5" },
-      { en: "Tiggo 4", ar: "تيجو 4" },
-    ],
-  },
-  {
-    code: "fiat",
-    en: "Fiat",
-    ar: "فيات",
-    models: [
-      { en: "Tipo", ar: "تيبو" },
-      { en: "500", ar: "500" },
-      { en: "Panda", ar: "باندا" },
-      { en: "Doblo", ar: "دوبلو" },
-    ],
-  },
-  {
-    code: "byd",
-    en: "BYD",
-    ar: "بي واي دي",
-    models: [
-      { en: "F3", ar: "إف 3" },
-      { en: "Song Plus", ar: "سونج بلس" },
-      { en: "Atto 3", ar: "أتو 3" },
-      { en: "Han", ar: "هان" },
-    ],
-  },
-  {
-    code: "porsche",
-    en: "Porsche",
-    ar: "بورش",
-    models: [
-      { en: "Cayenne", ar: "كايين" },
-      { en: "Macan", ar: "ماكان" },
-      { en: "Panamera", ar: "باناميرا" },
-      { en: "911", ar: "911" },
-    ],
-  },
-  {
-    code: "genesis",
-    en: "Genesis",
-    ar: "جينيسيس",
-    models: [
-      { en: "G70", ar: "جي 70" },
-      { en: "G80", ar: "جي 80" },
-      { en: "G90", ar: "جي 90" },
-      { en: "GV80", ar: "جي في 80" },
-    ],
-  },
-  {
-    code: "cadillac",
-    en: "Cadillac",
-    ar: "كاديلاك",
-    models: [
-      { en: "Escalade", ar: "إسكاليد" },
-      { en: "XT5", ar: "إكس تي 5" },
-      { en: "XT6", ar: "إكس تي 6" },
-      { en: "CT5", ar: "سي تي 5" },
-    ],
-  },
-  {
-    code: "dodge",
-    en: "Dodge",
-    ar: "دودج",
-    models: [
-      { en: "Charger", ar: "تشارجر" },
-      { en: "Challenger", ar: "تشالنجر" },
-      { en: "Durango", ar: "دورانجو" },
-    ],
-  },
-  {
-    code: "jaguar",
-    en: "Jaguar",
-    ar: "جاكوار",
-    models: [
-      { en: "XE", ar: "إكس إي" },
-      { en: "XF", ar: "إكس إف" },
-      { en: "F-Pace", ar: "إف بيس" },
-      { en: "E-Pace", ar: "إي بيس" },
-    ],
-  },
-  {
-    code: "mini",
-    en: "Mini",
-    ar: "ميني",
-    models: [
-      { en: "Cooper", ar: "كوبر" },
-      { en: "Countryman", ar: "كاونتري مان" },
-      { en: "Clubman", ar: "كلوبمان" },
-    ],
-  },
-  {
-    code: "isuzu",
-    en: "Isuzu",
-    ar: "إيسوزو",
-    models: [
-      { en: "D-Max", ar: "دي ماكس" },
-      { en: "MU-X", ar: "إم يو إكس" },
-    ],
-  },
-  {
-    code: "haval",
-    en: "Haval",
-    ar: "هافال",
-    models: [
-      { en: "H6", ar: "إتش 6" },
-      { en: "Jolion", ar: "جوليون" },
-      { en: "H9", ar: "إتش 9" },
-    ],
-  },
-  {
-    code: "geely",
-    en: "Geely",
-    ar: "جيلي",
-    models: [
-      { en: "Emgrand", ar: "إمجراند" },
-      { en: "Coolray", ar: "كولراي" },
-      { en: "Azkarra", ar: "أزكارا" },
-    ],
-  },
-  {
-    code: "jac",
-    en: "JAC",
-    ar: "جاك",
-    models: [
-      { en: "S3", ar: "إس 3" },
-      { en: "J4", ar: "جيه 4" },
-      { en: "JS4", ar: "جيه إس 4" },
-    ],
-  },
-  {
-    code: "daihatsu",
-    en: "Daihatsu",
-    ar: "دايهاتسو",
-    models: [
-      { en: "Terios", ar: "تيريوس" },
-      { en: "Sirion", ar: "سيريون" },
-    ],
-  },
-  {
-    code: "opel",
-    en: "Opel",
-    ar: "أوبل",
-    models: [
-      { en: "Astra", ar: "أسترا" },
-      { en: "Corsa", ar: "كورسا" },
-      { en: "Grandland", ar: "جراندلاند" },
-    ],
-  },
-  {
-    code: "subaru",
-    en: "Subaru",
-    ar: "سوبارو",
-    models: [
-      { en: "Forester", ar: "فورستر" },
-      { en: "Outback", ar: "أوت باك" },
-      { en: "XV", ar: "إكس في" },
-    ],
-  },
-  {
-    code: "tesla",
-    en: "Tesla",
-    ar: "تسلا",
-    models: [
-      { en: "Model 3", ar: "موديل 3" },
-      { en: "Model Y", ar: "موديل واي" },
-      { en: "Model S", ar: "موديل إس" },
-      { en: "Model X", ar: "موديل إكس" },
-    ],
-  },
-  {
-    code: "changan",
-    en: "Changan",
-    ar: "شانجان",
-    models: [
-      { en: "CS35", ar: "سي إس 35" },
-      { en: "CS55", ar: "سي إس 55" },
-      { en: "Eado", ar: "إيدو" },
-    ],
-  },
-  { code: "other", en: "Other", ar: "أخرى", models: [] },
-];
-
-const CAR_FORM_DRAFT_KEY = "karaji_car_form_draft";
-
-function CarForm({ lang, t, isRTL, onClose, onSubmitted }) {
-  const [form, setForm] = useState(() => {
-    try {
-      const saved = localStorage.getItem(CAR_FORM_DRAFT_KEY);
-      if (saved) return JSON.parse(saved);
-    } catch (e) {}
-    return {
-      car_make: "",
-      car_model: "",
-      custom_make: "",
-      custom_model: "",
-      year: "",
-      price: "",
-      mileage: "",
-      chassis_number: "",
-      city: "",
-      country: "uae",
-      specs: "",
-      phone: "",
-      description: "",
-      photo_urls: [],
-    };
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [uploading, setUploading] = useState(false);
-
+  const [dbCenters, setDbCenters] = useState([]);
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    try {
-      localStorage.setItem(CAR_FORM_DRAFT_KEY, JSON.stringify(form));
-    } catch (e) {}
-  }, [form]);
-
-  const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
-
-  const selectedMake = CAR_MAKES.find((m) => m.code === form.car_make);
-
-  function handleMakeChange(e) {
-    const code = e.target.value;
-    setForm((f) => ({ ...f, car_make: code, car_model: "", custom_model: "" }));
-  }
-
-  async function handlePhotoSelect(e) {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    if (!files.length || !supabase) return;
-    setUploading(true);
-    setError("");
-    const newUrls = [];
-    for (const file of files) {
-      const ext = file.name.split(".").pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("car-photos")
-        .upload(fileName, file);
-      if (uploadError) {
-        setError(t.carPhotoError);
-        continue;
-      }
-      const { data: urlData } = supabase.storage.from("car-photos").getPublicUrl(fileName);
-      newUrls.push(urlData.publicUrl);
+    let active = true;
+    if (supabase) {
+      supabase.from("maintenance_centers").select("*").eq("country", country).eq("is_active", true).order("created_at", { ascending: true })
+        .then(({ data }) => { if (active) { setDbCenters(data || []); setLoaded(true); } });
     }
-    setForm((f) => ({ ...f, photo_urls: [...f.photo_urls, ...newUrls] }));
-    setUploading(false);
-  }
-
-  function removePhoto(url) {
-    setForm((f) => ({ ...f, photo_urls: f.photo_urls.filter((u) => u !== url) }));
-  }
-
-  const fieldStyle = {
-    width: "100%",
-    background: C.asphalt,
-    border: `1px solid ${C.panelLine}`,
-    borderRadius: 10,
-    padding: "10px 12px",
-    color: C.cream,
-    fontSize: 13,
-    marginBottom: 10,
-    fontFamily: "inherit",
-    textAlign: isRTL ? "right" : "left",
-  };
-
-  async function handleSubmit() {
-    if (!supabase) {
-      setError(t.carNoDb);
-      return;
-    }
-    const makeLabel =
-      form.car_make === "other" ? form.custom_make : selectedMake ? selectedMake[lang] : "";
-    const modelLabel =
-      form.car_make === "other" || form.car_model === "other"
-        ? form.custom_model
-        : selectedMake?.models.find((m) => m.en === form.car_model)?.[lang] || form.car_model;
-    if (!makeLabel || !modelLabel || !form.price || !form.phone || !form.chassis_number) return;
-    setSubmitting(true);
-    setError("");
-    const { error: insertError } = await supabase.from("car_listings").insert([
-      {
-        make_model: `${makeLabel} ${modelLabel}`,
-        year: form.year,
-        price: form.price,
-        mileage: form.mileage,
-        chassis_number: form.chassis_number,
-        city: form.city,
-        country: form.country,
-        specs: form.country === "uae" ? form.specs : null,
-        phone: form.phone,
-        description: form.description,
-        photo_url: form.photo_urls[0] || null,
-        photo_urls: form.photo_urls,
-        status: "approved",
-      },
-    ]);
-    setSubmitting(false);
-    if (insertError) {
-      setError(insertError.message);
-      return;
-    }
-    try {
-      localStorage.removeItem(CAR_FORM_DRAFT_KEY);
-    } catch (e) {}
-    onSubmitted();
-  }
-
+    return () => { active = false; };
+  }, [country]);
+  const staticData = MAINTENANCE_CENTERS[country] || MAINTENANCE_CENTERS.uae;
+  const items = loaded && dbCenters.length ? dbCenters : staticData.list.map((p, i) => ({ id: `static-${i}`, name_en: p.name, name_ar: p.name, area_en: p.area.en, area_ar: p.area.ar, note_en: p.note.en, note_ar: p.note.ar }));
+  const countries = ["uae", "ksa", "egypt"];
   return (
     <div className="px-5 pt-5 pb-6">
-      <select value={form.car_make} onChange={handleMakeChange} style={fieldStyle}>
-        <option value="" disabled>
-          {t.carMake}
-        </option>
-        {CAR_MAKES.map((m) => (
-          <option key={m.code} value={m.code}>
-            {m[lang]}
-          </option>
-        ))}
-      </select>
-
-      {form.car_make === "other" && (
-        <input
-          placeholder={t.carMake}
-          value={form.custom_make}
-          onChange={set("custom_make")}
-          style={fieldStyle}
-        />
-      )}
-
-      {form.car_make && form.car_make !== "other" && (
-        <select value={form.car_model} onChange={set("car_model")} style={fieldStyle}>
-          <option value="" disabled>
-            {t.carModelType}
-          </option>
-          {selectedMake?.models.map((mo) => (
-            <option key={mo.en} value={mo.en}>
-              {mo[lang]}
-            </option>
-          ))}
-          <option value="other">{lang === "ar" ? "أخرى" : "Other"}</option>
-        </select>
-      )}
-
-      {form.car_make && form.car_make !== "other" && form.car_model === "other" && (
-        <input
-          placeholder={t.carModelType}
-          value={form.custom_model}
-          onChange={set("custom_model")}
-          style={fieldStyle}
-        />
-      )}
-
-      <div className="flex gap-2">
-        <input
-          placeholder={t.carYear}
-          value={form.year}
-          onChange={set("year")}
-          style={{ ...fieldStyle, flex: 1 }}
-        />
-        <input
-          placeholder={t.carPrice}
-          value={form.price}
-          onChange={set("price")}
-          style={{ ...fieldStyle, flex: 1 }}
-        />
-      </div>
-      <input
-        placeholder={t.carMileage}
-        value={form.mileage}
-        onChange={set("mileage")}
-        style={fieldStyle}
-      />
-      <input
-        placeholder={t.carChassis}
-        value={form.chassis_number}
-        onChange={set("chassis_number")}
-        style={fieldStyle}
-      />
-      <div className="flex gap-2">
-        {form.country === "uae" ? (
-          <select
-            value={form.city}
-            onChange={set("city")}
-            style={{ ...fieldStyle, flex: 1 }}
-          >
-            <option value="" disabled>
-              {t.carCity}
-            </option>
-            {UAE_EMIRATES.map((e) => (
-              <option key={e.en} value={e.en}>
-                {e[lang]}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            placeholder={t.carCity}
-            value={form.city}
-            onChange={set("city")}
-            style={{ ...fieldStyle, flex: 1 }}
-          />
-        )}
-        <select
-          value={form.country}
-          onChange={(e) => setForm((f) => ({ ...f, country: e.target.value, city: "" }))}
-          style={{ ...fieldStyle, flex: 1 }}
-        >
-          {CAR_COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c[lang]}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {form.country === "uae" && (
-        <select value={form.specs} onChange={set("specs")} style={fieldStyle}>
-          <option value="" disabled>
-            {t.carSpecs}
-          </option>
-          <option value="gulf">{t.carSpecsGulf}</option>
-          <option value="american">{t.carSpecsAmerican}</option>
-        </select>
-      )}
-
-      <input
-        placeholder={t.carPhone}
-        value={form.phone}
-        onChange={set("phone")}
-        style={fieldStyle}
-      />
-      <textarea
-        placeholder={t.carDescription}
-        value={form.description}
-        onChange={set("description")}
-        rows={3}
-        style={{ ...fieldStyle, resize: "none" }}
-      />
-
-      {form.photo_urls.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {form.photo_urls.map((url) => (
-            <div key={url} style={{ position: "relative", width: 78, height: 78 }}>
-              <img
-                src={url}
-                alt=""
-                style={{
-                  width: 78,
-                  height: 78,
-                  objectFit: "cover",
-                  borderRadius: 8,
-                  display: "block",
-                }}
-                onError={(e) => (e.target.style.opacity = 0.3)}
-              />
-              <button
-                onClick={() => removePhoto(url)}
-                style={{
-                  position: "absolute",
-                  top: -6,
-                  right: -6,
-                  width: 20,
-                  height: 20,
-                  borderRadius: "50%",
-                  background: C.red,
-                  border: "none",
-                  color: "#fff",
-                  fontSize: 12,
-                  lineHeight: "20px",
-                  cursor: "pointer",
-                }}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <label
-        className="flex items-center justify-center gap-2 mb-3"
-        style={{
-          width: "100%",
-          background: C.panel,
-          border: `1px dashed ${C.amberDim}`,
-          borderRadius: 10,
-          padding: "12px 14px",
-          cursor: "pointer",
-          display: "flex",
-        }}
-      >
-        <Plus size={16} color={C.amber} />
-        <span style={{ color: C.amber, fontSize: 13, fontWeight: 600 }}>
-          {uploading ? t.carUploading : form.photo_urls.length ? t.carChangePhoto : t.carAddPhoto}
-        </span>
-        <input
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handlePhotoSelect}
-          disabled={uploading}
-          style={{ display: "none" }}
-        />
-      </label>
-
-      {error && (
-        <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{error}</p>
-      )}
-
-      <div className="flex gap-2">
-        <button
-          onClick={onClose}
-          style={{
-            flex: 1,
-            background: C.panel,
-            border: `1px solid ${C.panelLine}`,
-            borderRadius: 12,
-            padding: "12px 14px",
-            color: C.creamDim,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
-          {t.carCancel}
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || uploading}
-          style={{
-            flex: 2,
-            background: C.amber,
-            border: "none",
-            borderRadius: 12,
-            padding: "12px 14px",
-            color: C.asphalt,
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-            opacity: submitting ? 0.7 : 1,
-          }}
-        >
-          {t.carSubmit}
-        </button>
+      <h1 style={{ color:C.cream, fontSize:21, fontWeight:700, margin:0 }}>{t.maintenanceHeading}</h1>
+      <p style={{ color:C.creamDim, fontSize:13, marginTop:4, marginBottom:14 }}>{t.maintenanceSub}</p>
+      <div className="flex gap-2 mb-4">{countries.map(code => <button key={code} onClick={()=>setCountry(code)} style={{flex:1,border:`1px solid ${code===country?C.amber:C.panelLine}`,background:code===country?`${C.amber}18`:C.panel,color:code===country?C.amber:C.creamDim,borderRadius:10,padding:"9px 6px",fontSize:11.5,fontWeight:600}}>{MAINTENANCE_CENTERS[code][lang]}</button>)}</div>
+      <div className="flex items-start gap-2 mb-4" style={{background:`${C.blue}14`,border:`1px solid ${C.blue}44`,borderRadius:10,padding:"10px 12px"}}><Info size={14} color={C.blue} style={{marginTop:2}}/><span style={{color:C.creamDim,fontSize:11.5,lineHeight:1.5}}>{t.maintenanceNote}</span></div>
+      <div className="flex flex-col gap-2.5">
+        {items.map(p => <button key={p.id} onClick={()=>window.open(p.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lang==='ar'?p.name_ar:p.name_en)+" "+(lang==='ar'?p.area_ar:p.area_en))}`,"_blank")} className="w-full" style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:"14px 16px",cursor:"pointer",textAlign:isRTL?"right":"left",display:"block"}}>
+          <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{lang==='ar'?p.name_ar:p.name_en}</span><MapPin size={15} color={C.amber}/></div>
+          <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{lang==='ar'?p.area_ar:p.area_en}</div>
+          <div style={{color:C.creamDim,fontSize:12.5,marginTop:5,lineHeight:1.5}}>{lang==='ar'?p.note_ar:p.note_en}</div>
+          <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+        </button>)}
       </div>
     </div>
   );
@@ -4998,6 +4104,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [cars, setCars] = useState([]);
   const [garageRequests, setGarageRequests] = useState([]);
   const [photoRequests, setPhotoRequests] = useState([]);
+  const [adminGarages, setAdminGarages] = useState([]);
+  const [maintenanceCenters, setMaintenanceCenters] = useState([]);
+  const [garageForm, setGarageForm] = useState({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
+  const [maintenanceForm, setMaintenanceForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
   const [generatedCodes, setGeneratedCodes] = useState({});
@@ -5046,17 +4156,23 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
+      supabase.from("garage_listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
+      supabase.from("maintenance_centers").select("*").order("country").order("created_at", { ascending: false }),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
     if (photosRes.error) setLoginError(photosRes.error.message);
+    if (adminGaragesRes.error) setLoginError(adminGaragesRes.error.message);
+    if (maintenanceRes.error) setLoginError(maintenanceRes.error.message);
     setCars(carsRes.data || []);
     setGarageRequests(garagesRes.data || []);
     setPhotoRequests(photosRes.data || []);
+    setAdminGarages(adminGaragesRes.data || []);
+    setMaintenanceCenters(maintenanceRes.data || []);
     setLoading(false);
   }
 
@@ -5140,12 +4256,62 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     window.open(`https://wa.me/${clean}?text=${msg}`, "_blank");
   }
 
+  async function addAdminGarage() {
+    if (!supabase || !user) return;
+    setLoginError("");
+    setBusyId("new-garage");
+    const f = garageForm;
+    const { error } = await supabase.rpc("admin_create_garage", {
+      p_garage_name: f.garage_name, p_owner_name: f.owner_name, p_phone: f.phone, p_address: f.address,
+      p_country: f.country, p_lat: null, p_lng: null, p_map_link: null, p_rank: Number(f.rank), p_photo_url: f.photo_url || null
+    });
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    setGarageForm({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
+    await loadAll();
+  }
+
+  async function deleteAdminGarage(id) {
+    if (!supabase || !user || !window.confirm(lang === "ar" ? "حذف هذا الجراج؟" : "Delete this garage?")) return;
+    setBusyId(id);
+    const { error } = await supabase.rpc("admin_delete_garage", { p_id: id });
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    await loadAll();
+  }
+
+  async function addMaintenanceCenter() {
+    if (!supabase || !user) return;
+    setLoginError("");
+    setBusyId("new-maintenance");
+    const f = maintenanceForm;
+    const { error } = await supabase.rpc("admin_create_maintenance", {
+      p_country: f.country, p_name_en: f.name_en, p_name_ar: f.name_ar, p_area_en: f.area_en, p_area_ar: f.area_ar,
+      p_note_en: f.note_en, p_note_ar: f.note_ar, p_map_link: f.map_link || null
+    });
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    setMaintenanceForm({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+    await loadAll();
+  }
+
+  async function deleteMaintenanceCenter(id) {
+    if (!supabase || !user || !window.confirm(lang === "ar" ? "حذف مركز الصيانة؟" : "Delete this maintenance center?")) return;
+    setBusyId(id);
+    const { error } = await supabase.rpc("admin_delete_maintenance", { p_id: id });
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    await loadAll();
+  }
+
   async function logout() {
     if (supabase) await supabase.auth.signOut();
     setUser(null);
     setCars([]);
     setGarageRequests([]);
     setPhotoRequests([]);
+    setAdminGarages([]);
+    setMaintenanceCenters([]);
   }
 
   const fieldStyle = {
@@ -5208,20 +4374,17 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
 
       {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
 
-      <div className="grid grid-cols-3 gap-2 mb-4">
+      <div className="flex gap-2 mb-4 overflow-x-auto" style={{ paddingBottom: 3 }}>
         {[
           ["photo", t.adminPhotosTab, photoRequests.filter((x) => x.status === "pending").length],
           ["garage", t.adminGaragesTab, garageRequests.filter((x) => x.status === "pending").length],
           ["cars", t.adminCarsTab, cars.length],
+          ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
+          ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
-            style={{
-              background: tab === id ? C.amber : C.panel,
-              color: tab === id ? C.asphalt : C.cream,
-              border: `1px solid ${tab === id ? C.amber : C.panelLine}`,
-              borderRadius: 10, padding: "9px 6px", fontSize: 11.5, fontWeight: 800
-            }}>
-            {label}<br /><span style={{ fontSize: 10, opacity: .8 }}>{count} {t.adminRequestsCount}</span>
+            style={{ minWidth: 105, background: tab === id ? C.amber : C.panel, color: tab === id ? C.asphalt : C.cream, border: `1px solid ${tab === id ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 7px", fontSize: 10.5, fontWeight: 800 }}>
+            {label}<br /><span style={{ fontSize: 9, opacity: .8 }}>{count}</span>
           </button>
         ))}
       </div>
@@ -5295,6 +4458,39 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               </div>
             </div>
           ))}
+        </div>
+      ) : tab === "manageGarages" ? (
+        <div>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddGarage}</div>
+            {[["garage_name", lang === "ar" ? "اسم الجراج" : "Garage name"],["owner_name", lang === "ar" ? "اسم المالك" : "Owner name"],["phone", lang === "ar" ? "الهاتف" : "Phone"],["address", lang === "ar" ? "العنوان" : "Address"],["photo_url", lang === "ar" ? "رابط الصورة" : "Photo URL"]].map(([k,ph]) => <input key={k} placeholder={ph} value={garageForm[k]} onChange={e=>setGarageForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            <div className="grid grid-cols-2 gap-2">
+              <select value={garageForm.country} onChange={e=>setGarageForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
+              <select value={garageForm.rank} onChange={e=>setGarageForm(v=>({...v,rank:e.target.value}))} style={fieldStyle}><option value="0">Normal</option><option value="1">Rank 1</option><option value="2">Rank 2</option><option value="3">Rank 3</option></select>
+            </div>
+            <button disabled={busyId === "new-garage"} onClick={addAdminGarage} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-garage" ? "..." : t.adminAddGarage}</button>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {adminGarages.map(g => <div key={g.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:12}}>
+              <div style={{color:C.cream,fontWeight:800}}>{g.garage_name}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{g.address} · {g.country}</div>
+              <button disabled={busyId===g.id} onClick={()=>deleteAdminGarage(g.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+            </div>)}
+          </div>
+        </div>
+      ) : tab === "maintenance" ? (
+        <div>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMaintenance}</div>
+            <select value={maintenanceForm.country} onChange={e=>setMaintenanceForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
+            {[["name_en","Name (EN)"],["name_ar","الاسم (AR)"],["area_en","Area (EN)"],["area_ar","المنطقة (AR)"],["note_en","Description (EN)"],["note_ar","الوصف (AR)"],["map_link","Maps link"]].map(([k,ph]) => <input key={k} placeholder={ph} value={maintenanceForm[k]} onChange={e=>setMaintenanceForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            <button disabled={busyId === "new-maintenance"} onClick={addMaintenanceCenter} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-maintenance" ? "..." : t.adminAddMaintenance}</button>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {maintenanceCenters.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:12}}>
+              <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
+              <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+            </div>)}
+          </div>
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
