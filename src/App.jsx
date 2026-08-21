@@ -3475,10 +3475,13 @@ function GaragesView({ lang, t, country, setCountry, isRTL }) {
           </button>
         ))}
         {dbGarages.map((g) => (
-          <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.garage_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, padding:"14px 16px", cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
-            <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.garage_name}</span><MapPin size={15} color={C.amber} /></div>
-            <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
-            <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+          <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.garage_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, overflow:"hidden", padding:0, cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
+            {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+            <div style={{padding:"14px 16px"}}>
+              <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.garage_name}</span><MapPin size={15} color={C.amber} /></div>
+              <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
+              <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+            </div>
           </button>
         ))}
 
@@ -3698,11 +3701,14 @@ function MaintenanceView({ lang, t, country, setCountry, isRTL }) {
       <div className="flex gap-2 mb-4">{countries.map(code => <button key={code} onClick={()=>setCountry(code)} style={{flex:1,border:`1px solid ${code===country?C.amber:C.panelLine}`,background:code===country?`${C.amber}18`:C.panel,color:code===country?C.amber:C.creamDim,borderRadius:10,padding:"9px 6px",fontSize:11.5,fontWeight:600}}>{MAINTENANCE_CENTERS[code][lang]}</button>)}</div>
       <div className="flex items-start gap-2 mb-4" style={{background:`${C.blue}14`,border:`1px solid ${C.blue}44`,borderRadius:10,padding:"10px 12px"}}><Info size={14} color={C.blue} style={{marginTop:2}}/><span style={{color:C.creamDim,fontSize:11.5,lineHeight:1.5}}>{t.maintenanceNote}</span></div>
       <div className="flex flex-col gap-2.5">
-        {items.map(p => <button key={p.id} onClick={()=>window.open(p.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lang==='ar'?p.name_ar:p.name_en)+" "+(lang==='ar'?p.area_ar:p.area_en))}`,"_blank")} className="w-full" style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:"14px 16px",cursor:"pointer",textAlign:isRTL?"right":"left",display:"block"}}>
-          <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{lang==='ar'?p.name_ar:p.name_en}</span><MapPin size={15} color={C.amber}/></div>
-          <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{lang==='ar'?p.area_ar:p.area_en}</div>
-          <div style={{color:C.creamDim,fontSize:12.5,marginTop:5,lineHeight:1.5}}>{lang==='ar'?p.note_ar:p.note_en}</div>
-          <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+        {items.map(p => <button key={p.id} onClick={()=>window.open(p.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lang==='ar'?p.name_ar:p.name_en)+" "+(lang==='ar'?p.area_ar:p.area_en))}`,"_blank")} className="w-full" style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden",padding:0,cursor:"pointer",textAlign:isRTL?"right":"left",display:"block"}}>
+          {p.photo_url && <img src={p.photo_url} alt={lang==='ar'?p.name_ar:p.name_en} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+          <div style={{padding:"14px 16px"}}>
+            <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{lang==='ar'?p.name_ar:p.name_en}</span><MapPin size={15} color={C.amber}/></div>
+            <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{lang==='ar'?p.area_ar:p.area_en}</div>
+            <div style={{color:C.creamDim,fontSize:12.5,marginTop:5,lineHeight:1.5}}>{lang==='ar'?p.note_ar:p.note_en}</div>
+            <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+          </div>
         </button>)}
       </div>
     </div>
@@ -4107,6 +4113,8 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [adminGarages, setAdminGarages] = useState([]);
   const [maintenanceCenters, setMaintenanceCenters] = useState([]);
   const [garageForm, setGarageForm] = useState({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
+  const [garagePhotoFile, setGaragePhotoFile] = useState(null);
+  const [maintenancePhotoFile, setMaintenancePhotoFile] = useState(null);
   const [maintenanceForm, setMaintenanceForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
@@ -4134,13 +4142,24 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           setUser(currentUser);
           setChecking(false);
         }
-      } else {
-        await supabase.auth.signOut();
+        return;
+      }
+      // Do NOT log the admin out just because the permission RPC has a
+      // transient/network/database error. Only an explicit false means the
+      // authenticated account is not an admin.
+      if (adminError) {
         if (active) {
-          setUser(null);
-          setLoginError(t.adminInvalid);
+          setUser(currentUser);
+          setLoginError(adminError.message || t.adminInvalid);
           setChecking(false);
         }
+        return;
+      }
+      await supabase.auth.signOut();
+      if (active) {
+        setUser(null);
+        setLoginError(t.adminInvalid);
+        setChecking(false);
       }
     }
     verifySession();
@@ -4190,7 +4209,12 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       return;
     }
     const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
-    if (adminError || adminData !== true) {
+    if (adminError) {
+      setLoginError(adminError.message || t.adminInvalid);
+      setUser(data?.user || null);
+      return;
+    }
+    if (adminData !== true) {
       await supabase.auth.signOut();
       setLoginError(t.adminInvalid);
       return;
@@ -4256,19 +4280,37 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     window.open(`https://wa.me/${clean}?text=${msg}`, "_blank");
   }
 
+  async function uploadAdminPhoto(file, prefix) {
+    if (!file) return null;
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const safeExt = /^[a-z0-9]+$/.test(ext) ? ext : "jpg";
+    const fileName = `admin/${prefix}_${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+    const { error: uploadError } = await supabase.storage.from("garage-photos").upload(fileName, file, { upsert: false });
+    if (uploadError) throw uploadError;
+    return supabase.storage.from("garage-photos").getPublicUrl(fileName).data.publicUrl;
+  }
+
   async function addAdminGarage() {
     if (!supabase || !user) return;
     setLoginError("");
     setBusyId("new-garage");
-    const f = garageForm;
-    const { error } = await supabase.rpc("admin_create_garage", {
-      p_garage_name: f.garage_name, p_owner_name: f.owner_name, p_phone: f.phone, p_address: f.address,
-      p_country: f.country, p_lat: null, p_lng: null, p_map_link: null, p_rank: Number(f.rank), p_photo_url: f.photo_url || null
-    });
-    setBusyId(null);
-    if (error) { setLoginError(error.message); return; }
-    setGarageForm({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
-    await loadAll();
+    try {
+      const f = garageForm;
+      if (!f.garage_name.trim() || !f.address.trim()) throw new Error(lang === "ar" ? "اكتب اسم الجراج والعنوان أولاً." : "Enter the garage name and address first.");
+      const uploadedPhotoUrl = await uploadAdminPhoto(garagePhotoFile, "garage");
+      const { error } = await supabase.rpc("admin_create_garage", {
+        p_garage_name: f.garage_name, p_owner_name: f.owner_name, p_phone: f.phone, p_address: f.address,
+        p_country: f.country, p_lat: null, p_lng: null, p_map_link: null, p_rank: Number(f.rank), p_photo_url: uploadedPhotoUrl || f.photo_url || null
+      });
+      if (error) throw error;
+      setGarageForm({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
+      setGaragePhotoFile(null);
+      await loadAll();
+    } catch (error) {
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function deleteAdminGarage(id) {
@@ -4284,15 +4326,23 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (!supabase || !user) return;
     setLoginError("");
     setBusyId("new-maintenance");
-    const f = maintenanceForm;
-    const { error } = await supabase.rpc("admin_create_maintenance", {
-      p_country: f.country, p_name_en: f.name_en, p_name_ar: f.name_ar, p_area_en: f.area_en, p_area_ar: f.area_ar,
-      p_note_en: f.note_en, p_note_ar: f.note_ar, p_map_link: f.map_link || null
-    });
-    setBusyId(null);
-    if (error) { setLoginError(error.message); return; }
-    setMaintenanceForm({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
-    await loadAll();
+    try {
+      const f = maintenanceForm;
+      if (!f.name_en.trim() && !f.name_ar.trim()) throw new Error(lang === "ar" ? "اكتب اسم مركز الصيانة." : "Enter the maintenance center name.");
+      const uploadedPhotoUrl = await uploadAdminPhoto(maintenancePhotoFile, "maintenance");
+      const { error } = await supabase.rpc("admin_create_maintenance", {
+        p_country: f.country, p_name_en: f.name_en, p_name_ar: f.name_ar, p_area_en: f.area_en, p_area_ar: f.area_ar,
+        p_note_en: f.note_en, p_note_ar: f.note_ar, p_map_link: f.map_link || null, p_photo_url: uploadedPhotoUrl || null
+      });
+      if (error) throw error;
+      setMaintenanceForm({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+      setMaintenancePhotoFile(null);
+      await loadAll();
+    } catch (error) {
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally {
+      setBusyId(null);
+    }
   }
 
   async function deleteMaintenanceCenter(id) {
@@ -4463,7 +4513,13 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         <div>
           <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
             <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddGarage}</div>
-            {[["garage_name", lang === "ar" ? "اسم الجراج" : "Garage name"],["owner_name", lang === "ar" ? "اسم المالك" : "Owner name"],["phone", lang === "ar" ? "الهاتف" : "Phone"],["address", lang === "ar" ? "العنوان" : "Address"],["photo_url", lang === "ar" ? "رابط الصورة" : "Photo URL"]].map(([k,ph]) => <input key={k} placeholder={ph} value={garageForm[k]} onChange={e=>setGarageForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            {[["garage_name", lang === "ar" ? "اسم الجراج" : "Garage name"],["owner_name", lang === "ar" ? "اسم المالك" : "Owner name"],["phone", lang === "ar" ? "الهاتف" : "Phone"],["address", lang === "ar" ? "العنوان" : "Address"]].map(([k,ph]) => <input key={k} placeholder={ph} value={garageForm[k]} onChange={e=>setGarageForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة الجراج" : "Garage photo"}</label>
+              <input type="file" accept="image/*" onChange={e=>setGaragePhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
+              {garagePhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{garagePhotoFile.name}</div>}
+              {garagePhotoFile && <img src={URL.createObjectURL(garagePhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
+            </div>
             <div className="grid grid-cols-2 gap-2">
               <select value={garageForm.country} onChange={e=>setGarageForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
               <select value={garageForm.rank} onChange={e=>setGarageForm(v=>({...v,rank:e.target.value}))} style={fieldStyle}><option value="0">Normal</option><option value="1">Rank 1</option><option value="2">Rank 2</option><option value="3">Rank 3</option></select>
@@ -4471,9 +4527,12 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
             <button disabled={busyId === "new-garage"} onClick={addAdminGarage} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-garage" ? "..." : t.adminAddGarage}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {adminGarages.map(g => <div key={g.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:12}}>
-              <div style={{color:C.cream,fontWeight:800}}>{g.garage_name}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{g.address} · {g.country}</div>
-              <button disabled={busyId===g.id} onClick={()=>deleteAdminGarage(g.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+            {adminGarages.map(g => <div key={g.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+              {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+              <div style={{padding:12}}>
+                <div style={{color:C.cream,fontWeight:800}}>{g.garage_name}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{g.address} · {g.country}</div>
+                <button disabled={busyId===g.id} onClick={()=>deleteAdminGarage(g.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+              </div>
             </div>)}
           </div>
         </div>
@@ -4483,12 +4542,21 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
             <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMaintenance}</div>
             <select value={maintenanceForm.country} onChange={e=>setMaintenanceForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
             {[["name_en","Name (EN)"],["name_ar","الاسم (AR)"],["area_en","Area (EN)"],["area_ar","المنطقة (AR)"],["note_en","Description (EN)"],["note_ar","الوصف (AR)"],["map_link","Maps link"]].map(([k,ph]) => <input key={k} placeholder={ph} value={maintenanceForm[k]} onChange={e=>setMaintenanceForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة مركز الصيانة" : "Maintenance center photo"}</label>
+              <input type="file" accept="image/*" onChange={e=>setMaintenancePhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
+              {maintenancePhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{maintenancePhotoFile.name}</div>}
+              {maintenancePhotoFile && <img src={URL.createObjectURL(maintenancePhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
+            </div>
             <button disabled={busyId === "new-maintenance"} onClick={addMaintenanceCenter} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-maintenance" ? "..." : t.adminAddMaintenance}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {maintenanceCenters.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,padding:12}}>
-              <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
-              <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+            {maintenanceCenters.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+              {m.photo_url && <img src={m.photo_url} alt={lang === "ar" ? m.name_ar : m.name_en} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+              <div style={{padding:12}}>
+                <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
+                <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+              </div>
             </div>)}
           </div>
         </div>
