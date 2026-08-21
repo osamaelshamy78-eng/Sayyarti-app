@@ -15,11 +15,9 @@ export default function CarFormMediaWrapper(props) {
     const syncMediaInput = () => {
       const input = root.querySelector('input[type="file"]');
       if (!input) return false;
-
       input.accept = "image/*,video/*";
       input.multiple = true;
       input.setAttribute("aria-label", props.lang === "ar" ? "إضافة صور أو فيديو" : "Add photos or videos");
-
       const label = input.closest("label");
       if (label && !label.querySelector("[data-media-hint]")) {
         const hint = document.createElement("span");
@@ -32,30 +30,31 @@ export default function CarFormMediaWrapper(props) {
         hint.style.lineHeight = "1.1";
         label.appendChild(hint);
       }
-
       return true;
     };
 
     const renderVideoPreviews = () => {
-      if (!mediaFilesRef.current.length) return;
+      const files = mediaFilesRef.current;
+      if (!files.length) return;
 
-      const images = Array.from(root.querySelectorAll("img"));
-      images.forEach((img) => {
-        const src = img.getAttribute("src") || img.src;
-        const index = mediaUrlsRef.current.indexOf(src);
-        if (index < 0) return;
+      const previewImages = Array.from(root.querySelectorAll('img')).filter((img) => {
+        const parent = img.parentElement;
+        return parent && !parent.querySelector('input[type="file"]');
+      });
 
-        const file = mediaFilesRef.current[index];
+      files.forEach((file, index) => {
         if (!file || !file.type.startsWith("video/")) return;
-        if (img.dataset.videoPreview === "true") return;
+        const img = previewImages[index];
+        if (!img || img.dataset.videoPreview === "true") return;
 
         const video = document.createElement("video");
         video.dataset.videoPreview = "true";
         video.src = mediaUrlsRef.current[index];
         video.muted = true;
         video.playsInline = true;
+        video.controls = false;
         video.preload = "metadata";
-        video.style.cssText = img.style.cssText;
+        video.style.cssText = img.style.cssText || "";
         video.style.width = "72px";
         video.style.height = "72px";
         video.style.objectFit = "cover";
@@ -63,13 +62,15 @@ export default function CarFormMediaWrapper(props) {
         video.style.border = "1px solid #2A2F38";
         video.setAttribute("aria-label", props.lang === "ar" ? "معاينة الفيديو" : "Video preview");
 
-        const badge = document.createElement("span");
-        badge.textContent = props.lang === "ar" ? "فيديو" : "VIDEO";
-        badge.style.cssText = "position:absolute;left:4px;bottom:4px;padding:2px 5px;border-radius:5px;background:rgba(0,0,0,.72);color:#fff;font-size:8px;font-weight:800;line-height:1";
-
         const wrapper = img.parentElement;
-        if (wrapper) {
-          img.replaceWith(video);
+        if (!wrapper) return;
+        img.replaceWith(video);
+
+        if (!wrapper.querySelector('[data-video-badge="true"]')) {
+          const badge = document.createElement("span");
+          badge.setAttribute("data-video-badge", "true");
+          badge.textContent = props.lang === "ar" ? "فيديو" : "VIDEO";
+          badge.style.cssText = "position:absolute;left:4px;bottom:4px;padding:2px 5px;border-radius:5px;background:rgba(0,0,0,.72);color:#fff;font-size:8px;font-weight:800;line-height:1;z-index:2";
           wrapper.appendChild(badge);
         }
       });
@@ -78,23 +79,19 @@ export default function CarFormMediaWrapper(props) {
     const onChangeCapture = (event) => {
       const input = event.target;
       if (!(input instanceof HTMLInputElement) || input.type !== "file") return;
-
       const files = Array.from(input.files || []);
       const remaining = Math.max(0, MAX_MEDIA - mediaFilesRef.current.length);
-      const accepted = files.slice(0, remaining);
-
-      accepted.forEach((file) => {
+      files.slice(0, remaining).forEach((file) => {
         mediaFilesRef.current.push(file);
         mediaUrlsRef.current.push(URL.createObjectURL(file));
       });
-
       requestAnimationFrame(renderVideoPreviews);
       setTimeout(renderVideoPreviews, 50);
       setTimeout(renderVideoPreviews, 250);
+      setTimeout(renderVideoPreviews, 700);
     };
 
     root.addEventListener("change", onChangeCapture, true);
-
     const observer = new MutationObserver(() => {
       syncMediaInput();
       renderVideoPreviews();
