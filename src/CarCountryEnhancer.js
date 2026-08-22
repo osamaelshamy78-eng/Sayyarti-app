@@ -66,17 +66,27 @@ function enhanceSpecsField() {
   select.appendChild(option);
 }
 
+// Only target the real fixed/sticky bottom navigation. The previous broad
+// selector could match a homepage content section and hide the homepage.
 function findBottomNav() {
   const known = new Set([
     "Home", "الرئيسية", "Garages", "الورش", "Quick Service", "خدمة سريعة", "Cars", "السيارات",
     "Spare Parts", "قطع غيار", "Photo Diagnosis", "تشخيص بالصور",
   ]);
-  return Array.from(document.querySelectorAll("div")).find((el) => {
+
+  return Array.from(document.querySelectorAll("div, nav, footer")).find((el) => {
     if (el.getAttribute("data-karaji-bottom-nav") === "true") return false;
     const directButtons = Array.from(el.children).filter((child) => child.tagName === "BUTTON");
     if (directButtons.length < 5) return false;
     const labels = directButtons.map((b) => b.textContent?.replace(/\s+/g, " ").trim());
-    return labels.filter((label) => known.has(label)).length >= 3;
+    if (labels.filter((label) => known.has(label)).length < 3) return false;
+
+    const style = getComputedStyle(el);
+    const rect = el.getBoundingClientRect();
+    const isFixedOrSticky = style.position === "fixed" || style.position === "sticky";
+    const isAtBottom = rect.bottom >= window.innerHeight - 40;
+    const hasBottomPosition = style.bottom !== "auto";
+    return isFixedOrSticky && (isAtBottom || hasBottomPosition);
   });
 }
 
@@ -108,12 +118,7 @@ function hideFloatingTools() {
 
 function enhanceBottomNavigation() {
   const original = findBottomNav();
-  if (!original) {
-    hideFloatingTools();
-    return;
-  }
-
-  original.style.display = "none";
+  if (original) original.style.display = "none";
 
   let nav = document.querySelector("[data-karaji-bottom-nav='true']");
   if (!nav) {
