@@ -3,6 +3,32 @@ import React, { useEffect, useMemo, useState } from "react";
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942", red: "#E4432B", green: "#61A56B" };
 const KEY = "karaji-maintenance-planner-v1";
 
+function detectAppLanguage() {
+  if (typeof document === "undefined") return "en";
+
+  const buttons = Array.from(document.querySelectorAll("button"));
+  const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
+  const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
+
+  const isActive = (button) => {
+    if (!button) return false;
+    if (button.getAttribute("aria-pressed") === "true") return true;
+    const style = window.getComputedStyle(button);
+    const bg = (style.backgroundColor || "").replace(/\s/g, "");
+    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg.toLowerCase() === "#f5b942";
+  };
+
+  if (isActive(arButton)) return "ar";
+  if (isActive(enButton)) return "en";
+
+  try {
+    const saved = localStorage.getItem("karajy-language");
+    if (saved === "ar" || saved === "en") return saved;
+  } catch (_) {}
+
+  return "en";
+}
+
 function getPlan(km) {
   const n = Number(km || 0);
   const plan = [
@@ -14,8 +40,9 @@ function getPlan(km) {
   return plan.map((item) => ({ ...item, due: Math.max(0, item.at - (n % item.at)) })).sort((a, b) => a.due - b.due);
 }
 
-export default function KarajiMaintenancePlanner({ lang = "ar" }) {
-  const isAr = lang === "ar";
+export default function KarajiMaintenancePlanner({ lang }) {
+  const [appLang, setAppLang] = useState(() => lang || detectAppLanguage());
+  const isAr = appLang === "ar";
   const [open, setOpen] = useState(false);
   const [mileage, setMileage] = useState("");
   const [saved, setSaved] = useState(false);
@@ -23,6 +50,24 @@ export default function KarajiMaintenancePlanner({ lang = "ar" }) {
   useEffect(() => {
     try { setMileage(localStorage.getItem(KEY) || ""); } catch (_) {}
   }, []);
+
+  useEffect(() => {
+    if (lang) {
+      setAppLang(lang);
+      return undefined;
+    }
+
+    const syncLanguage = () => setAppLang(detectAppLanguage());
+    syncLanguage();
+
+    const observer = new MutationObserver(syncLanguage);
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "aria-pressed"] });
+    window.addEventListener("storage", syncLanguage);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("storage", syncLanguage);
+    };
+  }, [lang]);
 
   const plan = useMemo(() => getPlan(mileage), [mileage]);
   const next = plan[0];
