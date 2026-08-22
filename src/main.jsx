@@ -31,7 +31,7 @@ const isFix3DRoute = window.location.pathname === "/3d-fix" || window.location.h
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AppErrorBoundary>
     <Suspense fallback={<StartupFallback />}>
-      {isFix3DRoute ? <Fix3DLibrary /> : <><App /><KarajiAIAssistant lang="ar" /><KarajiMaintenancePlanner lang="ar" /></>}
+      {isFix3DRoute ? <Fix3DLibrary /> : <><App /><KarajiAIAssistant lang="ar" /><KarajiMaintenancePlanner /></>}
     </Suspense>
   </AppErrorBoundary>
 );
