@@ -26,23 +26,20 @@ function setReactInputValue(input, value) {
 }
 
 function enhanceCountryField() {
-  const labels = Array.from(document.querySelectorAll("span"));
-  const label = labels.find((el) => ["Country", "الدولة"].includes(el.textContent?.trim()));
+  const label = Array.from(document.querySelectorAll("span")).find((el) => ["Country", "الدولة"].includes(el.textContent?.trim()));
   if (!label) return;
   const field = label.parentElement;
   if (!field) return;
   const input = field.querySelector("input");
   const select = field.querySelector("[data-karaji-country-select='true']");
   if (!input && !select) return;
-
   if (select) {
-    const arabic = detectArabic();
     const current = select.value;
+    const arabic = detectArabic();
     select.innerHTML = `<option value="">—</option>${COUNTRIES.slice(1).map((c) => `<option value="${c.code}">${arabic ? c.ar : c.en}</option>`).join("")}`;
     select.value = current;
     return;
   }
-
   const newSelect = document.createElement("select");
   newSelect.setAttribute("data-karaji-country-select", "true");
   newSelect.required = true;
@@ -56,14 +53,11 @@ function enhanceCountryField() {
 }
 
 function enhanceSpecsField() {
-  const labels = Array.from(document.querySelectorAll("span"));
-  const label = labels.find((el) => ["Specs", "المواصفات"].includes(el.textContent?.trim()));
+  const label = Array.from(document.querySelectorAll("span")).find((el) => ["Specs", "المواصفات"].includes(el.textContent?.trim()));
   if (!label) return;
   const field = label.parentElement;
-  if (!field) return;
-  const select = field.querySelector("select");
+  const select = field?.querySelector("select");
   if (!select || select.querySelector("[data-karaji-local-specs='true']")) return;
-
   const option = document.createElement("option");
   option.value = LOCAL_OR_OTHER_SPECS;
   option.setAttribute("data-karaji-local-specs", "true");
@@ -75,78 +69,69 @@ function getButtonLabel(button) {
   return button.textContent?.replace(/\s+/g, " ").trim() || "";
 }
 
-function isLegacyNavContainer(el) {
-  if (!el || el.getAttribute("data-karaji-bottom-nav") === "true") return false;
-  const buttons = Array.from(el.querySelectorAll("button"));
-  const labels = buttons.map(getButtonLabel);
-  const legacyCount = labels.filter((label) => LEGACY_NAV_LABELS.has(label)).length;
-  if (legacyCount < 5) return false;
-
-  const style = getComputedStyle(el);
-  const rect = el.getBoundingClientRect();
-  const fixedOrSticky = style.position === "fixed" || style.position === "sticky";
-  const atBottom = rect.bottom >= window.innerHeight - 60;
-  return fixedOrSticky && (atBottom || style.bottom !== "auto");
-}
-
-// Finds the old six-button bottom bar through its nested buttons, rather than
-// matching arbitrary homepage content containers.
-function findBottomNav() {
-  const buttons = Array.from(document.querySelectorAll("button")).filter((button) => LEGACY_NAV_LABELS.has(getButtonLabel(button)));
+function findLegacyNav() {
+  const buttons = Array.from(document.querySelectorAll("button")).filter((b) => LEGACY_NAV_LABELS.has(getButtonLabel(b)));
   const visited = new Set();
-
   for (const button of buttons) {
     let parent = button.parentElement;
-    let depth = 0;
-    while (parent && depth < 8) {
-      if (!visited.has(parent)) {
-        visited.add(parent);
-        if (isLegacyNavContainer(parent)) return parent;
-      }
-      parent = parent.parentElement;
-      depth += 1;
+    for (let depth = 0; parent && depth < 8; depth += 1, parent = parent.parentElement) {
+      if (visited.has(parent)) continue;
+      visited.add(parent);
+      const childButtons = Array.from(parent.querySelectorAll("button"));
+      const labels = childButtons.map(getButtonLabel);
+      const legacyCount = labels.filter((label) => LEGACY_NAV_LABELS.has(label)).length;
+      const style = getComputedStyle(parent);
+      const rect = parent.getBoundingClientRect();
+      if (legacyCount >= 5 && (style.position === "fixed" || style.position === "sticky") && (rect.bottom >= window.innerHeight - 60 || style.bottom !== "auto")) return parent;
     }
   }
-
   return null;
 }
 
-function clickOriginalNav(labelCandidates) {
-  const candidates = new Set(labelCandidates);
-  const button = Array.from(document.querySelectorAll("button")).find((b) => {
-    if (b.closest("[data-karaji-bottom-nav='true']")) return false;
-    return candidates.has(getButtonLabel(b));
-  });
-  if (button) button.click();
+function navigateTo(path) {
+  if (window.location.pathname === path) return;
+  window.history.pushState({}, "", path);
+  window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
-function clickOriginalMaintenance() {
-  const button = Array.from(document.querySelectorAll("button")).find((b) => {
-    const aria = b.getAttribute("aria-label") || "";
-    return aria === "Maintenance plan" || aria === "خطة الصيانة" || /maintenance plan|خطة الصيانة/i.test(getButtonLabel(b));
-  });
-  if (button) button.click();
+function findOriginalAIButton() {
+  return Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
 }
 
-function hideFloatingTools() {
-  const aiButton = Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
-  if (aiButton) {
-    aiButton.style.display = "none";
-    aiButton.setAttribute("data-karaji-hidden-button", "true");
-  }
-
-  const serviceButton = Array.from(document.querySelectorAll("button")).find((b) => {
-    const label = b.getAttribute("aria-label") || "";
-    return label === "Maintenance plan" || label === "خطة الصيانة";
-  });
-  if (serviceButton) {
-    serviceButton.style.display = "none";
-    serviceButton.setAttribute("data-karaji-hidden-button", "true");
-  }
+function styleAIAsBottomNavButton(button, arabic) {
+  if (!button) return;
+  const label = arabic ? "مساعد السيارة الذكي" : "Car AI Ass";
+  button.setAttribute("data-karaji-ai-bottom-button", "true");
+  button.style.cssText = [
+    "position:fixed",
+    "right:calc(10px + (100vw - 20px) / 3 * 0)",
+    "bottom:calc(8px + env(safe-area-inset-bottom))",
+    "width:calc((100vw - 32px) / 3)",
+    "height:58px",
+    "z-index:10001",
+    "border:1px solid #2A2F38",
+    "border-radius:12px",
+    "background:#14171C",
+    "color:#F2ECDD",
+    "box-shadow:0 8px 24px rgba(0,0,0,.25)",
+    "font-size:11px",
+    "font-weight:800",
+    "line-height:1.2",
+    "cursor:pointer",
+    "-webkit-tap-highlight-color:transparent",
+    "touch-action:manipulation",
+    "display:flex",
+    "flex-direction:column",
+    "align-items:center",
+    "justify-content:center",
+    "gap:4px",
+    "box-sizing:border-box",
+  ].join(";");
+  button.innerHTML = `<div style="font-size:18px;line-height:1">✦</div><div>${label}</div>`;
 }
 
 function enhanceBottomNavigation() {
-  const original = findBottomNav();
+  const original = findLegacyNav();
   if (original) original.style.display = "none";
 
   let nav = document.querySelector("[data-karaji-bottom-nav='true']");
@@ -154,68 +139,46 @@ function enhanceBottomNavigation() {
     nav = document.createElement("nav");
     nav.setAttribute("data-karaji-bottom-nav", "true");
     nav.style.cssText = [
-      "position:fixed",
-      "left:0",
-      "right:0",
-      "bottom:0",
-      "z-index:9990",
-      "display:flex",
-      "align-items:stretch",
-      "justify-content:space-around",
-      "gap:6px",
+      "position:fixed", "left:0", "right:0", "bottom:0", "z-index:9990",
+      "display:flex", "align-items:stretch", "justify-content:space-around", "gap:6px",
       "padding:8px 10px calc(8px + env(safe-area-inset-bottom))",
-      "background:#1D2129",
-      "border-top:1px solid #2A2F38",
-      "box-sizing:border-box",
-      "box-shadow:0 -8px 24px rgba(0,0,0,.25)",
+      "background:#1D2129", "border-top:1px solid #2A2F38", "box-sizing:border-box",
+      "box-shadow:0 -8px 24px rgba(0,0,0,.25)", "-webkit-tap-highlight-color:transparent",
     ].join(";");
     document.body.appendChild(nav);
   }
 
   const arabic = detectArabic();
-  const labels = arabic
-    ? { home: "الرئيسية", maintenance: "الصيانة", ai: "مساعد السيارة الذكي" }
-    : { home: "Home", maintenance: "Maintenance", ai: "Car AI Ass" };
-
+  const labels = arabic ? { home: "الرئيسية", maintenance: "الصيانة" } : { home: "Home", maintenance: "Maintenance" };
   nav.innerHTML = "";
-  const makeButton = (label, icon, action) => {
+
+  const makeButton = (label, icon, path) => {
     const button = document.createElement("button");
     button.type = "button";
-    button.setAttribute("data-karaji-nav-action", action);
+    button.setAttribute("data-karaji-nav-action", path);
+    button.setAttribute("role", "button");
     button.style.cssText = [
-      "flex:1",
-      "min-width:0",
-      "border:1px solid #2A2F38",
-      "border-radius:12px",
-      "background:#14171C",
-      "color:#F2ECDD",
-      "padding:8px 5px",
-      "font-size:11px",
-      "font-weight:800",
-      "line-height:1.2",
-      "cursor:pointer",
-      "display:flex",
-      "flex-direction:column",
-      "align-items:center",
-      "justify-content:center",
-      "gap:4px",
+      "flex:1", "min-width:0", "height:58px", "border:1px solid #2A2F38", "border-radius:12px",
+      "background:#14171C", "color:#F2ECDD", "padding:8px 5px", "font-size:11px", "font-weight:800",
+      "line-height:1.2", "cursor:pointer", "display:flex", "flex-direction:column", "align-items:center",
+      "justify-content:center", "gap:4px", "-webkit-tap-highlight-color:transparent", "touch-action:manipulation",
+      "-webkit-user-select:none", "user-select:none", "box-sizing:border-box",
     ].join(";");
     button.innerHTML = `<span style="font-size:18px;line-height:1">${icon}</span><span>${label}</span>`;
-    button.addEventListener("click", () => {
-      if (action === "home") clickOriginalNav(["Home", "الرئيسية"]);
-      if (action === "maintenance") clickOriginalMaintenance();
-      if (action === "ai") {
-        const ai = Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
-        if (ai) ai.click();
-      }
-    });
+    const action = () => navigateTo(path);
+    button.onclick = action;
+    button.addEventListener("touchend", (event) => {
+      event.preventDefault();
+      action();
+    }, { passive: false });
     return button;
   };
 
-  nav.appendChild(makeButton(labels.home, "⌂", "home"));
-  nav.appendChild(makeButton(labels.maintenance, "🔧", "maintenance"));
-  nav.appendChild(makeButton(labels.ai, "✦", "ai"));
-  hideFloatingTools();
+  nav.appendChild(makeButton(labels.home, "⌂", "/"));
+  nav.appendChild(makeButton(labels.maintenance, "🔧", "/maintenance"));
+
+  const ai = findOriginalAIButton();
+  if (ai) styleAIAsBottomNavButton(ai, arabic);
 }
 
 function enhanceCarFilter() {
@@ -225,7 +188,6 @@ function enhanceCarFilter() {
   if (!container) return;
   const addButton = Array.from(container.querySelectorAll("button")).find((b) => ["+ List Your Car", "+ اعرض سيارتك"].includes(b.textContent?.trim()));
   if (!addButton) return;
-
   let filterWrap = container.querySelector("[data-karaji-car-filter='true']");
   if (!filterWrap) {
     filterWrap = document.createElement("div");
@@ -233,7 +195,6 @@ function enhanceCarFilter() {
     filterWrap.style.cssText = "margin-bottom:14px;";
     addButton.insertAdjacentElement("afterend", filterWrap);
   }
-
   let select = filterWrap.querySelector("select");
   if (!select) {
     select = document.createElement("select");
@@ -241,7 +202,6 @@ function enhanceCarFilter() {
     filterWrap.appendChild(select);
     select.addEventListener("change", () => applyCarFilter(container, select.value));
   }
-
   const arabic = detectArabic();
   const current = select.value || "all";
   select.innerHTML = COUNTRIES.map((c) => `<option value="${c.code}">${arabic ? c.ar : c.en}</option>`).join("");
@@ -256,8 +216,7 @@ function applyCarFilter(container, selected) {
   Array.from(list.children).forEach((card) => {
     if (!card.querySelector) return;
     const text = card.textContent || "";
-    const matches = !wanted || text.includes(wanted.en) || text.includes(wanted.ar);
-    card.style.display = matches ? "" : "none";
+    card.style.display = !wanted || text.includes(wanted.en) || text.includes(wanted.ar) ? "" : "none";
   });
 }
 
