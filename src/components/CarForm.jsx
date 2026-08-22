@@ -184,6 +184,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
       const photoUrls = photos.length ? await uploadPhotos() : [];
       const { error } = await supabase.from("car_listings").insert({
         make_model: `${effectiveMake} ${effectiveModel}`.trim(),
+        status: "approved",
         year: form.year || null,
         price: form.price || null,
         mileage: form.mileage || null,
