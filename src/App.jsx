@@ -4196,7 +4196,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [rememberMe, setRememberMe] = useState(() => localStorage.getItem("karajy_admin_remember") === "1");
-  const [tab, setTab] = useState("photo");
+  const [tab, setTab] = useState("cars");
   const [cars, setCars] = useState([]);
   const [garageRequests, setGarageRequests] = useState([]);
   const [photoRequests, setPhotoRequests] = useState([]);
@@ -4697,8 +4697,6 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
 
       <div className="flex gap-2 mb-4 overflow-x-auto" style={{ paddingBottom: 3 }}>
         {[
-          ["photo", t.adminPhotosTab, photoRequests.filter((x) => x.status === "pending").length],
-          ["garage", t.adminGaragesTab, garageRequests.filter((x) => x.status === "pending").length],
           ["cars", t.adminCarsTab, cars.length],
           ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
           ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
