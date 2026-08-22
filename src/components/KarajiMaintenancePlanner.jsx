@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942", red: "#E4432B", green: "#61A56B" };
 const KEY = "karaji-maintenance-planner-v1";
@@ -13,9 +13,11 @@ function detectAppLanguage() {
   const isActive = (button) => {
     if (!button) return false;
     if (button.getAttribute("aria-pressed") === "true") return true;
+    const inlineBg = (button.style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
+    if (inlineBg === "#f5b942" || inlineBg === "rgb(245,185,66)" || inlineBg === "rgba(245,185,66,1)") return true;
     const style = window.getComputedStyle(button);
-    const bg = (style.backgroundColor || "").replace(/\s/g, "");
-    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg.toLowerCase() === "#f5b942";
+    const bg = (style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
+    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
   };
 
   if (isActive(arButton)) return "ar";
@@ -46,6 +48,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   const [open, setOpen] = useState(false);
   const [mileage, setMileage] = useState("");
   const [saved, setSaved] = useState(false);
+  const rootRef = useRef(null);
 
   useEffect(() => {
     try { setMileage(localStorage.getItem(KEY) || ""); } catch (_) {}
@@ -61,13 +64,29 @@ export default function KarajiMaintenancePlanner({ lang }) {
     syncLanguage();
 
     const observer = new MutationObserver(syncLanguage);
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "aria-pressed"] });
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-pressed"],
+    });
     window.addEventListener("storage", syncLanguage);
+    window.addEventListener("karaji-language-change", syncLanguage);
     return () => {
       observer.disconnect();
       window.removeEventListener("storage", syncLanguage);
+      window.removeEventListener("karaji-language-change", syncLanguage);
     };
   }, [lang]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleOutsidePointer = (event) => {
+      if (rootRef.current && !rootRef.current.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", handleOutsidePointer, true);
+    return () => document.removeEventListener("pointerdown", handleOutsidePointer, true);
+  }, [open]);
 
   const plan = useMemo(() => getPlan(mileage), [mileage]);
   const next = plan[0];
@@ -79,7 +98,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   };
 
   return (
-    <div dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
       {open && <div style={{ width: "min(330px, calc(100vw - 32px))", maxHeight: "min(520px, calc(100dvh - 150px))", overflowY: "auto", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: "0 18px 50px rgba(0,0,0,.45)", padding: 14, marginBottom: 9 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div><div style={{ color: C.amber, fontSize: 10, fontWeight: 900 }}>KARAJY</div><div style={{ color: C.cream, fontSize: 16, fontWeight: 900 }}>{isAr ? "خطة الصيانة" : "Maintenance plan"}</div></div>
@@ -94,7 +113,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
         <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
         <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions."}</div>
       </div>}
-      <button onClick={() => setOpen(v => !v)} aria-label="Maintenance plan" style={{ width: 50, height: 50, borderRadius: "50%", border: `1px solid ${C.line}`, background: C.asphalt, color: C.amber, boxShadow: "0 8px 22px rgba(0,0,0,.35)", fontWeight: 900, fontSize: 11 }}>🔧<br/>{isAr ? "صيانة" : "Service"}</button>
+      <button onClick={() => setOpen(v => !v)} aria-label={isAr ? "خطة الصيانة" : "Maintenance plan"} style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.asphalt}`, background: C.amber, color: C.asphalt, boxShadow: "0 8px 24px rgba(0,0,0,.35)", fontWeight: 950, fontSize: 11, cursor: "pointer" }}>🔧<br/>{isAr ? "صيانة" : "Service"}</button>
     </div>
   );
 }
