@@ -8,6 +8,7 @@ import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
+import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
 
@@ -46,4 +47,5 @@ if (!isFix3DRoute) {
   startKeyboardBehaviorFix();
   startOverlayBackHandler();
   startMenuLanguageEnhancer();
+  startCarCountryEnhancer();
 }
