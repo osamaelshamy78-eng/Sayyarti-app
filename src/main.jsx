@@ -8,6 +8,7 @@ import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 
 const App = React.lazy(() => import("./App.jsx"));
+const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
 
 class AppErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -23,12 +24,20 @@ class AppErrorBoundary extends Component {
 }
 function StartupFallback() { return <div style={{minHeight:"100vh",display:"grid",placeItems:"center",background:"#14171C",color:"#F2ECDD",fontFamily:"system-ui,sans-serif"}}>Loading Karaji…</div>; }
 
+const isFix3DRoute = window.location.pathname === "/3d-fix" || window.location.hash === "#/3d-fix";
+
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <AppErrorBoundary><Suspense fallback={<StartupFallback />}><App /></Suspense></AppErrorBoundary>
+  <AppErrorBoundary>
+    <Suspense fallback={<StartupFallback />}>
+      {isFix3DRoute ? <Fix3DLibrary /> : <App />}
+    </Suspense>
+  </AppErrorBoundary>
 );
 
-startAdminPhotoRequestEnhancer();
-startCarMediaEnhancer();
-startAdminCarDeleteEnhancer();
-startPendingCarAdminEnhancer();
-startKeyboardBehaviorFix();
+if (!isFix3DRoute) {
+  startAdminPhotoRequestEnhancer();
+  startCarMediaEnhancer();
+  startAdminCarDeleteEnhancer();
+  startPendingCarAdminEnhancer();
+  startKeyboardBehaviorFix();
+}
