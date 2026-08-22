@@ -178,8 +178,49 @@
   }
 
   function removeLegacyDuplicateMenu(){const old=document.getElementById("karaji-top-menu");if(old)old.remove();const oldBadge=document.getElementById("karaji-legal-entry");if(oldBadge)oldBadge.remove();}
-  function run(){if(!document.body)return;replaceText(document.body);removeLegacyDuplicateMenu();syncNativeMenu();addGarageNetworkCta();hideOldGaragePageButton();hidePaidGarageButtonsEverywhere();}
-  const observer=new MutationObserver(run); observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+
+  // ---- Performance fix for iPhone freezing ----
+  // The old version ran a full-page TreeWalker + several querySelectorAll
+  // scans SYNCHRONOUSLY on every single DOM mutation (childList + subtree +
+  // characterData). Because run() itself edits text nodes and adds/removes
+  // elements, it kept re-triggering the same observer in a tight loop.
+  // iOS Safari's JS engine chokes on this main-thread thrashing much harder
+  // than Chrome on Android, which caused the freezing/lag on iPhone.
+  //
+  // Fix: debounce run(), and disconnect the observer while run() is making
+  // its own DOM changes so those changes don't re-trigger it.
+  let observer;
+  let runScheduled = false;
+  let runTimer = null;
+
+  function runNow(){
+    if(!document.body)return;
+    observer.disconnect();
+    try {
+      replaceText(document.body);
+      removeLegacyDuplicateMenu();
+      syncNativeMenu();
+      addGarageNetworkCta();
+      hideOldGaragePageButton();
+      hidePaidGarageButtonsEverywhere();
+    } finally {
+      observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+    }
+  }
+
+  function scheduleRun(){
+    if(runScheduled)return;
+    runScheduled = true;
+    clearTimeout(runTimer);
+    runTimer = setTimeout(()=>{
+      runScheduled = false;
+      runNow();
+    }, 200);
+  }
+
+  observer = new MutationObserver(scheduleRun);
   closeMenuOnOutsideClick();
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",run);else run();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", runNow);
+  else runNow();
+  observer.observe(document.documentElement,{childList:true,subtree:true,characterData:true});
 })();
