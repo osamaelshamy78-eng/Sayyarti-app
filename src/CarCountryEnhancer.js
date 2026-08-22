@@ -98,13 +98,29 @@ function findOriginalAIButton() {
   return Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
 }
 
+function hideUnexpectedServiceButton() {
+  const labels = new Set(["Service", "Services", "خدمة", "الخدمات"]);
+  const candidates = Array.from(document.querySelectorAll("button, [role='button']"));
+  candidates.forEach((element) => {
+    if (element.closest("[data-karaji-bottom-nav='true']") || element.getAttribute("data-karaji-ai-bottom-button") === "true") return;
+    const label = getButtonLabel(element);
+    if (!labels.has(label)) return;
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    if ((style.position === "fixed" || style.position === "sticky") && rect.bottom >= window.innerHeight - 180) {
+      element.setAttribute("data-karaji-unwanted-service-button", "true");
+      element.style.setProperty("display", "none", "important");
+    }
+  });
+}
+
 function styleAIAsBottomNavButton(button, arabic) {
   if (!button) return;
   const label = arabic ? "مساعد السيارة الذكي" : "Car AI Ass";
   button.setAttribute("data-karaji-ai-bottom-button", "true");
   button.style.cssText = [
     "position:fixed",
-    "right:calc(10px + (100vw - 20px) / 3 * 0)",
+    "right:10px",
     "bottom:calc(8px + env(safe-area-inset-bottom))",
     "width:calc((100vw - 32px) / 3)",
     "height:58px",
@@ -177,8 +193,15 @@ function enhanceBottomNavigation() {
   nav.appendChild(makeButton(labels.home, "⌂", "/"));
   nav.appendChild(makeButton(labels.maintenance, "🔧", "/maintenance"));
 
+  // Keep a real third slot so the native AI button aligns exactly with the right slot.
+  const aiSlot = document.createElement("div");
+  aiSlot.setAttribute("aria-hidden", "true");
+  aiSlot.style.cssText = "flex:1;min-width:0;height:58px;visibility:hidden;pointer-events:none;";
+  nav.appendChild(aiSlot);
+
   const ai = findOriginalAIButton();
   if (ai) styleAIAsBottomNavButton(ai, arabic);
+  hideUnexpectedServiceButton();
 }
 
 function enhanceCarFilter() {
@@ -232,6 +255,7 @@ export function startCarCountryEnhancer() {
       enhanceSpecsField();
       enhanceBottomNavigation();
       enhanceCarFilter();
+      hideUnexpectedServiceButton();
     });
   };
   schedule();
