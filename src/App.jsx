@@ -5172,17 +5172,6 @@ export default function App() {
             </>
           )}
         </div>
-
-        <BottomNav
-          lang={lang}
-          t={t}
-          view={view}
-          setView={(id) => {
-            setMenuOpen(false);
-            if (id === "home") goHome();
-            else navPush(`/${id}`);
-          }}
-        />
       </div>
     </div>
   );
