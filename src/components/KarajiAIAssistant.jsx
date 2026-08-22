@@ -118,8 +118,9 @@ export default function KarajiAIAssistant({ lang = "ar" }) {
     <div dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
       {open && (
         <div style={{
-          width: "min(390px, calc(100vw - 20px))",
-          maxHeight: "calc(100dvh - 105px - env(safe-area-inset-bottom))",
+          width: "min(390px, calc(100vw - 32px))",
+          height: "min(680px, calc(100dvh - 190px - env(safe-area-inset-bottom)))",
+          maxHeight: "calc(100dvh - 190px - env(safe-area-inset-bottom))",
           overflowY: "auto",
           overscrollBehavior: "contain",
           WebkitOverflowScrolling: "touch",
