@@ -5,6 +5,8 @@ const COUNTRIES = [
   { code: "egypt", en: "Egypt", ar: "مصر" },
 ];
 
+const LOCAL_OR_OTHER_SPECS = "Local / Other";
+
 function detectArabic() {
   const ar = Array.from(document.querySelectorAll("button")).find((b) => b.textContent?.trim() === "AR");
   return ar?.getAttribute("aria-pressed") === "true" ||
@@ -46,6 +48,22 @@ function enhanceCountryField() {
   newSelect.addEventListener("change", () => setReactInputValue(input, newSelect.value));
   input.style.display = "none";
   input.insertAdjacentElement("afterend", newSelect);
+}
+
+function enhanceSpecsField() {
+  const labels = Array.from(document.querySelectorAll("span"));
+  const label = labels.find((el) => ["Specs", "المواصفات"].includes(el.textContent?.trim()));
+  if (!label) return;
+  const field = label.parentElement;
+  if (!field) return;
+  const select = field.querySelector("select");
+  if (!select || select.querySelector("[data-karaji-local-specs='true']")) return;
+
+  const option = document.createElement("option");
+  option.value = LOCAL_OR_OTHER_SPECS;
+  option.setAttribute("data-karaji-local-specs", "true");
+  option.textContent = detectArabic() ? "مواصفات محلية / أخرى" : "Local / Other Specs";
+  select.appendChild(option);
 }
 
 function enhanceCarFilter() {
@@ -100,6 +118,7 @@ export function startCarCountryEnhancer() {
     requestAnimationFrame(() => {
       scheduled = false;
       enhanceCountryField();
+      enhanceSpecsField();
       enhanceCarFilter();
     });
   };
