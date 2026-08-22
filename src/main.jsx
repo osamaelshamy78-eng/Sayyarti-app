@@ -6,6 +6,7 @@ import { startCarMediaEnhancer } from "./CarMediaEnhancer";
 import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
 import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
+import KarajiAIAssistant from "./components/KarajiAIAssistant";
 
 const App = React.lazy(() => import("./App.jsx"));
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
@@ -29,7 +30,7 @@ const isFix3DRoute = window.location.pathname === "/3d-fix" || window.location.h
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AppErrorBoundary>
     <Suspense fallback={<StartupFallback />}>
-      {isFix3DRoute ? <Fix3DLibrary /> : <App />}
+      {isFix3DRoute ? <Fix3DLibrary /> : <><App /><KarajiAIAssistant lang="ar" /></>}
     </Suspense>
   </AppErrorBoundary>
 );
