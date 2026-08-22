@@ -6,6 +6,11 @@ const COUNTRIES = [
 ];
 
 const LOCAL_OR_OTHER_SPECS = "Local / Other";
+const LEGACY_NAV_LABELS = new Set([
+  "Home", "الرئيسية", "Garages", "الورش", "Quick Service", "خدمة سريعة",
+  "Cars", "السيارات", "Spare Parts", "قطع غيار", "Photo Diagnosis", "تشخيص بالصور",
+  "Sell Your Car", "بيع سيارتك", "Quick", "سريع", "Sell Your", "اعرض سيارتك",
+]);
 
 function detectArabic() {
   const ar = Array.from(document.querySelectorAll("button")).find((b) => b.textContent?.trim() === "AR");
@@ -66,35 +71,59 @@ function enhanceSpecsField() {
   select.appendChild(option);
 }
 
-// Only target the real fixed/sticky bottom navigation. The previous broad
-// selector could match a homepage content section and hide the homepage.
+function getButtonLabel(button) {
+  return button.textContent?.replace(/\s+/g, " ").trim() || "";
+}
+
+function isLegacyNavContainer(el) {
+  if (!el || el.getAttribute("data-karaji-bottom-nav") === "true") return false;
+  const buttons = Array.from(el.querySelectorAll("button"));
+  const labels = buttons.map(getButtonLabel);
+  const legacyCount = labels.filter((label) => LEGACY_NAV_LABELS.has(label)).length;
+  if (legacyCount < 5) return false;
+
+  const style = getComputedStyle(el);
+  const rect = el.getBoundingClientRect();
+  const fixedOrSticky = style.position === "fixed" || style.position === "sticky";
+  const atBottom = rect.bottom >= window.innerHeight - 60;
+  return fixedOrSticky && (atBottom || style.bottom !== "auto");
+}
+
+// Finds the old six-button bottom bar through its nested buttons, rather than
+// matching arbitrary homepage content containers.
 function findBottomNav() {
-  const known = new Set([
-    "Home", "الرئيسية", "Garages", "الورش", "Quick Service", "خدمة سريعة", "Cars", "السيارات",
-    "Spare Parts", "قطع غيار", "Photo Diagnosis", "تشخيص بالصور",
-  ]);
+  const buttons = Array.from(document.querySelectorAll("button")).filter((button) => LEGACY_NAV_LABELS.has(getButtonLabel(button)));
+  const visited = new Set();
 
-  return Array.from(document.querySelectorAll("div, nav, footer")).find((el) => {
-    if (el.getAttribute("data-karaji-bottom-nav") === "true") return false;
-    const directButtons = Array.from(el.children).filter((child) => child.tagName === "BUTTON");
-    if (directButtons.length < 5) return false;
-    const labels = directButtons.map((b) => b.textContent?.replace(/\s+/g, " ").trim());
-    if (labels.filter((label) => known.has(label)).length < 3) return false;
+  for (const button of buttons) {
+    let parent = button.parentElement;
+    let depth = 0;
+    while (parent && depth < 8) {
+      if (!visited.has(parent)) {
+        visited.add(parent);
+        if (isLegacyNavContainer(parent)) return parent;
+      }
+      parent = parent.parentElement;
+      depth += 1;
+    }
+  }
 
-    const style = getComputedStyle(el);
-    const rect = el.getBoundingClientRect();
-    const isFixedOrSticky = style.position === "fixed" || style.position === "sticky";
-    const isAtBottom = rect.bottom >= window.innerHeight - 40;
-    const hasBottomPosition = style.bottom !== "auto";
-    return isFixedOrSticky && (isAtBottom || hasBottomPosition);
-  });
+  return null;
 }
 
 function clickOriginalNav(labelCandidates) {
   const candidates = new Set(labelCandidates);
   const button = Array.from(document.querySelectorAll("button")).find((b) => {
     if (b.closest("[data-karaji-bottom-nav='true']")) return false;
-    return candidates.has(b.textContent?.replace(/\s+/g, " ").trim());
+    return candidates.has(getButtonLabel(b));
+  });
+  if (button) button.click();
+}
+
+function clickOriginalMaintenance() {
+  const button = Array.from(document.querySelectorAll("button")).find((b) => {
+    const aria = b.getAttribute("aria-label") || "";
+    return aria === "Maintenance plan" || aria === "خطة الصيانة" || /maintenance plan|خطة الصيانة/i.test(getButtonLabel(b));
   });
   if (button) button.click();
 }
@@ -145,8 +174,8 @@ function enhanceBottomNavigation() {
 
   const arabic = detectArabic();
   const labels = arabic
-    ? { home: "الرئيسية", services: "الخدمات", ai: "مساعد السيارة الذكي" }
-    : { home: "Home", services: "Services", ai: "Car AI Ass" };
+    ? { home: "الرئيسية", maintenance: "الصيانة", ai: "مساعد السيارة الذكي" }
+    : { home: "Home", maintenance: "Maintenance", ai: "Car AI Ass" };
 
   nav.innerHTML = "";
   const makeButton = (label, icon, action) => {
@@ -174,7 +203,7 @@ function enhanceBottomNavigation() {
     button.innerHTML = `<span style="font-size:18px;line-height:1">${icon}</span><span>${label}</span>`;
     button.addEventListener("click", () => {
       if (action === "home") clickOriginalNav(["Home", "الرئيسية"]);
-      if (action === "services") clickOriginalNav(["Quick Service", "خدمة سريعة", "Service", "صيانة"]);
+      if (action === "maintenance") clickOriginalMaintenance();
       if (action === "ai") {
         const ai = Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
         if (ai) ai.click();
@@ -184,7 +213,7 @@ function enhanceBottomNavigation() {
   };
 
   nav.appendChild(makeButton(labels.home, "⌂", "home"));
-  nav.appendChild(makeButton(labels.services, "🔧", "services"));
+  nav.appendChild(makeButton(labels.maintenance, "🔧", "maintenance"));
   nav.appendChild(makeButton(labels.ai, "✦", "ai"));
   hideFloatingTools();
 }
