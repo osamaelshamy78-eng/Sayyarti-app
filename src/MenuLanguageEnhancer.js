@@ -22,7 +22,7 @@ function detectArabic() {
     const bg = (window.getComputedStyle(button).backgroundColor || "")
       .replace(/\s/g, "")
       .toLowerCase();
-    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
+    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)";
   };
 
   if (isActive(arButton)) return true;
@@ -36,20 +36,29 @@ function detectArabic() {
 }
 
 function translateMenu() {
-  const isArabic = detectArabic();
-  const map = isArabic ? MENU_TRANSLATIONS : MENU_ENGLISH;
+  const map = detectArabic() ? MENU_TRANSLATIONS : MENU_ENGLISH;
 
+  // The side-menu buttons also contain icons, so button.textContent is not
+  // equal to the label. Translate the label spans directly.
   document.querySelectorAll("button").forEach((button) => {
-    const text = button.textContent?.trim();
-    if (!text || !map[text]) return;
-
-    // Only translate menu items; these labels are unique to the side menu.
     button.querySelectorAll("span").forEach((span) => {
-      const spanText = span.textContent?.trim();
-      if (map[spanText]) span.textContent = map[spanText];
+      const current = span.textContent?.trim();
+      if (current && map[current]) span.textContent = map[current];
     });
 
-    if (!button.querySelector("span")) button.textContent = map[text];
+    const directText = Array.from(button.childNodes)
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent?.trim())
+      .filter(Boolean)
+      .join(" ");
+
+    if (directText && map[directText]) {
+      Array.from(button.childNodes).forEach((node) => {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
+          node.textContent = ` ${map[directText]} `;
+        }
+      });
+    }
   });
 }
 
@@ -72,15 +81,18 @@ export function startMenuLanguageEnhancer() {
   observer.observe(document.body, {
     subtree: true,
     childList: true,
+    characterData: true,
     attributes: true,
     attributeFilter: ["style", "class", "aria-pressed"],
   });
 
+  document.addEventListener("click", schedule, true);
   window.addEventListener("storage", schedule);
   window.addEventListener("karaji-language-change", schedule);
 
   return () => {
     observer.disconnect();
+    document.removeEventListener("click", schedule, true);
     window.removeEventListener("storage", schedule);
     window.removeEventListener("karaji-language-change", schedule);
   };
