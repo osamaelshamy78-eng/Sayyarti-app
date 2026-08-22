@@ -6,6 +6,7 @@ import { startCarMediaEnhancer } from "./CarMediaEnhancer";
 import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
 import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
+import { startOverlayBackHandler } from "./OverlayBackHandler";
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
 
@@ -42,4 +43,5 @@ if (!isFix3DRoute) {
   startAdminCarDeleteEnhancer();
   startPendingCarAdminEnhancer();
   startKeyboardBehaviorFix();
+  startOverlayBackHandler();
 }
