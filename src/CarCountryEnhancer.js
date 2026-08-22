@@ -38,6 +38,7 @@ function enhanceCountryField() {
 
   const newSelect = document.createElement("select");
   newSelect.setAttribute("data-karaji-country-select", "true");
+  newSelect.required = true;
   newSelect.style.cssText = input.style.cssText + ";cursor:pointer;";
   const arabic = detectArabic();
   newSelect.innerHTML = `<option value="">—</option>${COUNTRIES.slice(1).map((c) => `<option value="${c.code}">${arabic ? c.ar : c.en}</option>`).join("")}`;
@@ -81,7 +82,7 @@ function enhanceCarFilter() {
 function applyCarFilter(container, selected) {
   const list = Array.from(container.querySelectorAll("div")).find((el) => el.className?.includes("flex flex-col gap-2.5"));
   if (!list) return;
-  const wanted = selected === "all" ? [] : COUNTRIES.find((c) => c.code === selected);
+  const wanted = selected === "all" ? null : COUNTRIES.find((c) => c.code === selected);
   Array.from(list.children).forEach((card) => {
     if (!card.querySelector) return;
     const text = card.textContent || "";
