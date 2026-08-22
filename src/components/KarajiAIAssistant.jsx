@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 const C = {
   asphalt: "#14171C",
@@ -12,6 +12,34 @@ const C = {
 };
 
 const STORAGE_KEY = "karaji-ai-assistant-v1";
+
+function detectAppLanguage() {
+  if (typeof document === "undefined") return "en";
+
+  const buttons = Array.from(document.querySelectorAll("button"));
+  const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
+  const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
+
+  const isActive = (button) => {
+    if (!button) return false;
+    if (button.getAttribute("aria-pressed") === "true") return true;
+    const inlineBg = (button.style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
+    if (inlineBg === "#f5b942" || inlineBg === "rgb(245,185,66)" || inlineBg === "rgba(245,185,66,1)") return true;
+    const style = window.getComputedStyle(button);
+    const bg = (style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
+    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
+  };
+
+  if (isActive(arButton)) return "ar";
+  if (isActive(enButton)) return "en";
+
+  try {
+    const saved = localStorage.getItem("karajy-language");
+    if (saved === "ar" || saved === "en") return saved;
+  } catch (_) {}
+
+  return "en";
+}
 
 function getAssessment({ mileage, serviceDate, warning, symptom }) {
   let score = 100;
@@ -55,14 +83,16 @@ function getAssessment({ mileage, serviceDate, warning, symptom }) {
   return { score, urgent, reasons };
 }
 
-export default function KarajiAIAssistant({ lang = "ar" }) {
-  const isAr = lang === "ar";
+export default function KarajiAIAssistant() {
+  const [appLang, setAppLang] = useState(() => detectAppLanguage());
+  const isAr = appLang === "ar";
   const [open, setOpen] = useState(false);
   const [mileage, setMileage] = useState("");
   const [serviceDate, setServiceDate] = useState("");
   const [warning, setWarning] = useState("none");
   const [symptom, setSymptom] = useState("");
   const [saved, setSaved] = useState(false);
+  const rootRef = useRef(null);
 
   useEffect(() => {
     try {
@@ -74,6 +104,35 @@ export default function KarajiAIAssistant({ lang = "ar" }) {
       setSymptom(savedState.symptom || "");
     } catch (_) {}
   }, []);
+
+  useEffect(() => {
+    const syncLanguage = () => setAppLang(detectAppLanguage());
+    syncLanguage();
+
+    const observer = new MutationObserver(syncLanguage);
+    observer.observe(document.body, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "aria-pressed"],
+    });
+    window.addEventListener("storage", syncLanguage);
+    window.addEventListener("karaji-language-change", syncLanguage);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("storage", syncLanguage);
+      window.removeEventListener("karaji-language-change", syncLanguage);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const handleOutsidePointer = (event) => {
+      if (rootRef.current && !rootRef.current.contains(event.target)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", handleOutsidePointer, true);
+    return () => document.removeEventListener("pointerdown", handleOutsidePointer, true);
+  }, [open]);
 
   const assessment = useMemo(
     () => getAssessment({ mileage, serviceDate, warning, symptom }),
@@ -115,7 +174,7 @@ export default function KarajiAIAssistant({ lang = "ar" }) {
     : reason;
 
   return (
-    <div dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
       {open && (
         <div style={{
           width: "min(390px, calc(100vw - 32px))",
@@ -137,7 +196,7 @@ export default function KarajiAIAssistant({ lang = "ar" }) {
               <div style={{ color: C.amber, fontSize: 10, fontWeight: 900, letterSpacing: ".08em" }}>KARAJY AI</div>
               <div style={{ color: C.cream, fontSize: 17, fontWeight: 900, marginTop: 2 }}>{isAr ? "مساعد سيارتك الذكي" : "Your AI car assistant"}</div>
             </div>
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{ background: "transparent", border: `1px solid ${C.line}`, color: C.dim, borderRadius: 9, width: 32, height: 32, flex: "0 0 auto" }}>×</button>
+            <button type="button" onClick={() => setOpen(false)} aria-label={isAr ? "إغلاق" : "Close"} style={{ background: "transparent", border: `1px solid ${C.line}`, color: C.dim, borderRadius: 9, width: 32, height: 32, flex: "0 0 auto" }}>×</button>
           </div>
 
           <div style={{ background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 13, padding: 12, marginBottom: 10 }}>
