@@ -16,18 +16,13 @@ body,
   box-sizing: border-box;
 }
 
-/* Keep the app shell inside the real mobile viewport when the OS keyboard opens.
-   This prevents the fixed-height shell from fighting the visual viewport and
-   stealing focus from text fields while typing. */
-#root > div > div {
-  width: min(380px, calc(100vw - 16px)) !important;
-  height: min(760px, calc(100dvh - 16px)) !important;
-  max-height: calc(100dvh - 16px) !important;
-}
-
+/* Mobile viewport handling: do not apply a fixed height to arbitrary nested
+   divs, because that can accidentally force modal/dialog components to fill
+   the entire viewport. */
 @supports not (height: 100dvh) {
-  #root > div > div {
-    height: min(760px, calc(100vh - 16px)) !important;
-    max-height: calc(100vh - 16px) !important;
+  html,
+  body,
+  #root {
+    min-height: 100vh;
   }
 }
