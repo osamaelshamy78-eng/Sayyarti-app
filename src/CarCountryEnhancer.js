@@ -92,11 +92,8 @@ function clickOriginalNav(labelCandidates) {
 function hideFloatingTools() {
   const aiButton = Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
   if (aiButton) {
-    const root = aiButton.parentElement;
-    if (root && root.getAttribute("data-karaji-hidden-tool") !== "true") {
-      root.setAttribute("data-karaji-hidden-tool", "true");
-      root.style.display = "none";
-    }
+    aiButton.style.display = "none";
+    aiButton.setAttribute("data-karaji-hidden-button", "true");
   }
 
   const serviceButton = Array.from(document.querySelectorAll("button")).find((b) => {
@@ -104,11 +101,8 @@ function hideFloatingTools() {
     return label === "Maintenance plan" || label === "خطة الصيانة";
   });
   if (serviceButton) {
-    const root = serviceButton.parentElement;
-    if (root && root.getAttribute("data-karaji-hidden-tool") !== "true") {
-      root.setAttribute("data-karaji-hidden-tool", "true");
-      root.style.display = "none";
-    }
+    serviceButton.style.display = "none";
+    serviceButton.setAttribute("data-karaji-hidden-button", "true");
   }
 }
 
@@ -146,7 +140,7 @@ function enhanceBottomNavigation() {
 
   const arabic = detectArabic();
   const labels = arabic
-    ? { home: "الرئيسية", services: "الخدمات", ai: "مساعد السيارة بالذكاء الاصطناعي" }
+    ? { home: "الرئيسية", services: "الخدمات", ai: "مساعد السيارة الذكي" }
     : { home: "Home", services: "Services", ai: "Car AI Ass" };
 
   nav.innerHTML = "";
