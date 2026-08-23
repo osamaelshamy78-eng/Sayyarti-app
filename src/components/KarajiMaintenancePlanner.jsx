@@ -48,9 +48,9 @@ function getPlan(km, lastOilChange, oilInterval) {
   return RATIOS.map((item) => {
     if (!ready) return { ...item, at: null, due: null };
     const at = interval * item.mult;
-    let nextDueAt = lastOil + at;
-    while (nextDueAt < n) nextDueAt += at;
-    const due = Math.max(0, nextDueAt - n);
+    // due = threshold minus how far the car has driven since the last oil change.
+    // Positive = km remaining until due. Negative = km overdue.
+    const due = at - (n - lastOil);
     return { ...item, at, due };
   }).sort((a, b) => {
     if (a.due === null && b.due === null) return 0;
@@ -147,9 +147,32 @@ export default function KarajiMaintenancePlanner({ lang }) {
             <option value="10000">10,000 km</option>
           </select>
         </label>
-        {next && next.due !== null && <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.amber}55`, background: `${C.amber}0D` }}><div style={{ color: C.dim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div><div style={{ color: C.cream, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div><div style={{ color: C.amber, fontSize: 11, marginTop: 3 }}>{next.due.toLocaleString()} km {isAr ? "متبقية تقريبًا" : "approximately remaining"}</div></div>}
+        {next && next.due !== null && (
+          next.due < 0 ? (
+            <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.red}55`, background: `${C.red}0D` }}>
+              <div style={{ color: C.dim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
+              <div style={{ color: C.cream, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
+              <div style={{ color: C.red, fontSize: 11, marginTop: 3 }}>{Math.abs(next.due).toLocaleString()} km {isAr ? "متأخرة عن الموعد" : "overdue"}</div>
+            </div>
+          ) : (
+            <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.amber}55`, background: `${C.amber}0D` }}>
+              <div style={{ color: C.dim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
+              <div style={{ color: C.cream, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
+              <div style={{ color: C.amber, fontSize: 11, marginTop: 3 }}>{next.due.toLocaleString()} km {isAr ? "متبقية تقريبًا" : "approximately remaining"}</div>
+            </div>
+          )
+        )}
         {(!next || next.due === null) && <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.line}`, color: C.dim, fontSize: 10.5, textAlign: "center" }}>{isAr ? "أدخل عداد آخر تغيير زيت واختر الفترة لعرض الخطة" : "Enter last oil change mileage and select an interval to see the plan"}</div>}
-        <div style={{ marginTop: 10 }}>{plan.map((item, i) => <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "8px 0", borderBottom: `1px solid ${C.line}`, color: C.dim, fontSize: 10 }}><span>{isAr ? item.ar : item.title}</span><strong style={{ color: C.cream }}>{item.due === null ? "—" : `${item.due.toLocaleString()} km`}</strong></div>)}</div>
+        <div style={{ marginTop: 10 }}>{plan.map((item, i) => {
+          const overdue = item.due !== null && item.due < 0;
+          const label = item.due === null ? "—" : overdue ? `${Math.abs(item.due).toLocaleString()} km ${isAr ? "متأخرة" : "overdue"}` : `${item.due.toLocaleString()} km`;
+          return (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "8px 0", borderBottom: `1px solid ${C.line}`, color: C.dim, fontSize: 10 }}>
+              <span>{isAr ? item.ar : item.title}</span>
+              <strong style={{ color: overdue ? C.red : C.cream }}>{label}</strong>
+            </div>
+          );
+        })}</div>
         <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
         <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions."}</div>
       </div>}
