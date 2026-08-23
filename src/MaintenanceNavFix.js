@@ -2,23 +2,21 @@ export function startMaintenanceNavFix() {
   if (typeof document === "undefined") return () => {};
 
   const openExistingPlanner = (event) => {
-    const serviceButton = Array.from(document.querySelectorAll("button, [role='button']")).find((el) => {
-      const label = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-      return (label === "service" || label === "services" || label === "خدمة" || label === "الخدمات") &&
-        !el.closest("[data-karaji-bottom-nav='true']") &&
-        el.getAttribute("data-karaji-unwanted-service-button") === "true";
-    });
-
     event.preventDefault();
     event.stopPropagation();
     if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
-
-    if (serviceButton) serviceButton.click();
-    else window.dispatchEvent(new CustomEvent("karaji-open-maintenance-planner"));
+    window.dispatchEvent(new CustomEvent("karaji-open-maintenance-planner"));
   };
 
   const wire = () => {
-    const button = document.querySelector("button[data-karaji-nav-action='/maintenance']");
+    const candidates = Array.from(document.querySelectorAll("button, [role='button']"));
+    const button = candidates.find((el) => {
+      const label = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const aria = (el.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const title = (el.getAttribute("title") || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const haystack = `${label} ${aria} ${title}`;
+      return /(^|\s)(maintenance|الصيانة)(\s|$)/i.test(haystack) && el.closest("[data-karaji-bottom-nav='true']");
+    });
     if (!button || button.getAttribute("data-karaji-maintenance-fixed") === "true") return;
     button.setAttribute("data-karaji-maintenance-fixed", "true");
     button.addEventListener("pointerdown", openExistingPlanner, true);
