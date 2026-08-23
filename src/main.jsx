@@ -10,7 +10,7 @@ import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
-import KarajiAIAssistant from "./components/KarajiAIAIAssistant";
+import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
 
 const App = React.lazy(() => import("./App.jsx"));
