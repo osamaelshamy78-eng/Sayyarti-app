@@ -1,5 +1,8 @@
 const MENU_TRANSLATIONS = {
   "Add Your Garage Free": "أضف جراجك مجانًا",
+  "+ Add Your Garage Free": "+ أضف جراجك مجانًا",
+  "Own a garage? Let car owners find you": "هل تملك جراجًا؟ دع أصحاب السيارات يجدونك",
+  "Add your garage to the Karaji directory for free and let car owners discover your services, location and contact details.": "أضف جراجك إلى دليل كراجي مجانًا ودع أصحاب السيارات يكتشفون خدماتك وموقعك وبيانات التواصل معك.",
   "List Your Car for Sale": "اعرض سيارتك للبيع",
   "Legal": "سياسة الموقع",
   "About the App": "حول التطبيق",
@@ -36,22 +39,28 @@ function persistLanguage(lang) {
   } catch (_) {}
 }
 
-function syncStoredLanguageToApp() {
+function isLanguageButtonActive(button) {
+  if (!button) return false;
+  if (button.getAttribute("aria-pressed") === "true") return true;
+  const bg = (window.getComputedStyle(button).backgroundColor || "")
+    .replace(/\s/g, "")
+    .toLowerCase();
+  return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)";
+}
+
+// Restore the stored language only once after the app initially renders.
+// Never force a language again while navigating between app sections.
+function syncStoredLanguageToAppOnce() {
   if (typeof document === "undefined") return;
   const stored = getStoredLanguage();
   if (!stored) return;
 
-  const arButton = Array.from(document.querySelectorAll("button")).find(
-    (b) => b.textContent?.trim() === "AR"
-  );
-  const enButton = Array.from(document.querySelectorAll("button")).find(
-    (b) => b.textContent?.trim() === "EN"
-  );
+  const buttons = Array.from(document.querySelectorAll("button"));
+  const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
+  const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
   const target = stored === "ar" ? arButton : enButton;
-  if (!target) return;
-
-  const isActive = target.getAttribute("aria-pressed") === "true";
-  if (!isActive) target.click();
+  if (!target || isLanguageButtonActive(target)) return;
+  target.click();
 }
 
 function detectArabic() {
@@ -61,42 +70,28 @@ function detectArabic() {
   const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
   const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
 
-  const isActive = (button) => {
-    if (!button) return false;
-    if (button.getAttribute("aria-pressed") === "true") return true;
-    const bg = (window.getComputedStyle(button).backgroundColor || "")
-      .replace(/\s/g, "")
-      .toLowerCase();
-    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)";
-  };
-
-  if (isActive(arButton)) return true;
-  if (isActive(enButton)) return false;
+  if (isLanguageButtonActive(arButton)) return true;
+  if (isLanguageButtonActive(enButton)) return false;
   return getStoredLanguage() === "ar";
 }
 
 function translateMenu() {
   const map = detectArabic() ? MENU_TRANSLATIONS : MENU_ENGLISH;
 
+  // Translate exact leaf text throughout the visible app, not only buttons.
+  // This covers the garage directory promotional card and its CTA.
+  document.querySelectorAll("*").forEach((element) => {
+    if (element.children.length !== 0) return;
+    const current = element.textContent?.trim();
+    if (!current || !map[current]) return;
+    element.textContent = map[current];
+  });
+
   document.querySelectorAll("button").forEach((button) => {
     button.querySelectorAll("span").forEach((span) => {
       const current = span.textContent?.trim();
       if (current && map[current]) span.textContent = map[current];
     });
-
-    const directText = Array.from(button.childNodes)
-      .filter((node) => node.nodeType === Node.TEXT_NODE)
-      .map((node) => node.textContent?.trim())
-      .filter(Boolean)
-      .join(" ");
-
-    if (directText && map[directText]) {
-      Array.from(button.childNodes).forEach((node) => {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent?.trim()) {
-          node.textContent = ` ${map[directText]} `;
-        }
-      });
-    }
   });
 }
 
@@ -132,13 +127,15 @@ export function startMenuLanguageEnhancer() {
     scheduled = true;
     requestAnimationFrame(() => {
       scheduled = false;
-      syncStoredLanguageToApp();
       translateMenu();
       hideGeneralFaultCategory();
     });
   };
 
-  schedule();
+  setTimeout(() => {
+    syncStoredLanguageToAppOnce();
+    schedule();
+  }, 150);
 
   const observer = new MutationObserver(schedule);
   observer.observe(document.body, {
@@ -152,8 +149,14 @@ export function startMenuLanguageEnhancer() {
   const handleClick = (event) => {
     const button = event.target?.closest?.("button");
     const label = button?.textContent?.trim();
-    if (label === "AR") persistLanguage("ar");
-    if (label === "EN") persistLanguage("en");
+    if (label === "AR") {
+      persistLanguage("ar");
+      window.dispatchEvent(new CustomEvent("karaji-language-change", { detail: { lang: "ar" } }));
+    }
+    if (label === "EN") {
+      persistLanguage("en");
+      window.dispatchEvent(new CustomEvent("karaji-language-change", { detail: { lang: "en" } }));
+    }
     schedule();
   };
 
