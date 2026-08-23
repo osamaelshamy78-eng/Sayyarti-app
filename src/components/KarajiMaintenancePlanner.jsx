@@ -79,16 +79,26 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
-  // The old floating Service button has been removed. The bottom
-  // Maintenance navigation item now opens this same planner panel.
+  // The Maintenance bottom-nav item is the replacement for the old
+  // floating Service button. Intercept it before the app's normal route
+  // handler so it opens the same maintenance planner panel instead of
+  // navigating to the unrelated Maintenance directory page.
   useEffect(() => {
     const handleMaintenanceNav = (event) => {
       const button = event.target?.closest?.("button");
       if (!button) return;
-      const label = (button.textContent || "").replace(/\s+/g, " ").trim();
-      if (label === "Quick Service" || label === "الصيانة السريعة") {
-        setOpen(true);
-      }
+      const label = (button.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const isMaintenanceButton = [
+        "maintenance",
+        "الصيانة",
+        "quick service",
+        "الصيانة السريعة",
+      ].includes(label);
+      if (!isMaintenanceButton) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      setOpen(true);
     };
     document.addEventListener("click", handleMaintenanceNav, true);
     return () => document.removeEventListener("click", handleMaintenanceNav, true);
