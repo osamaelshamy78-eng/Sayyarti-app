@@ -4930,6 +4930,22 @@ export default function App() {
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : true
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const handleChange = () => setIsMobile(mq.matches);
+    handleChange();
+    if (mq.addEventListener) mq.addEventListener("change", handleChange);
+    else mq.addListener(handleChange);
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener("change", handleChange);
+      else mq.removeListener(handleChange);
+    };
+  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -5024,18 +5040,18 @@ export default function App() {
 
   return (
     <div
-      className="w-full min-h-screen flex items-center justify-center py-8"
-      style={{ background: "#0A0B0D" }}
+      className={isMobile ? "w-full" : "w-full min-h-screen flex items-center justify-center py-8"}
+      style={{ background: "#0A0B0D", minHeight: isMobile ? "100dvh" : undefined }}
     >
       <div
         dir={isRTL ? "rtl" : "ltr"}
         style={{
-          width: 380,
-          height: 760,
+          width: isMobile ? "100%" : 380,
+          height: isMobile ? "100dvh" : 760,
           background: C.asphalt,
-          borderRadius: 40,
-          border: `8px solid #05060700`,
-          boxShadow: "0 30px 60px rgba(0,0,0,0.5)",
+          borderRadius: isMobile ? 0 : 40,
+          border: isMobile ? "none" : `8px solid #05060700`,
+          boxShadow: isMobile ? "none" : "0 30px 60px rgba(0,0,0,0.5)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -5043,14 +5059,17 @@ export default function App() {
           position: "relative",
         }}
       >
-        {/* status bar */}
-        <div
-          className="flex items-center justify-between px-6"
-          style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600 }}
-        >
-          <span>{clock}</span>
-          <span style={{ letterSpacing: 1 }}>●●●●</span>
-        </div>
+        {/* status bar (desktop preview only — real phones already show their own) */}
+        {!isMobile && (
+          <div
+            className="flex items-center justify-between px-6"
+            style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600, flexShrink: 0 }}
+          >
+            <span>{clock}</span>
+            <span style={{ letterSpacing: 1 }}>●●●●</span>
+          </div>
+        )}
+        {isMobile && <div style={{ height: "env(safe-area-inset-top)", flexShrink: 0 }} />}
 
         <TopBar
           lang={lang}
@@ -5064,7 +5083,7 @@ export default function App() {
         />
         <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: isMobile ? "calc(74px + env(safe-area-inset-bottom))" : undefined }}>
           {view === "home" && (
             <HomeView
               lang={lang}
