@@ -9,6 +9,51 @@ const MENU_ENGLISH = Object.fromEntries(
   Object.entries(MENU_TRANSLATIONS).map(([en, ar]) => [ar, en])
 );
 
+function getStoredLanguage() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = params.get("lang");
+    if (fromUrl === "ar" || fromUrl === "en") return fromUrl;
+
+    const keys = ["karajy-language", "karajiLanguage", "language", "appLanguage", "locale"];
+    for (const key of keys) {
+      const value = localStorage.getItem(key)?.toLowerCase();
+      if (value?.startsWith("ar")) return "ar";
+      if (value?.startsWith("en")) return "en";
+    }
+  } catch (_) {}
+  return null;
+}
+
+function persistLanguage(lang) {
+  if (lang !== "ar" && lang !== "en") return;
+  try {
+    // Keep the app language in the keys used by both the app and the legal page.
+    localStorage.setItem("karajy-language", lang);
+    localStorage.setItem("karajiLanguage", lang);
+    localStorage.setItem("appLanguage", lang);
+    localStorage.setItem("language", lang);
+  } catch (_) {}
+}
+
+function syncStoredLanguageToApp() {
+  if (typeof document === "undefined") return;
+  const stored = getStoredLanguage();
+  if (!stored) return;
+
+  const arButton = Array.from(document.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === "AR"
+  );
+  const enButton = Array.from(document.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === "EN"
+  );
+  const target = stored === "ar" ? arButton : enButton;
+  if (!target) return;
+
+  const isActive = target.getAttribute("aria-pressed") === "true";
+  if (!isActive) target.click();
+}
+
 function detectArabic() {
   if (typeof document === "undefined") return false;
 
@@ -28,11 +73,7 @@ function detectArabic() {
   if (isActive(arButton)) return true;
   if (isActive(enButton)) return false;
 
-  try {
-    return localStorage.getItem("karajy-language") === "ar";
-  } catch (_) {
-    return false;
-  }
+  return getStoredLanguage() === "ar";
 }
 
 function translateMenu() {
@@ -79,7 +120,9 @@ function hideGeneralFaultCategory() {
       if (clickable) break;
       target = target.parentElement;
     }
-    target.style.display = "none";
+    // Remove the category from the grid instead of hiding it, so it cannot
+    // leave an empty grid slot or create a broken layout.
+    target.remove();
   });
 }
 
@@ -92,6 +135,7 @@ export function startMenuLanguageEnhancer() {
     scheduled = true;
     requestAnimationFrame(() => {
       scheduled = false;
+      syncStoredLanguageToApp();
       translateMenu();
       hideGeneralFaultCategory();
     });
@@ -108,13 +152,18 @@ export function startMenuLanguageEnhancer() {
     attributeFilter: ["style", "class", "aria-pressed"],
   });
 
-  document.addEventListener("click", schedule, true);
+  document.addEventListener("click", (event) => {
+    const button = event.target?.closest?.("button");
+    const label = button?.textContent?.trim();
+    if (label === "AR") persistLanguage("ar");
+    if (label === "EN") persistLanguage("en");
+    schedule();
+  }, true);
   window.addEventListener("storage", schedule);
   window.addEventListener("karaji-language-change", schedule);
 
   return () => {
     observer.disconnect();
-    document.removeEventListener("click", schedule, true);
     window.removeEventListener("storage", schedule);
     window.removeEventListener("karaji-language-change", schedule);
   };
