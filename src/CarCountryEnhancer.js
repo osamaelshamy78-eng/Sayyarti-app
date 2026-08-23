@@ -119,31 +119,23 @@ function styleAIAsBottomNavButton(button, arabic) {
   const label = arabic ? "مساعد السيارة الذكي" : "Car AI Ass";
   button.setAttribute("data-karaji-ai-bottom-button", "true");
   button.style.cssText = [
-    "position:fixed",
-    "right:10px",
-    "bottom:calc(8px + env(safe-area-inset-bottom))",
-    "width:calc((100vw - 32px) / 3)",
-    "height:58px",
-    "z-index:10001",
-    "border:1px solid #2A2F38",
-    "border-radius:12px",
-    "background:#14171C",
-    "color:#F2ECDD",
-    "box-shadow:0 8px 24px rgba(0,0,0,.25)",
-    "font-size:11px",
-    "font-weight:800",
-    "line-height:1.2",
-    "cursor:pointer",
-    "-webkit-tap-highlight-color:transparent",
-    "touch-action:manipulation",
-    "display:flex",
-    "flex-direction:column",
-    "align-items:center",
-    "justify-content:center",
-    "gap:4px",
-    "box-sizing:border-box",
+    "position:fixed", "right:10px", "bottom:calc(8px + env(safe-area-inset-bottom))",
+    "width:calc((100vw - 32px) / 3)", "height:58px", "z-index:10001", "border:1px solid #2A2F38",
+    "border-radius:12px", "background:#14171C", "color:#F2ECDD", "box-shadow:0 8px 24px rgba(0,0,0,.25)",
+    "font-size:11px", "font-weight:800", "line-height:1.2", "cursor:pointer", "-webkit-tap-highlight-color:transparent",
+    "touch-action:manipulation", "display:flex", "flex-direction:column", "align-items:center",
+    "justify-content:center", "gap:4px", "box-sizing:border-box",
   ].join(";");
   button.innerHTML = `<div style="font-size:18px;line-height:1">✦</div><div>${label}</div>`;
+}
+
+function openMaintenancePlanner(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
+  }
+  window.dispatchEvent(new CustomEvent("karaji-open-maintenance-planner"));
 }
 
 function enhanceBottomNavigation() {
@@ -155,11 +147,11 @@ function enhanceBottomNavigation() {
     nav = document.createElement("nav");
     nav.setAttribute("data-karaji-bottom-nav", "true");
     nav.style.cssText = [
-      "position:fixed", "left:0", "right:0", "bottom:0", "z-index:9990",
-      "display:flex", "align-items:stretch", "justify-content:space-around", "gap:6px",
-      "padding:8px 10px calc(8px + env(safe-area-inset-bottom))",
-      "background:#1D2129", "border-top:1px solid #2A2F38", "box-sizing:border-box",
-      "box-shadow:0 -8px 24px rgba(0,0,0,.25)", "-webkit-tap-highlight-color:transparent",
+      "position:fixed", "left:0", "right:0", "bottom:0", "z-index:9990", "display:flex",
+      "align-items:stretch", "justify-content:space-around", "gap:6px",
+      "padding:8px 10px calc(8px + env(safe-area-inset-bottom))", "background:#1D2129",
+      "border-top:1px solid #2A2F38", "box-sizing:border-box", "box-shadow:0 -8px 24px rgba(0,0,0,.25)",
+      "-webkit-tap-highlight-color:transparent",
     ].join(";");
     document.body.appendChild(nav);
   }
@@ -181,19 +173,24 @@ function enhanceBottomNavigation() {
       "-webkit-user-select:none", "user-select:none", "box-sizing:border-box",
     ].join(";");
     button.innerHTML = `<span style="font-size:18px;line-height:1">${icon}</span><span>${label}</span>`;
-    const action = () => navigateTo(path);
-    button.onclick = action;
-    button.addEventListener("touchend", (event) => {
-      event.preventDefault();
-      action();
-    }, { passive: false });
+
+    if (path === "/maintenance") {
+      button.onclick = openMaintenancePlanner;
+      button.addEventListener("touchend", openMaintenancePlanner, { passive: false });
+    } else {
+      const action = () => navigateTo(path);
+      button.onclick = action;
+      button.addEventListener("touchend", (event) => {
+        event.preventDefault();
+        action();
+      }, { passive: false });
+    }
     return button;
   };
 
   nav.appendChild(makeButton(labels.home, "⌂", "/"));
   nav.appendChild(makeButton(labels.maintenance, "🔧", "/maintenance"));
 
-  // Keep a real third slot so the native AI button aligns exactly with the right slot.
   const aiSlot = document.createElement("div");
   aiSlot.setAttribute("aria-hidden", "true");
   aiSlot.style.cssText = "flex:1;min-width:0;height:58px;visibility:hidden;pointer-events:none;";
