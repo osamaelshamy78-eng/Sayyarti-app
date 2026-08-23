@@ -1,16 +1,7 @@
 export function startMaintenanceNavFix() {
   if (typeof document === "undefined") return () => {};
 
-  const activateExistingPlanner = (event) => {
-    const button = event.target?.closest?.("button[data-karaji-nav-action='/maintenance']");
-    if (!button) return;
-
-    // This button must open the existing planner that was previously
-    // opened by the floating Service button. Do not navigate to /maintenance.
-    event.preventDefault();
-    event.stopPropagation();
-    if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
-
+  const openExistingPlanner = (event) => {
     const serviceButton = Array.from(document.querySelectorAll("button, [role='button']")).find((el) => {
       const label = (el.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
       return (label === "service" || label === "services" || label === "خدمة" || label === "الخدمات") &&
@@ -18,22 +9,25 @@ export function startMaintenanceNavFix() {
         el.getAttribute("data-karaji-unwanted-service-button") === "true";
     });
 
-    if (serviceButton) {
-      serviceButton.click();
-      return;
-    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
 
-    // Fallback: open the planner directly through its public DOM event.
-    window.dispatchEvent(new CustomEvent("karaji-open-maintenance-planner"));
+    if (serviceButton) serviceButton.click();
+    else window.dispatchEvent(new CustomEvent("karaji-open-maintenance-planner"));
   };
 
-  document.addEventListener("pointerdown", activateExistingPlanner, true);
-  document.addEventListener("touchstart", activateExistingPlanner, true);
-  document.addEventListener("click", activateExistingPlanner, true);
-
-  return () => {
-    document.removeEventListener("pointerdown", activateExistingPlanner, true);
-    document.removeEventListener("touchstart", activateExistingPlanner, true);
-    document.removeEventListener("click", activateExistingPlanner, true);
+  const wire = () => {
+    const button = document.querySelector("button[data-karaji-nav-action='/maintenance']");
+    if (!button || button.getAttribute("data-karaji-maintenance-fixed") === "true") return;
+    button.setAttribute("data-karaji-maintenance-fixed", "true");
+    button.addEventListener("pointerdown", openExistingPlanner, true);
+    button.addEventListener("touchstart", openExistingPlanner, true);
+    button.addEventListener("click", openExistingPlanner, true);
   };
+
+  wire();
+  const observer = new MutationObserver(wire);
+  observer.observe(document.body, { subtree: true, childList: true });
+  return () => observer.disconnect();
 }
