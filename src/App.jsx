@@ -3280,7 +3280,7 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
   }, [issueId, lang]);
 
   return (
-    <div className="pb-6">
+    <div className="pb-6" style={{ paddingBottom: "calc(90px + env(safe-area-inset-bottom))" }}>
       <BackHeader label={categoryLabel} onBack={onBack} isRTL={isRTL} />
       <div className="px-5">
         {CategoryIcon && (
