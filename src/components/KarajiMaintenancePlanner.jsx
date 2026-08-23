@@ -5,11 +5,9 @@ const KEY = "karaji-maintenance-planner-v1";
 
 function detectAppLanguage() {
   if (typeof document === "undefined") return "en";
-
   const buttons = Array.from(document.querySelectorAll("button"));
   const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
   const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
-
   const isActive = (button) => {
     if (!button) return false;
     if (button.getAttribute("aria-pressed") === "true") return true;
@@ -19,15 +17,12 @@ function detectAppLanguage() {
     const bg = (style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
     return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
   };
-
   if (isActive(arButton)) return "ar";
   if (isActive(enButton)) return "en";
-
   try {
     const saved = localStorage.getItem("karajy-language");
     if (saved === "ar" || saved === "en") return saved;
   } catch (_) {}
-
   return "en";
 }
 
@@ -59,17 +54,10 @@ export default function KarajiMaintenancePlanner({ lang }) {
       setAppLang(lang);
       return undefined;
     }
-
     const syncLanguage = () => setAppLang(detectAppLanguage());
     syncLanguage();
-
     const observer = new MutationObserver(syncLanguage);
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "aria-pressed"],
-    });
+    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "aria-pressed"] });
     window.addEventListener("storage", syncLanguage);
     window.addEventListener("karaji-language-change", syncLanguage);
     return () => {
@@ -79,8 +67,15 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
-  // Only intercept the bottom Maintenance button. Do not alter any other
-  // navigation item or the existing Maintenance directory content.
+  // The bottom Maintenance button dispatches this event. Keep this handler
+  // scoped to the existing planner so no other navigation is changed.
+  useEffect(() => {
+    const openPlanner = () => setOpen(true);
+    window.addEventListener("karaji-open-maintenance-planner", openPlanner);
+    return () => window.removeEventListener("karaji-open-maintenance-planner", openPlanner);
+  }, []);
+
+  // Only intercept the bottom Maintenance button. Do not alter any other navigation item or the existing directory content.
   useEffect(() => {
     const getMaintenanceButton = (target) => {
       const button = target?.closest?.("button");
@@ -91,7 +86,6 @@ export default function KarajiMaintenancePlanner({ lang }) {
       const haystack = `${label} ${aria} ${title}`;
       return /(^|\s)(maintenance|quick service|الصيانة|الصيانة السريعة)(\s|$)/i.test(haystack) ? button : null;
     };
-
     const openPlannerFromMaintenance = (event) => {
       const button = getMaintenanceButton(event.target);
       if (!button) return;
@@ -100,9 +94,6 @@ export default function KarajiMaintenancePlanner({ lang }) {
       if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
       setOpen(true);
     };
-
-    // Capture the interaction before React's bottom-nav onClick can call
-    // setView("maintenance"), so this button opens the planner instead.
     document.addEventListener("pointerdown", openPlannerFromMaintenance, true);
     document.addEventListener("touchstart", openPlannerFromMaintenance, true);
     document.addEventListener("click", openPlannerFromMaintenance, true);
@@ -124,7 +115,6 @@ export default function KarajiMaintenancePlanner({ lang }) {
 
   const plan = useMemo(() => getPlan(mileage), [mileage]);
   const next = plan[0];
-
   const save = () => {
     try { localStorage.setItem(KEY, mileage); } catch (_) {}
     setSaved(true);
