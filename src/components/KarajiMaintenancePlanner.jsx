@@ -79,6 +79,21 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
+  // The old floating Service button has been removed. The bottom
+  // Maintenance navigation item now opens this same planner panel.
+  useEffect(() => {
+    const handleMaintenanceNav = (event) => {
+      const button = event.target?.closest?.("button");
+      if (!button) return;
+      const label = (button.textContent || "").replace(/\s+/g, " ").trim();
+      if (label === "Quick Service" || label === "الصيانة السريعة") {
+        setOpen(true);
+      }
+    };
+    document.addEventListener("click", handleMaintenanceNav, true);
+    return () => document.removeEventListener("click", handleMaintenanceNav, true);
+  }, []);
+
   useEffect(() => {
     if (!open) return undefined;
     const handleOutsidePointer = (event) => {
@@ -98,7 +113,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   };
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif", pointerEvents: open ? "auto" : "none" }}>
       {open && <div style={{ width: "min(330px, calc(100vw - 32px))", maxHeight: "min(520px, calc(100dvh - 150px))", overflowY: "auto", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: "0 18px 50px rgba(0,0,0,.45)", padding: 14, marginBottom: 9 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div><div style={{ color: C.amber, fontSize: 10, fontWeight: 900 }}>KARAJY</div><div style={{ color: C.cream, fontSize: 16, fontWeight: 900 }}>{isAr ? "خطة الصيانة" : "Maintenance plan"}</div></div>
@@ -113,7 +128,6 @@ export default function KarajiMaintenancePlanner({ lang }) {
         <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
         <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions."}</div>
       </div>}
-      <button onClick={() => setOpen(v => !v)} aria-label={isAr ? "خطة الصيانة" : "Maintenance plan"} style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.asphalt}`, background: C.amber, color: C.asphalt, boxShadow: "0 8px 24px rgba(0,0,0,.35)", fontWeight: 950, fontSize: 11, cursor: "pointer" }}>🔧<br/>{isAr ? "صيانة" : "Service"}</button>
     </div>
   );
 }
