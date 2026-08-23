@@ -9,7 +9,8 @@ import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startCarCountryEnhancer } from "./CarCountryEnhancer";
-import KarajiAIAssistant from "./components/KarajiAIAssistant";
+import { startMaintenanceNavFix } from "./MaintenanceNavFix";
+import KarajiAIAssistant from "./components/KarajiAIAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
 
 const App = React.lazy(() => import("./App.jsx"));
@@ -48,4 +49,5 @@ if (!isFix3DRoute) {
   startOverlayBackHandler();
   startMenuLanguageEnhancer();
   startCarCountryEnhancer();
+  startMaintenanceNavFix();
 }
