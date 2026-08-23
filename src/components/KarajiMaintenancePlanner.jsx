@@ -67,47 +67,11 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
-  // Kept for compatibility in case anything else still dispatches this event.
+  // The Maintenance bottom-nav button opens this planner through this event.
   useEffect(() => {
     const openPlanner = () => setOpen(true);
     window.addEventListener("karaji-open-maintenance-planner", openPlanner);
     return () => window.removeEventListener("karaji-open-maintenance-planner", openPlanner);
-  }, []);
-
-  // Only intercept the bottom Maintenance button. Do not alter any other
-  // navigation item or the existing directory content.
-  //
-  // iOS fix: previously this listened on THREE event types
-  // (pointerdown + touchstart + click), each with preventDefault +
-  // stopPropagation + stopImmediatePropagation, AND a second separate
-  // script (MaintenanceNavFix.js) did the same thing independently.
-  // Two competing capture-phase interceptors triple-hijacking the same
-  // tap is exactly the kind of thing iOS Safari's touch-to-click
-  // sequencing handles inconsistently (Android Chrome is far more
-  // forgiving about this). Using a single "click" listener is the most
-  // cross-platform-reliable way to catch a tap, since the browser has
-  // already resolved touch-vs-click for you by the time it fires.
-  useEffect(() => {
-    const getMaintenanceButton = (target) => {
-      const button = target?.closest?.("button");
-      if (!button) return null;
-      const label = (button.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-      const aria = (button.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().toLowerCase();
-      const title = (button.getAttribute("title") || "").replace(/\s+/g, " ").trim().toLowerCase();
-      const haystack = `${label} ${aria} ${title}`;
-      return /(^|\s)(maintenance|quick service|الصيانة|الصيانة السريعة)(\s|$)/i.test(haystack) ? button : null;
-    };
-    const openPlannerFromMaintenance = (event) => {
-      const button = getMaintenanceButton(event.target);
-      if (!button) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setOpen(true);
-    };
-    document.addEventListener("click", openPlannerFromMaintenance, true);
-    return () => {
-      document.removeEventListener("click", openPlannerFromMaintenance, true);
-    };
   }, []);
 
   useEffect(() => {
