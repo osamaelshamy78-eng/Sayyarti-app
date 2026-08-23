@@ -5,8 +5,10 @@ const KEY = "karaji-maintenance-planner-v1";
 const LAST_OIL_KEY = "karaji-maintenance-planner-last-oil-v1";
 const INTERVAL_KEY = "karaji-maintenance-planner-oil-interval-v1";
 const LAST_OIL_DATE_KEY = "karaji-maintenance-planner-last-oil-date-v1";
-const REMINDED_KEY = "karaji-maintenance-planner-last-reminded-v1";
+const UPCOMING_NOTIFIED_KEY = "karaji-maintenance-planner-last-upcoming-notice-v1";
+const OVERDUE_NOTIFIED_KEY = "karaji-maintenance-planner-last-overdue-notice-v1";
 const REMINDER_WINDOW_DAYS = 3;
+const TOAST_AUTO_DISMISS_MS = 8000;
 
 function detectAppLanguage() {
   if (typeof document === "undefined") return "en";
@@ -104,6 +106,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   const [oilInterval, setOilInterval] = useState("");
   const [lastOilDate, setLastOilDate] = useState("");
   const [saved, setSaved] = useState(false);
+  const [toast, setToast] = useState(null); // { kind: "overdue" | "upcoming", title, ar, detail }
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -117,23 +120,52 @@ export default function KarajiMaintenancePlanner({ lang }) {
       setOilInterval(storedInterval);
       setLastOilDate(storedLastOilDate);
 
-      // Auto-pop the reminder once per day if something is due within the window.
       const planNow = getPlan(storedMileage, storedLastOil, storedInterval);
-      const dailyAvgNow = getDailyAvg(storedMileage, storedLastOil, storedLastOilDate);
       const soonest = planNow[0];
-      if (soonest && soonest.due !== null && dailyAvgNow) {
-        const daysRemaining = soonest.due / dailyAvgNow;
-        if (daysRemaining >= 0 && daysRemaining <= REMINDER_WINDOW_DAYS) {
-          const todayStr = new Date().toDateString();
-          const lastReminded = localStorage.getItem(REMINDED_KEY);
-          if (lastReminded !== todayStr) {
-            setOpen(true);
-            localStorage.setItem(REMINDED_KEY, todayStr);
+      const todayStr = new Date().toDateString();
+
+      if (soonest && soonest.due !== null) {
+        if (soonest.due < 0) {
+          // Overdue — gentle one-time-per-day toast, not a forced popup.
+          const lastOverdueNotice = localStorage.getItem(OVERDUE_NOTIFIED_KEY);
+          if (lastOverdueNotice !== todayStr) {
+            setToast({
+              kind: "overdue",
+              title: soonest.title,
+              ar: soonest.ar,
+              detail: `${Math.abs(soonest.due).toLocaleString()} km`,
+            });
+            localStorage.setItem(OVERDUE_NOTIFIED_KEY, todayStr);
+          }
+        } else {
+          const dailyAvgNow = getDailyAvg(storedMileage, storedLastOil, storedLastOilDate);
+          if (dailyAvgNow) {
+            const daysRemaining = soonest.due / dailyAvgNow;
+            if (daysRemaining >= 0 && daysRemaining <= REMINDER_WINDOW_DAYS) {
+              const lastUpcomingNotice = localStorage.getItem(UPCOMING_NOTIFIED_KEY);
+              if (lastUpcomingNotice !== todayStr) {
+                setToast({
+                  kind: "upcoming",
+                  title: soonest.title,
+                  ar: soonest.ar,
+                  detail: formatDaysLeft(daysRemaining, isAr),
+                });
+                localStorage.setItem(UPCOMING_NOTIFIED_KEY, todayStr);
+              }
+            }
           }
         }
       }
     } catch (_) {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Auto-dismiss the toast after a few seconds so it never lingers or nags.
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = setTimeout(() => setToast(null), TOAST_AUTO_DISMISS_MS);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     if (lang) {
@@ -189,8 +221,41 @@ export default function KarajiMaintenancePlanner({ lang }) {
     setTimeout(() => setSaved(false), 1600);
   };
 
+  const openFromToast = () => {
+    setToast(null);
+    setOpen(true);
+  };
+
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif", pointerEvents: open ? "auto" : "none" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+      {!open && toast && (
+        <button
+          onClick={openFromToast}
+          style={{
+            display: "flex", alignItems: "center", gap: 8, textAlign: isAr ? "right" : "left",
+            width: "min(300px, calc(100vw - 32px))", marginBottom: 9, padding: "10px 12px",
+            borderRadius: 12, border: `1px solid ${toast.kind === "overdue" ? C.red : C.amber}66`,
+            background: C.panel, boxShadow: "0 12px 30px rgba(0,0,0,.4)", cursor: "pointer",
+          }}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1 }}>{toast.kind === "overdue" ? "⚠️" : "⏰"}</span>
+          <span style={{ flex: 1 }}>
+            <span style={{ display: "block", color: toast.kind === "overdue" ? C.red : C.amber, fontWeight: 900, fontSize: 11 }}>
+              {toast.kind === "overdue" ? (isAr ? "صيانة متأخرة" : "Overdue maintenance") : (isAr ? "صيانة قريبة" : "Maintenance coming up")}
+            </span>
+            <span style={{ display: "block", color: C.cream, fontSize: 11, marginTop: 1 }}>
+              {isAr ? toast.ar : toast.title} — {toast.detail}
+            </span>
+          </span>
+          <span
+            onClick={(e) => { e.stopPropagation(); setToast(null); }}
+            style={{ color: C.dim, fontSize: 14, padding: "0 2px" }}
+          >
+            ×
+          </span>
+        </button>
+      )}
+
       {open && <div style={{ width: "min(330px, calc(100vw - 32px))", maxHeight: "min(560px, calc(100dvh - 150px))", overflowY: "auto", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: "0 18px 50px rgba(0,0,0,.45)", padding: 14, marginBottom: 9 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
           <div><div style={{ color: C.amber, fontSize: 10, fontWeight: 900 }}>KARAJY</div><div style={{ color: C.cream, fontSize: 16, fontWeight: 900 }}>{isAr ? "خطة الصيانة" : "Maintenance plan"}</div></div>
