@@ -8,6 +8,7 @@ const MENU_TRANSLATIONS = {
 const MENU_ENGLISH = Object.fromEntries(
   Object.entries(MENU_TRANSLATIONS).map(([en, ar]) => [ar, en])
 );
+MENU_ENGLISH["سياسة الموقع"] = "App policy";
 
 function getStoredLanguage() {
   try {
@@ -28,7 +29,6 @@ function getStoredLanguage() {
 function persistLanguage(lang) {
   if (lang !== "ar" && lang !== "en") return;
   try {
-    // Keep the app language in the keys used by both the app and the legal page.
     localStorage.setItem("karajy-language", lang);
     localStorage.setItem("karajiLanguage", lang);
     localStorage.setItem("appLanguage", lang);
@@ -72,7 +72,6 @@ function detectArabic() {
 
   if (isActive(arButton)) return true;
   if (isActive(enButton)) return false;
-
   return getStoredLanguage() === "ar";
 }
 
@@ -120,8 +119,6 @@ function hideGeneralFaultCategory() {
       if (clickable) break;
       target = target.parentElement;
     }
-    // Remove the category from the grid instead of hiding it, so it cannot
-    // leave an empty grid slot or create a broken layout.
     target.remove();
   });
 }
@@ -152,18 +149,21 @@ export function startMenuLanguageEnhancer() {
     attributeFilter: ["style", "class", "aria-pressed"],
   });
 
-  document.addEventListener("click", (event) => {
+  const handleClick = (event) => {
     const button = event.target?.closest?.("button");
     const label = button?.textContent?.trim();
     if (label === "AR") persistLanguage("ar");
     if (label === "EN") persistLanguage("en");
     schedule();
-  }, true);
+  };
+
+  document.addEventListener("click", handleClick, true);
   window.addEventListener("storage", schedule);
   window.addEventListener("karaji-language-change", schedule);
 
   return () => {
     observer.disconnect();
+    document.removeEventListener("click", handleClick, true);
     window.removeEventListener("storage", schedule);
     window.removeEventListener("karaji-language-change", schedule);
   };
