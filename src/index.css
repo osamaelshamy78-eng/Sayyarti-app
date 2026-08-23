@@ -16,6 +16,15 @@ body,
   box-sizing: border-box;
 }
 
+/* Give the mobile app shell more vertical room so the Fix/issues grid
+   is not cramped or clipped by the device viewport. */
+@media (max-width: 600px) {
+  #root > div > div[style*="width: 380px"] {
+    height: calc(100dvh - 16px) !important;
+    min-height: 760px;
+  }
+}
+
 /* Mobile viewport handling: do not apply a fixed height to arbitrary nested
    divs, because that can accidentally force modal/dialog components to fill
    the entire viewport. */
