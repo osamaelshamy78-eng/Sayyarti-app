@@ -67,15 +67,26 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
-  // The bottom Maintenance button dispatches this event. Keep this handler
-  // scoped to the existing planner so no other navigation is changed.
+  // Kept for compatibility in case anything else still dispatches this event.
   useEffect(() => {
     const openPlanner = () => setOpen(true);
     window.addEventListener("karaji-open-maintenance-planner", openPlanner);
     return () => window.removeEventListener("karaji-open-maintenance-planner", openPlanner);
   }, []);
 
-  // Only intercept the bottom Maintenance button. Do not alter any other navigation item or the existing directory content.
+  // Only intercept the bottom Maintenance button. Do not alter any other
+  // navigation item or the existing directory content.
+  //
+  // iOS fix: previously this listened on THREE event types
+  // (pointerdown + touchstart + click), each with preventDefault +
+  // stopPropagation + stopImmediatePropagation, AND a second separate
+  // script (MaintenanceNavFix.js) did the same thing independently.
+  // Two competing capture-phase interceptors triple-hijacking the same
+  // tap is exactly the kind of thing iOS Safari's touch-to-click
+  // sequencing handles inconsistently (Android Chrome is far more
+  // forgiving about this). Using a single "click" listener is the most
+  // cross-platform-reliable way to catch a tap, since the browser has
+  // already resolved touch-vs-click for you by the time it fires.
   useEffect(() => {
     const getMaintenanceButton = (target) => {
       const button = target?.closest?.("button");
@@ -91,15 +102,10 @@ export default function KarajiMaintenancePlanner({ lang }) {
       if (!button) return;
       event.preventDefault();
       event.stopPropagation();
-      if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
       setOpen(true);
     };
-    document.addEventListener("pointerdown", openPlannerFromMaintenance, true);
-    document.addEventListener("touchstart", openPlannerFromMaintenance, true);
     document.addEventListener("click", openPlannerFromMaintenance, true);
     return () => {
-      document.removeEventListener("pointerdown", openPlannerFromMaintenance, true);
-      document.removeEventListener("touchstart", openPlannerFromMaintenance, true);
       document.removeEventListener("click", openPlannerFromMaintenance, true);
     };
   }, []);
