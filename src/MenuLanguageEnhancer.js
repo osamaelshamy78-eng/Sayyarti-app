@@ -1,7 +1,7 @@
 const MENU_TRANSLATIONS = {
   "Add Your Garage Free": "أضف جراجك مجانًا",
   "List Your Car for Sale": "اعرض سيارتك للبيع",
-  "Legal": "الشؤون القانونية",
+  "Legal": "سياسة الموقع",
   "About the App": "حول التطبيق",
 };
 
@@ -38,8 +38,6 @@ function detectArabic() {
 function translateMenu() {
   const map = detectArabic() ? MENU_TRANSLATIONS : MENU_ENGLISH;
 
-  // The side-menu buttons also contain icons, so button.textContent is not
-  // equal to the label. Translate the label spans directly.
   document.querySelectorAll("button").forEach((button) => {
     button.querySelectorAll("span").forEach((span) => {
       const current = span.textContent?.trim();
@@ -62,6 +60,29 @@ function translateMenu() {
   });
 }
 
+function hideGeneralFaultCategory() {
+  const labels = new Set([
+    "General / Not Sure What's Wrong",
+    "أعطال عامة / مش عارف العطل فين",
+  ]);
+
+  document.querySelectorAll("*").forEach((element) => {
+    if (element.children.length !== 0) return;
+    const text = element.textContent?.trim();
+    if (!text || !labels.has(text)) return;
+
+    let target = element;
+    for (let i = 0; i < 5 && target.parentElement; i += 1) {
+      const tag = target.tagName?.toLowerCase();
+      const role = target.getAttribute?.("role");
+      const clickable = tag === "button" || role === "button" || typeof target.onclick === "function";
+      if (clickable) break;
+      target = target.parentElement;
+    }
+    target.style.display = "none";
+  });
+}
+
 export function startMenuLanguageEnhancer() {
   if (typeof document === "undefined") return () => {};
 
@@ -72,6 +93,7 @@ export function startMenuLanguageEnhancer() {
     requestAnimationFrame(() => {
       scheduled = false;
       translateMenu();
+      hideGeneralFaultCategory();
     });
   };
 
