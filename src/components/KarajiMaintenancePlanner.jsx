@@ -79,29 +79,38 @@ export default function KarajiMaintenancePlanner({ lang }) {
     };
   }, [lang]);
 
-  // The Maintenance bottom-nav item is the replacement for the old
-  // floating Service button. Intercept it before the app's normal route
-  // handler so it opens the same maintenance planner panel instead of
-  // navigating to the unrelated Maintenance directory page.
+  // Only intercept the bottom Maintenance button. Do not alter any other
+  // navigation item or the existing Maintenance directory content.
   useEffect(() => {
-    const handleMaintenanceNav = (event) => {
-      const button = event.target?.closest?.("button");
-      if (!button) return;
+    const getMaintenanceButton = (target) => {
+      const button = target?.closest?.("button");
+      if (!button) return null;
       const label = (button.textContent || "").replace(/\s+/g, " ").trim().toLowerCase();
-      const isMaintenanceButton = [
-        "maintenance",
-        "الصيانة",
-        "quick service",
-        "الصيانة السريعة",
-      ].includes(label);
-      if (!isMaintenanceButton) return;
+      const aria = (button.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const title = (button.getAttribute("title") || "").replace(/\s+/g, " ").trim().toLowerCase();
+      const haystack = `${label} ${aria} ${title}`;
+      return /(^|\s)(maintenance|quick service|الصيانة|الصيانة السريعة)(\s|$)/i.test(haystack) ? button : null;
+    };
 
+    const openPlannerFromMaintenance = (event) => {
+      const button = getMaintenanceButton(event.target);
+      if (!button) return;
       event.preventDefault();
-      event.stopImmediatePropagation();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === "function") event.stopImmediatePropagation();
       setOpen(true);
     };
-    document.addEventListener("click", handleMaintenanceNav, true);
-    return () => document.removeEventListener("click", handleMaintenanceNav, true);
+
+    // Capture the interaction before React's bottom-nav onClick can call
+    // setView("maintenance"), so this button opens the planner instead.
+    document.addEventListener("pointerdown", openPlannerFromMaintenance, true);
+    document.addEventListener("touchstart", openPlannerFromMaintenance, true);
+    document.addEventListener("click", openPlannerFromMaintenance, true);
+    return () => {
+      document.removeEventListener("pointerdown", openPlannerFromMaintenance, true);
+      document.removeEventListener("touchstart", openPlannerFromMaintenance, true);
+      document.removeEventListener("click", openPlannerFromMaintenance, true);
+    };
   }, []);
 
   useEffect(() => {
