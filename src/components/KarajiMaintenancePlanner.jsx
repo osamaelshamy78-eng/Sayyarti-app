@@ -7,7 +7,6 @@ const INTERVAL_KEY = "karaji-maintenance-planner-oil-interval-v1";
 const LAST_OIL_DATE_KEY = "karaji-maintenance-planner-last-oil-date-v1";
 const DUE_DATES_KEY = "karaji-maintenance-planner-due-dates-v1";
 const UPCOMING_NOTIFIED_KEY = "karaji-maintenance-planner-last-upcoming-notice-v1";
-const OVERDUE_NOTIFIED_KEY = "karaji-maintenance-planner-last-overdue-notice-v1";
 const REMINDER_WINDOW_DAYS = 3;
 const TOAST_AUTO_DISMISS_MS = 8000;
 
@@ -172,17 +171,15 @@ export default function KarajiMaintenancePlanner({ lang }) {
 
       if (soonest && soonest.due !== null) {
         if (soonest.due < 0) {
-          // Overdue — gentle one-time-per-day toast, not a forced popup.
-          const lastOverdueNotice = localStorage.getItem(OVERDUE_NOTIFIED_KEY);
-          if (lastOverdueNotice !== todayStr) {
-            setToast({
-              kind: "overdue",
-              title: soonest.title,
-              ar: soonest.ar,
-              detail: `${Math.abs(soonest.due).toLocaleString()} km`,
-            });
-            localStorage.setItem(OVERDUE_NOTIFIED_KEY, todayStr);
-          }
+          // Overdue — shown every time the app opens (not just once/day), since
+          // it now stays on screen until the user dismisses it or opens the plan,
+          // rather than timing out on its own.
+          setToast({
+            kind: "overdue",
+            title: soonest.title,
+            ar: soonest.ar,
+            detail: `${Math.abs(soonest.due).toLocaleString()} km`,
+          });
         } else if (storedDueDates && storedDueDates[soonest.title]) {
           const daysRemaining = daysRemainingFromDueDate(storedDueDates[soonest.title]);
           if (daysRemaining !== null && daysRemaining >= 0 && daysRemaining <= REMINDER_WINDOW_DAYS) {
@@ -203,9 +200,11 @@ export default function KarajiMaintenancePlanner({ lang }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auto-dismiss the toast after a few seconds so it never lingers or nags.
+  // Auto-dismiss "coming up soon" toasts after a few seconds so they never nag.
+  // Overdue toasts stay on screen until the user dismisses them or opens the plan —
+  // they're urgent enough that they shouldn't vanish on their own.
   useEffect(() => {
-    if (!toast) return undefined;
+    if (!toast || toast.kind === "overdue") return undefined;
     const timer = setTimeout(() => setToast(null), TOAST_AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
   }, [toast]);
