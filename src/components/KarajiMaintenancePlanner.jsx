@@ -5,6 +5,7 @@ const KEY = "karaji-maintenance-planner-v1";
 const LAST_OIL_KEY = "karaji-maintenance-planner-last-oil-v1";
 const INTERVAL_KEY = "karaji-maintenance-planner-oil-interval-v1";
 const LAST_OIL_DATE_KEY = "karaji-maintenance-planner-last-oil-date-v1";
+const DUE_DATES_KEY = "karaji-maintenance-planner-due-dates-v1";
 const UPCOMING_NOTIFIED_KEY = "karaji-maintenance-planner-last-upcoming-notice-v1";
 const OVERDUE_NOTIFIED_KEY = "karaji-maintenance-planner-last-overdue-notice-v1";
 const REMINDER_WINDOW_DAYS = 3;
@@ -83,6 +84,38 @@ function getDailyAvg(km, lastOilChange, lastOilDate) {
   return kmDriven / daysElapsed;
 }
 
+// Snapshot the *calendar dates* each item is predicted to be due, using the
+// driving pace at the moment of calculation. Once stored, these dates are
+// fixed reference points — "days remaining/overdue" is then a plain calendar
+// countdown against them, so it changes by exactly 1 day per real day instead
+// of drifting based on a recalculated average every time the app is opened.
+function computeDueDates(km, lastOilChange, oilInterval, lastOilDate) {
+  const dailyAvg = getDailyAvg(km, lastOilChange, lastOilDate);
+  if (!dailyAvg) return null;
+  const plan = getPlan(km, lastOilChange, oilInterval);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const dueDates = {};
+  plan.forEach((item) => {
+    if (item.due === null) return;
+    const daysFromToday = Math.round(item.due / dailyAvg);
+    const d = new Date(today);
+    d.setDate(d.getDate() + daysFromToday);
+    dueDates[item.title] = d.toISOString().slice(0, 10);
+  });
+  return dueDates;
+}
+
+function daysRemainingFromDueDate(dueDateStr) {
+  if (!dueDateStr) return null;
+  const due = new Date(dueDateStr);
+  if (Number.isNaN(due.getTime())) return null;
+  const today = new Date();
+  due.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return Math.round((due.getTime() - today.getTime()) / 86400000);
+}
+
 function formatDaysLeft(days, isAr) {
   if (days === null || days === undefined || Number.isNaN(days)) return "—";
   if (days < 0) {
@@ -105,6 +138,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   const [lastOilChange, setLastOilChange] = useState("");
   const [oilInterval, setOilInterval] = useState("");
   const [lastOilDate, setLastOilDate] = useState("");
+  const [dueDates, setDueDates] = useState({});
   const [saved, setSaved] = useState(false);
   const [toast, setToast] = useState(null); // { kind: "overdue" | "upcoming", title, ar, detail }
   const rootRef = useRef(null);
@@ -119,6 +153,18 @@ export default function KarajiMaintenancePlanner({ lang }) {
       setLastOilChange(storedLastOil);
       setOilInterval(storedInterval);
       setLastOilDate(storedLastOilDate);
+
+      let storedDueDates = null;
+      try {
+        const raw = localStorage.getItem(DUE_DATES_KEY);
+        if (raw) storedDueDates = JSON.parse(raw);
+      } catch (_) {}
+      if (!storedDueDates) {
+        // First run with this data — snapshot due dates now.
+        storedDueDates = computeDueDates(storedMileage, storedLastOil, storedInterval, storedLastOilDate);
+        if (storedDueDates) localStorage.setItem(DUE_DATES_KEY, JSON.stringify(storedDueDates));
+      }
+      if (storedDueDates) setDueDates(storedDueDates);
 
       const planNow = getPlan(storedMileage, storedLastOil, storedInterval);
       const soonest = planNow[0];
@@ -137,21 +183,18 @@ export default function KarajiMaintenancePlanner({ lang }) {
             });
             localStorage.setItem(OVERDUE_NOTIFIED_KEY, todayStr);
           }
-        } else {
-          const dailyAvgNow = getDailyAvg(storedMileage, storedLastOil, storedLastOilDate);
-          if (dailyAvgNow) {
-            const daysRemaining = soonest.due / dailyAvgNow;
-            if (daysRemaining >= 0 && daysRemaining <= REMINDER_WINDOW_DAYS) {
-              const lastUpcomingNotice = localStorage.getItem(UPCOMING_NOTIFIED_KEY);
-              if (lastUpcomingNotice !== todayStr) {
-                setToast({
-                  kind: "upcoming",
-                  title: soonest.title,
-                  ar: soonest.ar,
-                  detail: formatDaysLeft(daysRemaining, isAr),
-                });
-                localStorage.setItem(UPCOMING_NOTIFIED_KEY, todayStr);
-              }
+        } else if (storedDueDates && storedDueDates[soonest.title]) {
+          const daysRemaining = daysRemainingFromDueDate(storedDueDates[soonest.title]);
+          if (daysRemaining !== null && daysRemaining >= 0 && daysRemaining <= REMINDER_WINDOW_DAYS) {
+            const lastUpcomingNotice = localStorage.getItem(UPCOMING_NOTIFIED_KEY);
+            if (lastUpcomingNotice !== todayStr) {
+              setToast({
+                kind: "upcoming",
+                title: soonest.title,
+                ar: soonest.ar,
+                detail: formatDaysLeft(daysRemaining, isAr),
+              });
+              localStorage.setItem(UPCOMING_NOTIFIED_KEY, todayStr);
             }
           }
         }
@@ -202,10 +245,9 @@ export default function KarajiMaintenancePlanner({ lang }) {
   }, [open]);
 
   const plan = useMemo(() => getPlan(mileage, lastOilChange, oilInterval), [mileage, lastOilChange, oilInterval]);
-  const dailyAvg = useMemo(() => getDailyAvg(mileage, lastOilChange, lastOilDate), [mileage, lastOilChange, lastOilDate]);
   const planWithDays = useMemo(
-    () => plan.map((item) => ({ ...item, daysRemaining: item.due !== null && dailyAvg ? item.due / dailyAvg : null })),
-    [plan, dailyAvg]
+    () => plan.map((item) => ({ ...item, daysRemaining: daysRemainingFromDueDate(dueDates[item.title]) })),
+    [plan, dueDates]
   );
   const next = planWithDays[0];
   const showReminderBanner = next && next.daysRemaining !== null && next.daysRemaining >= 0 && next.daysRemaining <= REMINDER_WINDOW_DAYS;
@@ -216,6 +258,15 @@ export default function KarajiMaintenancePlanner({ lang }) {
       localStorage.setItem(LAST_OIL_KEY, lastOilChange);
       localStorage.setItem(INTERVAL_KEY, oilInterval);
       localStorage.setItem(LAST_OIL_DATE_KEY, lastOilDate);
+      // Recalculate the due-date snapshot from the freshly saved data.
+      const freshDueDates = computeDueDates(mileage, lastOilChange, oilInterval, lastOilDate);
+      if (freshDueDates) {
+        localStorage.setItem(DUE_DATES_KEY, JSON.stringify(freshDueDates));
+        setDueDates(freshDueDates);
+      } else {
+        localStorage.removeItem(DUE_DATES_KEY);
+        setDueDates({});
+      }
     } catch (_) {}
     setSaved(true);
     setTimeout(() => setSaved(false), 1600);
@@ -333,7 +384,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
         })}</div>
 
         <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
-        <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions."}</div>
+        <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام. الأيام تُحسب من تاريخ استحقاق ثابت يتحدّث فقط عند حفظ عداد جديد." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions. Days are counted from a fixed due date that only updates when you save a new mileage reading."}</div>
       </div>}
     </div>
   );
