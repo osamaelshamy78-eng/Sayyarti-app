@@ -383,6 +383,37 @@ export default function KarajiMaintenancePlanner({ lang }) {
         })}</div>
 
         <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
+
+        {(() => {
+          const canBookNow = next && next.daysRemaining !== null && next.daysRemaining <= 2;
+          return (
+            <>
+              <button
+                onClick={() => {
+                  if (!canBookNow) return;
+                  setOpen(false);
+                  window.history.pushState({}, "", "/maintenance");
+                  window.dispatchEvent(new PopStateEvent("popstate"));
+                }}
+                disabled={!canBookNow}
+                style={{
+                  width: "100%", marginTop: 8, padding: 10, borderRadius: 10, fontWeight: 900,
+                  border: `1px solid ${canBookNow ? C.red : C.line}`,
+                  background: canBookNow ? `${C.red}1A` : "transparent",
+                  color: canBookNow ? C.red : C.dim,
+                  cursor: canBookNow ? "pointer" : "not-allowed",
+                }}
+              >
+                {isAr ? "افتح مراكز الصيانة" : "Open maintenance centers"}
+              </button>
+              {!canBookNow && (
+                <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 5, textAlign: "center" }}>
+                  {isAr ? "هيتفعل الزر قبل الموعد بيوم أو يومين، أو لو الموعد فات." : "This unlocks a day or two before the due date, or once it's overdue."}
+                </div>
+              )}
+            </>
+          );
+        })()}
         <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام. الأيام تُحسب من تاريخ استحقاق ثابت يتحدّث فقط عند حفظ عداد جديد." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions. Days are counted from a fixed due date that only updates when you save a new mileage reading."}</div>
       </div>}
     </div>
