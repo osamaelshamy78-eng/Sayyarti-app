@@ -1,5 +1,6 @@
 import React, { Component, Suspense } from "react";
 import ReactDOM from "react-dom/client";
+import { inject } from "@vercel/analytics";
 import "./index.css";
 import { startAdminPhotoRequestEnhancer } from "./AdminPhotoRequestEnhancer";
 import { startCarMediaEnhancer } from "./CarMediaEnhancer";
@@ -12,6 +13,11 @@ import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
+
+// Explicitly initialize Vercel Web Analytics for the Vite/React SPA.
+// This ensures production visitors and page views are reported even though
+// the @vercel/analytics package is not auto-mounted by Vite.
+inject({ mode: import.meta.env.DEV ? "development" : "production" });
 
 const App = React.lazy(() => import("./App.jsx"));
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
