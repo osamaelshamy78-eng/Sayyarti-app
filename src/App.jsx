@@ -2281,6 +2281,12 @@ const T = {
       "Starter directory from public sources — confirm hours, pricing & contact details before visiting.",
     openInMaps: "Open in Maps →",
     addGarageBtn: "+ Add Your Garage",
+    requestQuoteBtn: "Request a price quote from a garage",
+    quoteBannerLabel: "Requesting a quote for:",
+    quoteBannerHint: "Pick a Plus garage below to send this request on WhatsApp",
+    quoteClear: "Cancel",
+    quoteCardBtn: "📩 Request quote via WhatsApp",
+    quoteStaticNote: "Directory listing — not set up for direct quote requests",
     navParts: "Spare Parts",
     partsHeading: "Spare parts shops",
     partsSub: "Pick a country to browse trusted spare parts dealers",
@@ -2419,6 +2425,12 @@ const T = {
       "دليل أولي من مصادر عامة — يرجى التأكد من مواعيد العمل والأسعار وبيانات التواصل قبل الزيارة.",
     openInMaps: "← افتح في الخرائط",
     addGarageBtn: "+ أضف جراجك",
+    requestQuoteBtn: "اطلب عرض سعر من ورشة",
+    quoteBannerLabel: "بتطلب عرض سعر عن:",
+    quoteBannerHint: "اختر ورشة من قايمة \"بلس\" تحت عشان تبعتلها الطلب على واتساب",
+    quoteClear: "إلغاء",
+    quoteCardBtn: "📩 اطلب عرض سعر عبر واتساب",
+    quoteStaticNote: "ورشة من الدليل العام — مش متاح ليها طلب عرض سعر مباشر",
     navParts: "قطع غيار",
     partsHeading: "محلات قطع الغيار",
     partsSub: "اختر دولة لتصفح موزعي قطع الغيار الموثوقين",
@@ -3257,7 +3269,7 @@ function Section({ label, color, children }) {
   );
 }
 
-function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRTL }) {
+function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRTL, onRequestQuote }) {
   const issue = ISSUES[issueId][lang];
   const [media, setMedia] = useState([]);
 
@@ -3418,12 +3430,30 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
           <PlayCircle size={18} color={C.asphalt} />
           <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.watchVideo}</span>
         </button>
+
+        {onRequestQuote && (
+          <button
+            onClick={() => onRequestQuote(issue)}
+            className="w-full flex items-center justify-center gap-2"
+            style={{
+              background: "transparent",
+              border: `1.5px solid ${C.blue}`,
+              borderRadius: 12,
+              padding: "13px 16px",
+              cursor: "pointer",
+              marginTop: 10,
+            }}
+          >
+            <MapPin size={18} color={C.blue} />
+            <span style={{ color: C.blue, fontSize: 14, fontWeight: 700 }}>{t.requestQuoteBtn}</span>
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-function GaragesView({ lang, t, country, setCountry, isRTL }) {
+function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClearQuote }) {
   const [showGarageForm, setShowGarageForm] = useState(false);
   const [dbGarages, setDbGarages] = useState([]);
   const data = GARAGES[country];
@@ -4354,6 +4384,38 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     await loadAll();
   }
 
+  function carPhotoStoragePath(url) {
+    if (!url) return null;
+    const marker = "/car-photos/";
+    const idx = url.indexOf(marker);
+    if (idx === -1) return null;
+    return url.slice(idx + marker.length);
+  }
+
+  async function deleteCar(car) {
+    if (!supabase || !user) return;
+    const ok = window.confirm(lang === "ar" ? "متأكد إنك عايز تمسح إعلان السيارة ده نهائيًا؟" : "Permanently delete this car listing?");
+    if (!ok) return;
+    setBusyId(car.id);
+    setLoginError("");
+    const { data, error } = await supabase.rpc("admin_delete_car", { p_id: car.id });
+    if (error) {
+      setBusyId(null);
+      setLoginError(error.message);
+      return;
+    }
+    const row = Array.isArray(data) ? data[0] : data;
+    const urls = new Set();
+    if (row?.photo_url) urls.add(row.photo_url);
+    if (Array.isArray(row?.photo_urls)) row.photo_urls.forEach((u) => u && urls.add(u));
+    const paths = [...urls].map(carPhotoStoragePath).filter(Boolean);
+    if (paths.length) {
+      await supabase.storage.from("car-photos").remove(paths);
+    }
+    setBusyId(null);
+    await loadAll();
+  }
+
   async function updateGarageStatus(item, nextStatus) {
     if (!supabase || !user) return;
     setBusyId(item.id);
@@ -4903,6 +4965,12 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                   {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}
                   {c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
                 </button>
+                <button disabled={busyId === c.id} onClick={() => deleteCar(c)}
+                  className="flex items-center justify-center gap-2 mt-2"
+                  style={{ width: "100%", background: "transparent", border: `1px solid ${C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: C.red, fontSize: 12.5, fontWeight: 700 }}>
+                  <Trash2 size={14} />
+                  {t.adminDelete}
+                </button>
               </div>
             </div>
           ))}
@@ -4930,22 +4998,6 @@ export default function App() {
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.matchMedia("(max-width: 767px)").matches : true
-  );
-
-  useEffect(() => {
-    if (typeof window === "undefined") return undefined;
-    const mq = window.matchMedia("(max-width: 767px)");
-    const handleChange = () => setIsMobile(mq.matches);
-    handleChange();
-    if (mq.addEventListener) mq.addEventListener("change", handleChange);
-    else mq.addListener(handleChange);
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener("change", handleChange);
-      else mq.removeListener(handleChange);
-    };
-  }, []);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -5040,18 +5092,18 @@ export default function App() {
 
   return (
     <div
-      className={isMobile ? "w-full" : "w-full min-h-screen flex items-center justify-center py-8"}
-      style={{ background: "#0A0B0D", minHeight: isMobile ? "100dvh" : undefined }}
+      className="w-full min-h-screen flex items-center justify-center py-8"
+      style={{ background: "#0A0B0D" }}
     >
       <div
         dir={isRTL ? "rtl" : "ltr"}
         style={{
-          width: isMobile ? "100%" : 380,
-          height: isMobile ? "100dvh" : 760,
+          width: 380,
+          height: 760,
           background: C.asphalt,
-          borderRadius: isMobile ? 0 : 40,
-          border: isMobile ? "none" : `8px solid #05060700`,
-          boxShadow: isMobile ? "none" : "0 30px 60px rgba(0,0,0,0.5)",
+          borderRadius: 40,
+          border: `8px solid #05060700`,
+          boxShadow: "0 30px 60px rgba(0,0,0,0.5)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -5059,17 +5111,14 @@ export default function App() {
           position: "relative",
         }}
       >
-        {/* status bar (desktop preview only — real phones already show their own) */}
-        {!isMobile && (
-          <div
-            className="flex items-center justify-between px-6"
-            style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600, flexShrink: 0 }}
-          >
-            <span>{clock}</span>
-            <span style={{ letterSpacing: 1 }}>●●●●</span>
-          </div>
-        )}
-        {isMobile && <div style={{ height: "env(safe-area-inset-top)", flexShrink: 0 }} />}
+        {/* status bar */}
+        <div
+          className="flex items-center justify-between px-6"
+          style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600 }}
+        >
+          <span>{clock}</span>
+          <span style={{ letterSpacing: 1 }}>●●●●</span>
+        </div>
 
         <TopBar
           lang={lang}
@@ -5083,7 +5132,7 @@ export default function App() {
         />
         <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
-        <div className="flex-1 overflow-y-auto" style={{ paddingBottom: isMobile ? "calc(74px + env(safe-area-inset-bottom))" : undefined }}>
+        <div className="flex-1 overflow-y-auto">
           {view === "home" && (
             <HomeView
               lang={lang}
