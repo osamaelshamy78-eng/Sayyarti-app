@@ -26,7 +26,7 @@ import {
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
 import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
-import CarForm from "./components/CarForm";
+import CarForm, { CAR_MAKES, CAR_MODELS } from "./components/CarForm";
 
 /* ---------------------------------------------------------------
    Design tokens
@@ -1878,9 +1878,10 @@ function routeFromPath(pathname) {
   if (path === "/maintenance") return { view: "maintenance" };
   if (path === "/parts") return { view: "parts" };
   if (path === "/diagnosis") return { view: "diagnosis" };
-  if (path === "/cars") return { view: "cars" };
+  if (path === "/cars") return { view: "cars", carMode: "add" };
   if (path === "/cars/add") return { view: "cars", carMode: "add" };
   if (path === "/cars/submitted") return { view: "cars", carMode: "submitted" };
+  if (path === "/buy-car") return { view: "buy-car" };
   if (path === "/admin") return { view: "admin" };
 
   const fixMatch = path.match(/^\/fix\/([^/]+)$/);
@@ -2337,7 +2338,19 @@ const T = {
     advertiseNote: "Tap below to email us your advertising inquiry.",
     navCars: "Sell Your Car",
     carsHeading: "Sell Your Car",
-    carsSub: "Browse listings or post your own car",
+    carsSub: "Post your car for sale in a few steps",
+    navBuyCar: "Buy a Car",
+    buyCarHeading: "Buy a Car",
+    buyCarSub: "Browse listings or narrow down with filters",
+    filterCountry: "Country",
+    filterMake: "Make",
+    filterModel: "Model",
+    filterPrice: "Price range",
+    filterYear: "Year",
+    filterMileage: "Mileage",
+    filterAll: "All",
+    filterClear: "Clear filters",
+    filterNoResults: "No cars match these filters yet.",
     addCarBtn: "+ List Your Car",
     carModel: "Make & Model",
     carMake: "Make",
@@ -2481,7 +2494,19 @@ const T = {
     advertiseNote: "اضغط بالأسفل لإرسال استفسار الإعلان عبر البريد الإلكتروني.",
     navCars: "بيع سيارتك",
     carsHeading: "بيع سيارتك",
-    carsSub: "تصفح السيارات المعروضة أو اعرض سيارتك",
+    carsSub: "اعرض سيارتك للبيع في خطوات بسيطة",
+    navBuyCar: "اشتري سيارة",
+    buyCarHeading: "اشتري سيارة",
+    buyCarSub: "تصفح السيارات المعروضة أو ضيّق البحث بالفلاتر",
+    filterCountry: "الدولة",
+    filterMake: "الماركة",
+    filterModel: "الموديل",
+    filterPrice: "نطاق السعر",
+    filterYear: "السنة",
+    filterMileage: "الكيلومترات",
+    filterAll: "الكل",
+    filterClear: "مسح الفلاتر",
+    filterNoResults: "مفيش سيارات مطابقة للفلاتر دي دلوقتي.",
     addCarBtn: "+ اعرض سيارتك",
     carModel: "الماركة والموديل",
     carMake: "الماركة",
@@ -2828,6 +2853,7 @@ const MAIN_SECTIONS = [
   { id: "fix", icon: Gauge, labelKey: "navIssues" },
   { id: "garages", icon: MapPin, labelKey: "navGarages" },
   { id: "maintenance", icon: Droplet, labelKey: "navMaintenance" },
+  { id: "buy-car", icon: Search, labelKey: "navBuyCar" },
   { id: "cars", icon: Car, labelKey: "navCars" },
   { id: "parts", icon: Settings, labelKey: "navParts" },
   { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
@@ -3943,10 +3969,99 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
   );
 }
 
-function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSelectCar, onBack }) {
+function CarsView({ lang, t, isRTL, mode, onSubmitted, onBack }) {
+  if (mode === "submitted") {
+    return (
+      <div className="px-5 pt-8 pb-6 text-center">
+        <div
+          className="flex items-center justify-center rounded-full mb-4"
+          style={{
+            width: 60,
+            height: 60,
+            background: `${C.amber}18`,
+            border: `1px solid ${C.amberDim}`,
+            margin: "0 auto 16px",
+          }}
+        >
+          <Car size={26} color={C.amber} />
+        </div>
+        <p style={{ color: C.cream, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+          {t.carSubmitted}
+        </p>
+        <button
+          onClick={onBack}
+          style={{
+            background: C.amber,
+            border: "none",
+            borderRadius: 12,
+            padding: "12px 20px",
+            color: C.asphalt,
+            fontSize: 13,
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {t.navCars}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <CarForm
+      lang={lang}
+      t={t}
+      isRTL={isRTL}
+      onClose={onBack}
+      onSubmitted={onSubmitted}
+    />
+  );
+}
+
+/* ---------------------------------------------------------------
+   Buy a car — browse & filter approved listings
+--------------------------------------------------------------- */
+const PRICE_RANGES = [
+  { id: "u20k", min: 0, max: 20000 },
+  { id: "20-50k", min: 20000, max: 50000 },
+  { id: "50-100k", min: 50000, max: 100000 },
+  { id: "100-200k", min: 100000, max: 200000 },
+  { id: "o200k", min: 200000, max: null },
+];
+const YEAR_RANGES = [
+  { id: "pre2015", min: null, max: 2014 },
+  { id: "2015-2019", min: 2015, max: 2019 },
+  { id: "2020-2022", min: 2020, max: 2022 },
+  { id: "2023plus", min: 2023, max: null },
+];
+const MILEAGE_RANGES = [
+  { id: "u20k", min: 0, max: 20000 },
+  { id: "20-60k", min: 20000, max: 60000 },
+  { id: "60-120k", min: 60000, max: 120000 },
+  { id: "o120k", min: 120000, max: null },
+];
+
+function rangeLabel(r, lang, unit) {
+  if (r.min == null) return lang === "ar" ? `أقل من ${r.max.toLocaleString()}${unit}` : `Under ${r.max.toLocaleString()}${unit}`;
+  if (r.max == null) return lang === "ar" ? `أكتر من ${r.min.toLocaleString()}${unit}` : `Over ${r.min.toLocaleString()}${unit}`;
+  return `${r.min.toLocaleString()} – ${r.max.toLocaleString()}${unit}`;
+}
+
+function inRange(value, range) {
+  if (!range) return true;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return false;
+  if (range.min != null && n < range.min) return false;
+  if (range.max != null && n > range.max) return false;
+  return true;
+}
+
+function BuyCarView({ lang, t, isRTL }) {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [filters, setFilters] = useState({ country: "", make: "", model: "", price: "", year: "", mileage: "" });
 
   useEffect(() => {
     let active = true;
@@ -3986,106 +4101,147 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
       active = false;
       clearTimeout(timer);
     };
-  }, [mode]);
+  }, []);
 
   if (selected) {
-    return (
-      <CarDetailView lang={lang} t={t} isRTL={isRTL} car={selected} onBack={onBack} />
-    );
+    return <CarDetailView lang={lang} t={t} isRTL={isRTL} car={selected} onBack={() => setSelected(null)} />;
   }
 
-  if (mode === "add") {
-    return (
-      <CarForm
-        lang={lang}
-        t={t}
-        isRTL={isRTL}
-        onClose={onBack}
-        onSubmitted={onSubmitted}
-      />
-    );
-  }
+  const modelOptions = filters.make && filters.make !== "Other" ? CAR_MODELS[filters.make] || [] : [];
+  const priceRange = PRICE_RANGES.find((r) => r.id === filters.price);
+  const yearRange = YEAR_RANGES.find((r) => r.id === filters.year);
+  const mileageRange = MILEAGE_RANGES.find((r) => r.id === filters.mileage);
 
-  if (mode === "submitted") {
-    return (
-      <div className="px-5 pt-8 pb-6 text-center">
-        <div
-          className="flex items-center justify-center rounded-full mb-4"
-          style={{
-            width: 60,
-            height: 60,
-            background: `${C.amber}18`,
-            border: `1px solid ${C.amberDim}`,
-            margin: "0 auto 16px",
-          }}
-        >
-          <Car size={26} color={C.amber} />
-        </div>
-        <p style={{ color: C.cream, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
-          {t.carSubmitted}
-        </p>
-        <button
-          onClick={onBack}
-          style={{
-            background: C.amber,
-            border: "none",
-            borderRadius: 12,
-            padding: "12px 20px",
-            color: C.asphalt,
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: "pointer",
-          }}
-        >
-          {t.navCars}
-        </button>
-      </div>
-    );
-  }
+  const filtered = listings.filter((c) => {
+    if (filters.country && c.country !== filters.country) return false;
+    if (filters.make && !(c.make_model || "").toLowerCase().startsWith(filters.make.toLowerCase())) return false;
+    if (filters.model && !(c.make_model || "").toLowerCase().includes(filters.model.toLowerCase())) return false;
+    if (priceRange && !inRange(c.price, priceRange)) return false;
+    if (yearRange && !inRange(c.year, yearRange)) return false;
+    if (mileageRange && !inRange(c.mileage, mileageRange)) return false;
+    return true;
+  });
+
+  const hasActiveFilters = Object.values(filters).some(Boolean);
+
+  const selectStyle = {
+    background: C.panel,
+    border: `1px solid ${C.panelLine}`,
+    borderRadius: 10,
+    padding: "9px 10px",
+    color: C.cream,
+    fontSize: 12.5,
+    width: "100%",
+  };
 
   return (
     <div className="px-5 pt-5 pb-6">
       <div className="flex items-center justify-between mb-1">
-        <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
-          {t.carsHeading}
-        </h1>
+        <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.buyCarHeading}</h1>
       </div>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>
-        {t.carsSub}
-      </p>
+      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.buyCarSub}</p>
 
-      <button
-        onClick={onOpenAdd}
-        className="w-full flex items-center justify-center gap-2 mb-5"
-        style={{
-          background: C.amber,
-          border: "none",
-          borderRadius: 12,
-          padding: "12px 16px",
-          cursor: "pointer",
-        }}
-      >
-        <Plus size={16} color={C.asphalt} strokeWidth={2.5} />
-        <span style={{ color: C.asphalt, fontSize: 13.5, fontWeight: 700 }}>{t.addCarBtn}</span>
-      </button>
+      <div className="grid grid-cols-2 gap-2 mb-2">
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterCountry}</span>
+          <select
+            style={selectStyle}
+            value={filters.country}
+            onChange={(e) => setFilters((f) => ({ ...f, country: e.target.value }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {CAR_COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>{c[lang]}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMake}</span>
+          <select
+            style={selectStyle}
+            value={filters.make}
+            onChange={(e) => setFilters((f) => ({ ...f, make: e.target.value, model: "" }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {CAR_MAKES.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterModel}</span>
+          <select
+            style={selectStyle}
+            value={filters.model}
+            disabled={!modelOptions.length}
+            onChange={(e) => setFilters((f) => ({ ...f, model: e.target.value }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {modelOptions.map((m) => (
+              <option key={m} value={m}>{m}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterPrice}</span>
+          <select
+            style={selectStyle}
+            value={filters.price}
+            onChange={(e) => setFilters((f) => ({ ...f, price: e.target.value }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {PRICE_RANGES.map((r) => (
+              <option key={r.id} value={r.id}>{rangeLabel(r, lang, "")}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterYear}</span>
+          <select
+            style={selectStyle}
+            value={filters.year}
+            onChange={(e) => setFilters((f) => ({ ...f, year: e.target.value }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {YEAR_RANGES.map((r) => (
+              <option key={r.id} value={r.id}>{rangeLabel(r, lang, "")}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMileage}</span>
+          <select
+            style={selectStyle}
+            value={filters.mileage}
+            onChange={(e) => setFilters((f) => ({ ...f, mileage: e.target.value }))}
+          >
+            <option value="">{t.filterAll}</option>
+            {MILEAGE_RANGES.map((r) => (
+              <option key={r.id} value={r.id}>{rangeLabel(r, lang, " km")}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {hasActiveFilters && (
+        <button
+          onClick={() => setFilters({ country: "", make: "", model: "", price: "", year: "", mileage: "" })}
+          style={{ background: "none", border: "none", color: C.blue, fontSize: 11.5, fontWeight: 700, cursor: "pointer", padding: "4px 0", marginBottom: 10 }}
+        >
+          {t.filterClear}
+        </button>
+      )}
 
       {!supabase ? (
         <div
           className="flex items-start gap-2"
-          style={{
-            background: `${C.blue}14`,
-            border: `1px solid ${C.blue}44`,
-            borderRadius: 10,
-            padding: "10px 12px",
-          }}
+          style={{ background: `${C.blue}14`, border: `1px solid ${C.blue}44`, borderRadius: 10, padding: "10px 12px", marginTop: 8 }}
         >
           <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
           <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.carNoDb}</span>
         </div>
       ) : loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
-          {t.carLoading}
-        </p>
+        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>{t.carLoading}</p>
       ) : loadError ? (
         <div style={{ marginTop: 20, textAlign: "center" }}>
           <p style={{ color: C.red, fontSize: 13, marginBottom: 10 }}>
@@ -4098,16 +4254,16 @@ function CarsView({ lang, t, isRTL, mode, selected, onOpenAdd, onSubmitted, onSe
             {lang === "ar" ? "إعادة المحاولة" : "Retry"}
           </button>
         </div>
-      ) : listings.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
-          {t.carEmpty}
+          {listings.length === 0 ? t.carEmpty : t.filterNoResults}
         </p>
       ) : (
-        <div className="flex flex-col gap-2.5">
-          {listings.map((c) => (
+        <div className="flex flex-col gap-2.5" style={{ marginTop: 6 }}>
+          {filtered.map((c) => (
             <div
               key={c.id}
-              onClick={() => onSelectCar(c)}
+              onClick={() => setSelected(c)}
               style={{
                 background: C.panel,
                 border: `1px solid ${C.panelLine}`,
@@ -5255,6 +5411,12 @@ export default function App() {
               <AdminCarsView lang={lang} t={t} isRTL={isRTL} onBack={goHome} />
             </>
           )}
+          {view === "buy-car" && (
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <BuyCarView lang={lang} t={t} isRTL={isRTL} />
+            </>
+          )}
           {view === "cars" && (
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
@@ -5263,10 +5425,7 @@ export default function App() {
                 t={t}
                 isRTL={isRTL}
                 mode={carMode}
-                selected={selectedCar}
-                onOpenAdd={openCarAdd}
                 onSubmitted={carSubmitted}
-                onSelectCar={selectCar}
                 onBack={goBack}
               />
             </>
