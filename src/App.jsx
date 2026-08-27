@@ -2057,6 +2057,38 @@ const GARAGES = {
           ar: "مركز صيانة موثوق مع خدمة استلام مجانية",
         },
       },
+      {
+        name: "Max Garage",
+        area: { en: "Al Quoz, Dubai", ar: "القوز، دبي" },
+        note: {
+          en: "Independent multi-brand garage, trusted since the 1980s",
+          ar: "ورشة مستقلة متعددة الماركات، موثوقة منذ الثمانينيات",
+        },
+      },
+      {
+        name: "Orange Auto",
+        area: { en: "Dubai", ar: "دبي" },
+        note: {
+          en: "Family-owned specialist in BMW, Audi & Porsche",
+          ar: "ورشة عائلية متخصصة في بي إم دبليو وأودي وبورش",
+        },
+      },
+      {
+        name: "Drums Auto Service Center",
+        area: { en: "Mussafah, Abu Dhabi", ar: "مصفح، أبوظبي" },
+        note: {
+          en: "Full-service multi-brand workshop with 1,500+ reviews",
+          ar: "ورشة متكاملة الخدمات لكل الماركات، بأكتر من 1500 تقييم",
+        },
+      },
+      {
+        name: "KM Garage",
+        area: { en: "7 branches across the UAE", ar: "٧ فروع في الإمارات" },
+        note: {
+          en: "ISO 9001-certified workshop, operating since 1983",
+          ar: "ورشة معتمدة بشهادة ISO 9001، شغالة من سنة 1983",
+        },
+      },
     ],
   },
   ksa: {
