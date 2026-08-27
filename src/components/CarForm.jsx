@@ -17,7 +17,7 @@ const C = {
 const MAX_PHOTOS = 6;
 const OTHER = "Other";
 
-const CAR_MODELS = {
+export const CAR_MODELS = {
   Toyota: ["Corolla", "Camry", "Yaris", "Yaris Cross", "Avanza", "Rush", "Fortuner", "Land Cruiser", "Land Cruiser Prado", "Hilux", "RAV4", "Highlander", "Prius", "C-HR", "Avalon", "Innova", "86", "Supra", "Coaster"],
   Honda: ["Civic", "Accord", "City", "Jazz", "CR-V", "HR-V", "BR-V", "Pilot", "Odyssey", "Fit"],
   Nissan: ["Sunny", "Altima", "Maxima", "Sentra", "Patrol", "Patrol Safari", "X-Trail", "Kicks", "Juke", "Pathfinder", "Navara", "Urvan", "GT-R", "370Z"],
@@ -72,7 +72,7 @@ const CAR_MODELS = {
   [OTHER]: [],
 };
 
-const CAR_MAKES = [...Object.keys(CAR_MODELS).filter((m) => m !== OTHER).sort(), OTHER];
+export const CAR_MAKES = [...Object.keys(CAR_MODELS).filter((m) => m !== OTHER).sort(), OTHER];
 
 const inputStyle = {
   width: "100%",
