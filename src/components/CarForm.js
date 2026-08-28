@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import OriginalCarForm from "./CarForm.jsx";
 
+export { CAR_MAKES, CAR_MODELS } from "./CarForm.jsx";
+
 const MAX_MEDIA = 6;
 
 export default function CarFormMediaWrapper(props) {
