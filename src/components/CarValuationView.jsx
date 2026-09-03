@@ -71,7 +71,7 @@ export default function CarValuationView({ lang }) {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, lang }),
       });
       const data = await res.json();
       if (!res.ok) {
