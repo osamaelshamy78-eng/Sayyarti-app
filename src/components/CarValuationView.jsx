@@ -43,7 +43,6 @@ const inputStyle = {
 export default function CarValuationView({ lang }) {
   const isAr = lang === "ar";
   const [form, setForm] = useState({
-    code: "",
     country: "",
     make: "",
     model: "",
@@ -61,7 +60,7 @@ export default function CarValuationView({ lang }) {
   const modelOptions = form.make && form.make !== "Other" ? CAR_MODELS[form.make] || [] : [];
 
   const canSubmit =
-    form.code.trim() && form.country && form.make && form.model && form.year && form.mileage;
+    form.country && form.make && form.model && form.year && form.mileage;
 
   const handleSubmit = async () => {
     if (!canSubmit || loading) return;
@@ -222,18 +221,6 @@ export default function CarValuationView({ lang }) {
         </div>
       </div>
 
-      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <label style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, display: "block", marginBottom: 8 }}>
-          {isAr ? "كود التفعيل" : "Activation code"}
-        </label>
-        <input
-          style={inputStyle}
-          value={form.code}
-          onChange={set("code")}
-          placeholder={isAr ? "أدخل الكود" : "Enter your code"}
-        />
-      </div>
-
       <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}55`, borderRadius: 13, padding: "11px 12px", marginBottom: 12 }}>
         <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>
           {isAr
@@ -258,7 +245,7 @@ export default function CarValuationView({ lang }) {
           fontWeight: 900,
         }}
       >
-        {loading ? (isAr ? "جاري البحث والتحليل..." : "Searching & analyzing...") : (isAr ? "قيّم السيارة" : "Get price estimate")}
+        {loading ? (isAr ? "جاري البحث والتحليل..." : "Searching & analyzing...") : (isAr ? "قيّم السيارة مجانًا" : "Get price estimate — Free")}
       </button>
 
       {error && (
