@@ -22,10 +22,12 @@ import {
   CheckCircle2,
   RotateCcw,
   Trash2,
+  Tag,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
 import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
+import CarValuationView from "./components/CarValuationView";
 import CarForm, { CAR_MAKES, CAR_MODELS } from "./components/CarForm";
 
 /* ---------------------------------------------------------------
@@ -1882,6 +1884,7 @@ function routeFromPath(pathname) {
   if (path === "/cars/add") return { view: "cars", carMode: "add" };
   if (path === "/cars/submitted") return { view: "cars", carMode: "submitted" };
   if (path === "/buy-car") return { view: "buy-car" };
+  if (path === "/valuation") return { view: "valuation" };
   if (path === "/admin") return { view: "admin" };
 
   const fixMatch = path.match(/^\/fix\/([^/]+)$/);
@@ -2445,6 +2448,7 @@ const T = {
     maintenanceNote:
       "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
     navDiagnosis: "Photo Diagnosis",
+    navValuation: "Car Valuation",
     backHome: "Home",
   },
   ar: {
@@ -2600,6 +2604,7 @@ const T = {
     maintenanceNote:
       "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
     navDiagnosis: "تشخيص بالصورة",
+    navValuation: "تقييم سعر السيارة",
     backHome: "الرئيسية",
   },
 };
@@ -2857,6 +2862,7 @@ const MAIN_SECTIONS = [
   { id: "cars", icon: Car, labelKey: "navCars" },
   { id: "parts", icon: Settings, labelKey: "navParts" },
   { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
+  { id: "valuation", icon: Tag, labelKey: "navValuation" },
 ];
 
 function MainSectionsGrid({ lang, t, onOpenSection }) {
@@ -5403,6 +5409,12 @@ export default function App() {
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
               <PhotoDiagnosisView lang={lang} />
+            </>
+          )}
+          {view === "valuation" && (
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <CarValuationView lang={lang} />
             </>
           )}
           {view === "admin" && (
