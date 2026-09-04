@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
 
-// ===== بيانات الحساب البنكي =====
+// ===== Bank account details =====
 const BANK_DETAILS = {
   bankName: "Emirates NBD",
   accountHolder: "Osama Elshamy",
@@ -12,23 +12,119 @@ const BANK_DETAILS = {
   routing: "202620103",
 };
 
-// ===== أسعار الترتيب =====
+// ===== Rank prices =====
 const RANK_PRICES = {
   1: 10000,
   2: 7000,
   3: 4000,
-  0: 2000, // أي ترتيب آخر
+  0: 2000,
 };
 
-const RANK_LABELS = {
-  1: "الترتيب الأول",
-  2: "الترتيب الثاني",
-  3: "الترتيب الثالث",
-  0: "ترتيب عادي",
+const MAX_PHOTOS = 6;
+
+const T = {
+  ar: {
+    title: "أضف مكتب تأجير سيارات",
+    nameLabel: "اسم مكتب التأجير",
+    namePlaceholder: "مثال: مكتب النجاح لتأجير السيارات",
+    ownerLabel: "اسم صاحب المكتب",
+    phoneLabel: "رقم الهاتف",
+    phonePlaceholder: "05xxxxxxxx",
+    addressLabel: "العنوان",
+    addressPlaceholder: "المنطقة، الشارع، أقرب معلم",
+    useLocation: "استخدم موقعي الحالي",
+    useLocationLoading: "جاري تحديد موقعك...",
+    locationSet: "تم تحديد الموقع بنجاح ✓",
+    photoLabel: "صور المكتب",
+    photoHint: `تقدر ترفع لحد ${MAX_PHOTOS} صور`,
+    photoCount: (n) => `${n} صورة مختارة`,
+    nextBtn: "التالي: اختر الترتيب",
+    rankSectionTitle: "اختر ترتيب ظهور المكتب",
+    rankLabels: { 1: "الترتيب الأول", 2: "الترتيب الثاني", 3: "الترتيب الثالث", 0: "ترتيب عادي" },
+    perYear: "درهم/سنة",
+    taken: "محجوز",
+    amountRequired: (n) => `المبلغ المطلوب: ${n.toLocaleString()} درهم`,
+    transferInstructions: "حوّل المبلغ على الحساب التالي، ثم ارفع صورة الإيصال:",
+    bankName: "اسم البنك",
+    accountHolder: "اسم صاحب الحساب",
+    accountNumber: "رقم الحساب",
+    currency: "العملة",
+    receiptLabel: "صورة إيصال التحويل",
+    confirmLabel: "أؤكد أنني قمت بتحويل المبلغ المطلوب على الحساب أعلاه",
+    backBtn: "رجوع",
+    submitBtn: "أضف مكتبك",
+    submittingBtn: "جاري الإرسال...",
+    successTitle: "تم استلام طلبك",
+    successMsg: "سيتم مراجعة إيصال التحويل والموافقة على ظهور مكتبك قريباً.",
+    doneBtn: "تم",
+    errName: "من فضلك اكتب اسم مكتب التأجير",
+    errOwner: "من فضلك اكتب اسم صاحب المكتب",
+    errPhone: "من فضلك اكتب رقم الهاتف",
+    errAddress: "من فضلك اكتب العنوان",
+    errPhoto: "من فضلك ارفع صورة واحدة على الأقل للمكتب",
+    errGeo: "جهازك لا يدعم تحديد الموقع",
+    errGeoFail: "تعذر الحصول على موقعك، حاول مرة أخرى أو اكتب العنوان يدوياً",
+    errRank: "من فضلك اختر الترتيب المطلوب",
+    errReceipt: "من فضلك ارفع صورة إيصال التحويل البنكي",
+    errConfirm: "من فضلك أكّد أنك قمت بتحويل المبلغ",
+    errRankTaken: "للأسف تم حجز هذا الترتيب للتو من مستخدم آخر، من فضلك اختر ترتيب آخر",
+    errGeneric: "حصل خطأ أثناء إرسال الطلب، من فضلك حاول مرة أخرى",
+  },
+  en: {
+    title: "Add a Car Rental Office",
+    nameLabel: "Rental office name",
+    namePlaceholder: "e.g. Al Najah Car Rental Office",
+    ownerLabel: "Owner's name",
+    phoneLabel: "Phone number",
+    phonePlaceholder: "05xxxxxxxx",
+    addressLabel: "Address",
+    addressPlaceholder: "Area, street, nearest landmark",
+    useLocation: "Use my current location",
+    useLocationLoading: "Getting your location...",
+    locationSet: "Location set successfully ✓",
+    photoLabel: "Office photos",
+    photoHint: `You can upload up to ${MAX_PHOTOS} photos`,
+    photoCount: (n) => `${n} photo${n === 1 ? "" : "s"} selected`,
+    nextBtn: "Next: choose ranking",
+    rankSectionTitle: "Choose your listing rank",
+    rankLabels: { 1: "1st position", 2: "2nd position", 3: "3rd position", 0: "Standard listing" },
+    perYear: "AED/year",
+    taken: "Taken",
+    amountRequired: (n) => `Amount due: AED ${n.toLocaleString()}`,
+    transferInstructions: "Transfer the amount to the account below, then upload the receipt:",
+    bankName: "Bank name",
+    accountHolder: "Account holder",
+    accountNumber: "Account number",
+    currency: "Currency",
+    receiptLabel: "Transfer receipt photo",
+    confirmLabel: "I confirm I have transferred the required amount to the account above",
+    backBtn: "Back",
+    submitBtn: "Add your office",
+    submittingBtn: "Submitting...",
+    successTitle: "Your request has been received",
+    successMsg: "We'll review your transfer receipt and approve your listing shortly.",
+    doneBtn: "Done",
+    errName: "Please enter the rental office name",
+    errOwner: "Please enter the owner's name",
+    errPhone: "Please enter a phone number",
+    errAddress: "Please enter the address",
+    errPhoto: "Please upload at least one photo of the office",
+    errGeo: "Your device doesn't support location detection",
+    errGeoFail: "Couldn't get your location, try again or enter the address manually",
+    errRank: "Please choose a listing rank",
+    errReceipt: "Please upload the bank transfer receipt",
+    errConfirm: "Please confirm you've transferred the amount",
+    errRankTaken: "Sorry, this rank was just taken by someone else — please pick another one",
+    errGeneric: "Something went wrong while submitting, please try again",
+  },
 };
 
-export default function RentalListingForm({ isOpen, onClose, country = "uae" }) {
-  const [step, setStep] = useState(1); // 1: بيانات المكتب, 2: الترتيب والدفع
+export default function RentalListingForm({ isOpen, onClose, country = "uae", lang = "ar" }) {
+  const isAr = lang !== "en";
+  const t = isAr ? T.ar : T.en;
+  const dir = isAr ? "rtl" : "ltr";
+
+  const [step, setStep] = useState(1);
   const [takenRanks, setTakenRanks] = useState([]);
   const [loadingRanks, setLoadingRanks] = useState(true);
 
@@ -43,7 +139,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
     rank: null,
   });
 
-  const [photoFile, setPhotoFile] = useState(null);
+  const [photoFiles, setPhotoFiles] = useState([]);
   const [receiptFile, setReceiptFile] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -74,7 +170,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
 
   function handleUseMyLocation() {
     if (!navigator.geolocation) {
-      setError("جهازك لا يدعم تحديد الموقع");
+      setError(t.errGeo);
       return;
     }
     setGpsLoading(true);
@@ -87,18 +183,23 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
         setGpsLoading(false);
       },
       () => {
-        setError("تعذر الحصول على موقعك، حاول مرة أخرى أو اكتب العنوان يدوياً");
+        setError(t.errGeoFail);
         setGpsLoading(false);
       }
     );
   }
 
+  function handlePhotoChange(e) {
+    const files = Array.from(e.target.files || []).slice(0, MAX_PHOTOS);
+    setPhotoFiles(files);
+  }
+
   function validateStep1() {
-    if (!form.rental_name.trim()) return "من فضلك اكتب اسم مكتب التأجير";
-    if (!form.owner_name.trim()) return "من فضلك اكتب اسم صاحب المكتب";
-    if (!form.phone.trim()) return "من فضلك اكتب رقم الهاتف";
-    if (!form.address.trim()) return "من فضلك اكتب العنوان";
-    if (!photoFile) return "من فضلك ارفع صورة للمكتب";
+    if (!form.rental_name.trim()) return t.errName;
+    if (!form.owner_name.trim()) return t.errOwner;
+    if (!form.phone.trim()) return t.errPhone;
+    if (!form.address.trim()) return t.errAddress;
+    if (!photoFiles.length) return t.errPhoto;
     return "";
   }
 
@@ -136,23 +237,23 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
       owner_name: payload.owner_name,
       phone: payload.phone,
       address: payload.address,
-      map_link: payload.map_link || "لم يتم تحديد الموقع بالـ GPS",
-      rank: RANK_LABELS[payload.rank],
+      map_link: payload.map_link || (isAr ? "لم يتم تحديد الموقع بالـ GPS" : "GPS location not set"),
+      rank: T.ar.rankLabels[payload.rank],
       price: RANK_PRICES[payload.rank],
     });
   }
 
   async function handleSubmit() {
     if (form.rank === null) {
-      setError("من فضلك اختر الترتيب المطلوب");
+      setError(t.errRank);
       return;
     }
     if (!receiptFile) {
-      setError("من فضلك ارفع صورة إيصال التحويل البنكي");
+      setError(t.errReceipt);
       return;
     }
     if (!confirmed) {
-      setError("من فضلك أكّد أنك قمت بتحويل المبلغ");
+      setError(t.errConfirm);
       return;
     }
 
@@ -160,7 +261,10 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
     setError("");
 
     try {
-      const photoUrl = await uploadFile(photoFile, "garage-photos");
+      const photoUrls = [];
+      for (const file of photoFiles) {
+        photoUrls.push(await uploadFile(file, "garage-photos"));
+      }
       const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
 
       const { data: requestId, error: submitError } = await supabase.rpc("submit_rental_listing", {
@@ -172,7 +276,8 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
         p_lng: form.lng,
         p_map_link: form.map_link || null,
         p_rank: form.rank,
-        p_photo_url: photoUrl,
+        p_photo_url: photoUrls[0],
+        p_photo_urls: photoUrls,
         p_receipt_url: receiptUrl,
         p_country: country,
       });
@@ -180,20 +285,20 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
       if (submitError) {
         const msg = String(submitError.message || "");
         if (msg.toLowerCase().includes("rank") || msg.includes("duplicate") || submitError.code === "23505") {
-          setError("للأسف تم حجز هذا الترتيب للتو من مستخدم آخر، من فضلك اختر ترتيب آخر");
+          setError(t.errRankTaken);
           await fetchTakenRanks();
           return;
         }
         throw submitError;
       }
 
-      if (!requestId) throw new Error("لم يتم إنشاء طلب المكتب");
+      if (!requestId) throw new Error("no id");
 
       sendNotificationEmail(form);
       setSuccess(true);
     } catch (err) {
       console.error(err);
-      setError("حصل خطأ أثناء إرسال الطلب، من فضلك حاول مرة أخرى");
+      setError(t.errGeneric);
     } finally {
       setSubmitting(false);
     }
@@ -211,7 +316,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
       map_link: "",
       rank: null,
     });
-    setPhotoFile(null);
+    setPhotoFiles([]);
     setReceiptFile(null);
     setConfirmed(false);
     setError("");
@@ -223,12 +328,12 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
 
   return (
     <div
-      dir="rtl"
+      dir={dir}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
     >
       <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
         <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">أضف مكتب تأجير سيارات</h2>
+          <h2 className="text-lg font-bold text-gray-900">{t.title}</h2>
           <button onClick={resetAndClose} className="text-gray-400 text-xl leading-none">×</button>
         </div>
 
@@ -238,15 +343,13 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
               <div className="w-16 h-16 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
                 ✓
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">تم استلام طلبك</h3>
-              <p className="text-gray-500 text-sm mb-6">
-                سيتم مراجعة إيصال التحويل والموافقة على ظهور مكتبك قريباً.
-              </p>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">{t.successTitle}</h3>
+              <p className="text-gray-500 text-sm mb-6">{t.successMsg}</p>
               <button
                 onClick={resetAndClose}
                 className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold"
               >
-                تم
+                {t.doneBtn}
               </button>
             </div>
           ) : (
@@ -259,16 +362,16 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
 
               {step === 1 && (
                 <div className="space-y-4">
-                  <Field label="اسم مكتب التأجير">
+                  <Field label={t.nameLabel}>
                     <input
                       className="input"
                       value={form.rental_name}
                       onChange={(e) => handleChange("rental_name", e.target.value)}
-                      placeholder="مثال: مكتب النجاح لتأجير السيارات"
+                      placeholder={t.namePlaceholder}
                     />
                   </Field>
 
-                  <Field label="اسم صاحب المكتب">
+                  <Field label={t.ownerLabel}>
                     <input
                       className="input"
                       value={form.owner_name}
@@ -276,22 +379,22 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                     />
                   </Field>
 
-                  <Field label="رقم الهاتف">
+                  <Field label={t.phoneLabel}>
                     <input
                       className="input"
                       type="tel"
                       value={form.phone}
                       onChange={(e) => handleChange("phone", e.target.value)}
-                      placeholder="05xxxxxxxx"
+                      placeholder={t.phonePlaceholder}
                     />
                   </Field>
 
-                  <Field label="العنوان">
+                  <Field label={t.addressLabel}>
                     <textarea
                       className="input min-h-[80px]"
                       value={form.address}
                       onChange={(e) => handleChange("address", e.target.value)}
-                      placeholder="المنطقة، الشارع، أقرب معلم"
+                      placeholder={t.addressPlaceholder}
                     />
                     <button
                       type="button"
@@ -299,29 +402,44 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                       disabled={gpsLoading}
                       className="mt-2 text-sm text-blue-600 font-medium flex items-center gap-1"
                     >
-                      📍 {gpsLoading ? "جاري تحديد موقعك..." : "استخدم موقعي الحالي"}
+                      📍 {gpsLoading ? t.useLocationLoading : t.useLocation}
                     </button>
                     {form.map_link && (
-                      <p className="mt-1 text-xs text-green-600">
-                        تم تحديد الموقع بنجاح ✓
-                      </p>
+                      <p className="mt-1 text-xs text-green-600">{t.locationSet}</p>
                     )}
                   </Field>
 
-                  <Field label="صورة المكتب">
+                  <Field label={t.photoLabel}>
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                      multiple
+                      onChange={handlePhotoChange}
                       className="input"
                     />
+                    <p className="mt-1 text-xs text-gray-400">{t.photoHint}</p>
+                    {photoFiles.length > 0 && (
+                      <>
+                        <p className="mt-1 text-xs text-green-600">{t.photoCount(photoFiles.length)}</p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {photoFiles.map((f, i) => (
+                            <img
+                              key={i}
+                              src={URL.createObjectURL(f)}
+                              alt=""
+                              className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
                   </Field>
 
                   <button
                     onClick={goToStep2}
                     className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold mt-2"
                   >
-                    التالي: اختر الترتيب
+                    {t.nextBtn}
                   </button>
                 </div>
               )}
@@ -329,9 +447,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
               {step === 2 && (
                 <div className="space-y-5">
                   <div>
-                    <p className="text-sm font-semibold text-gray-700 mb-2">
-                      اختر ترتيب ظهور المكتب
-                    </p>
+                    <p className="text-sm font-semibold text-gray-700 mb-2">{t.rankSectionTitle}</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[1, 2, 3, 0].map((rankKey) => {
                         const isTaken = rankKey !== 0 && takenRanks.includes(rankKey);
@@ -342,7 +458,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                             type="button"
                             disabled={isTaken || loadingRanks}
                             onClick={() => selectRank(rankKey)}
-                            className={`rounded-xl border-2 px-3 py-3 text-right transition ${
+                            className={`rounded-xl border-2 px-3 py-3 text-${isAr ? "right" : "left"} transition ${
                               isSelected
                                 ? "border-blue-600 bg-blue-50"
                                 : isTaken
@@ -351,13 +467,13 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                             }`}
                           >
                             <div className="font-bold text-gray-900 text-sm">
-                              {RANK_LABELS[rankKey]}
+                              {t.rankLabels[rankKey]}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              {RANK_PRICES[rankKey].toLocaleString()} درهم/سنة
+                              {RANK_PRICES[rankKey].toLocaleString()} {t.perYear}
                             </div>
                             {isTaken && (
-                              <div className="text-[11px] text-red-500 mt-1">محجوز</div>
+                              <div className="text-[11px] text-red-500 mt-1">{t.taken}</div>
                             )}
                           </button>
                         );
@@ -368,24 +484,22 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                   {form.rank !== null && (
                     <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
                       <p className="text-sm font-semibold text-gray-800">
-                        المبلغ المطلوب: {RANK_PRICES[form.rank].toLocaleString()} درهم
+                        {t.amountRequired(RANK_PRICES[form.rank])}
                       </p>
-                      <p className="text-xs text-gray-500 mb-2">
-                        حوّل المبلغ على الحساب التالي، ثم ارفع صورة الإيصال:
-                      </p>
-                      <BankRow label="اسم البنك" value={BANK_DETAILS.bankName} />
-                      <BankRow label="اسم صاحب الحساب" value={BANK_DETAILS.accountHolder} />
+                      <p className="text-xs text-gray-500 mb-2">{t.transferInstructions}</p>
+                      <BankRow label={t.bankName} value={BANK_DETAILS.bankName} />
+                      <BankRow label={t.accountHolder} value={BANK_DETAILS.accountHolder} />
                       <BankRow label="IBAN" value={BANK_DETAILS.iban} />
-                      <BankRow label="رقم الحساب" value={BANK_DETAILS.accountNumber} />
+                      <BankRow label={t.accountNumber} value={BANK_DETAILS.accountNumber} />
                       <BankRow label="Swift Code" value={BANK_DETAILS.swift} />
                       <BankRow label="Routing Number" value={BANK_DETAILS.routing} />
-                      <BankRow label="العملة" value={BANK_DETAILS.currency} />
+                      <BankRow label={t.currency} value={BANK_DETAILS.currency} />
                     </div>
                   )}
 
                   {form.rank !== null && (
                     <>
-                      <Field label="صورة إيصال التحويل">
+                      <Field label={t.receiptLabel}>
                         <input
                           type="file"
                           accept="image/*"
@@ -401,7 +515,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                           onChange={(e) => setConfirmed(e.target.checked)}
                           className="mt-1"
                         />
-                        <span>أؤكد أنني قمت بتحويل المبلغ المطلوب على الحساب أعلاه</span>
+                        <span>{t.confirmLabel}</span>
                       </label>
                     </>
                   )}
@@ -411,7 +525,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                       onClick={() => setStep(1)}
                       className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold"
                     >
-                      رجوع
+                      {t.backBtn}
                     </button>
                     <button
                       onClick={handleSubmit}
@@ -423,7 +537,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae" }) 
                       }
                       className="flex-[2] py-3 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-40"
                     >
-                      {submitting ? "جاري الإرسال..." : "أضف مكتبك"}
+                      {submitting ? t.submittingBtn : t.submitBtn}
                     </button>
                   </div>
                 </div>
