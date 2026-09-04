@@ -3956,7 +3956,16 @@ function RentalsView({ lang, t, country, setCountry, isRTL }) {
 
       <div className="flex flex-col gap-2.5">
         {dbListings.map(g => <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.rental_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, overflow:"hidden", padding:0, cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
-          {g.photo_url && <img src={g.photo_url} alt={g.rental_name} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+          {g.photo_url && (
+            <div style={{ position: "relative" }}>
+              <img src={g.photo_url} alt={g.rental_name} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />
+              {g.photo_urls && g.photo_urls.length > 1 && (
+                <span style={{ position:"absolute", bottom:8, insetInlineEnd:8, background:"rgba(0,0,0,0.6)", color:C.cream, fontSize:11, fontWeight:600, padding:"2px 8px", borderRadius:999 }}>
+                  +{g.photo_urls.length - 1}
+                </span>
+              )}
+            </div>
+          )}
           <div style={{padding:"14px 16px"}}>
             <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.rental_name}</span><MapPin size={15} color={C.amber} /></div>
             <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
@@ -3974,7 +3983,7 @@ function RentalsView({ lang, t, country, setCountry, isRTL }) {
         </button>)}
       </div>
 
-      <RentalListingForm isOpen={showRentalForm} onClose={() => setShowRentalForm(false)} country={country} />
+      <RentalListingForm isOpen={showRentalForm} onClose={() => setShowRentalForm(false)} country={country} lang={lang} />
     </div>
   );
 }
