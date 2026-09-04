@@ -29,6 +29,7 @@ import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
 import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
 import CarValuationView from "./components/CarValuationView";
+import RentalListingForm from "./components/RentalListingForm";
 import CarForm, { CAR_MAKES, CAR_MODELS } from "./components/CarForm";
 
 /* ---------------------------------------------------------------
@@ -2406,6 +2407,8 @@ const T = {
     adminGaragesTab: "Garage Requests",
     adminCarsTab: "Cars",
     adminManageGaragesTab: "Manage Garages",
+    adminGarageTab: "Garage Requests",
+    adminRentalRequestsTab: "Rental Requests",
     adminMaintenanceTab: "Maintenance Centers",
     adminRentalsTab: "Car Rentals",
     adminMediaTab: "Fault Media",
@@ -2434,6 +2437,7 @@ const T = {
     adminApproving: "Approving...",
     adminApproveGenerate: "Approve + Generate Code",
     adminNoGarageRequests: "No garage requests.",
+    adminNoRentalRequests: "No rental requests.",
     adminRank: "Rank",
     adminYear: "AED/year",
     adminApprove: "Approve",
@@ -2456,6 +2460,7 @@ const T = {
     navRentals: "Car Rentals",
     rentalsHeading: "Car Rentals",
     rentalsSub: "Pick a country to browse rental companies",
+    addRentalBtn: "+ Add Your Rental Company",
     backHome: "Home",
   },
   ar: {
@@ -2567,6 +2572,8 @@ const T = {
     adminGaragesTab: "طلبات الجراجات",
     adminCarsTab: "السيارات",
     adminManageGaragesTab: "إدارة الجراجات",
+    adminGarageTab: "طلبات الجراجات",
+    adminRentalRequestsTab: "طلبات التأجير",
     adminMaintenanceTab: "مراكز الصيانة",
     adminRentalsTab: "تأجير السيارات",
     adminMediaTab: "صور وفيديو الأعطال",
@@ -2595,6 +2602,7 @@ const T = {
     adminApproving: "جاري الاعتماد...",
     adminApproveGenerate: "اعتماد + توليد الكود",
     adminNoGarageRequests: "لا توجد طلبات جراجات.",
+    adminNoRentalRequests: "لا توجد طلبات تأجير.",
     adminRank: "الترتيب",
     adminYear: "درهم/سنة",
     adminApprove: "اعتماد",
@@ -2617,6 +2625,7 @@ const T = {
     navRentals: "تأجير السيارات",
     rentalsHeading: "تأجير السيارات",
     rentalsSub: "اختر دولة لتصفح شركات التأجير",
+    addRentalBtn: "+ أضف مكتبك",
     backHome: "الرئيسية",
   },
 };
@@ -3913,13 +3922,17 @@ const CAR_RENTALS = {
 };
 
 function RentalsView({ lang, t, country, setCountry, isRTL }) {
+  const [showRentalForm, setShowRentalForm] = useState(false);
   const [dbRentals, setDbRentals] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [dbListings, setDbListings] = useState([]);
   useEffect(() => {
     let active = true;
     if (supabase) {
       supabase.from("car_rentals").select("*").eq("country", country).eq("is_active", true).order("created_at", { ascending: true })
         .then(({ data }) => { if (active) { setDbRentals(data || []); setLoaded(true); } });
+      supabase.from("rental_directory").select("*").eq("country", country).order("rank", { ascending: true }).order("created_at", { ascending: false })
+        .then(({ data }) => { if (active) setDbListings(data || []); });
     }
     return () => { active = false; };
   }, [country]);
@@ -3931,7 +3944,25 @@ function RentalsView({ lang, t, country, setCountry, isRTL }) {
       <h1 style={{ color:C.cream, fontSize:21, fontWeight:700, margin:0 }}>{t.rentalsHeading}</h1>
       <p style={{ color:C.creamDim, fontSize:13, marginTop:4, marginBottom:14 }}>{t.rentalsSub}</p>
       <div className="flex gap-2 mb-4">{countries.map(code => <button key={code} onClick={()=>setCountry(code)} style={{flex:1,border:`1px solid ${code===country?C.amber:C.panelLine}`,background:code===country?`${C.amber}18`:C.panel,color:code===country?C.amber:C.creamDim,borderRadius:10,padding:"9px 6px",fontSize:11.5,fontWeight:600}}>{CAR_RENTALS[code][lang]}</button>)}</div>
+
+      <button
+        onClick={() => setShowRentalForm(true)}
+        className="w-full flex items-center justify-center gap-2 mb-4"
+        style={{ background: C.amber, border: "none", borderRadius: 12, padding: "12px 16px", cursor: "pointer" }}
+      >
+        <Plus size={16} color={C.asphalt} strokeWidth={2.5} />
+        <span style={{ color: C.asphalt, fontSize: 13.5, fontWeight: 700 }}>{t.addRentalBtn}</span>
+      </button>
+
       <div className="flex flex-col gap-2.5">
+        {dbListings.map(g => <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.rental_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, overflow:"hidden", padding:0, cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
+          {g.photo_url && <img src={g.photo_url} alt={g.rental_name} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+          <div style={{padding:"14px 16px"}}>
+            <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.rental_name}</span><MapPin size={15} color={C.amber} /></div>
+            <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
+            <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+          </div>
+        </button>)}
         {items.map(p => <button key={p.id} onClick={()=>window.open(p.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lang==='ar'?p.name_ar:p.name_en)+" "+(lang==='ar'?p.area_ar:p.area_en))}`,"_blank")} className="w-full" style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden",padding:0,cursor:"pointer",textAlign:isRTL?"right":"left",display:"block"}}>
           {p.photo_url && <img src={p.photo_url} alt={lang==='ar'?p.name_ar:p.name_en} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
           <div style={{padding:"14px 16px"}}>
@@ -3942,6 +3973,8 @@ function RentalsView({ lang, t, country, setCountry, isRTL }) {
           </div>
         </button>)}
       </div>
+
+      <RentalListingForm isOpen={showRentalForm} onClose={() => setShowRentalForm(false)} country={country} />
     </div>
   );
 }
@@ -4536,6 +4569,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [tab, setTab] = useState("cars");
   const [cars, setCars] = useState([]);
   const [garageRequests, setGarageRequests] = useState([]);
+  const [rentalRequests, setRentalRequests] = useState([]);
   const [photoRequests, setPhotoRequests] = useState([]);
   const [adminGarages, setAdminGarages] = useState([]);
   const [maintenanceCenters, setMaintenanceCenters] = useState([]);
@@ -4622,7 +4656,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes, rentalRequestsRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
@@ -4630,6 +4664,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       supabase.from("maintenance_centers").select("*").order("country").order("created_at", { ascending: false }),
       supabase.from("issue_media").select("*").order("sort_order").order("created_at", { ascending: false }),
       supabase.from("car_rentals").select("*").order("country").order("created_at", { ascending: false }),
+      supabase.rpc("get_rental_admin_requests"),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
@@ -4638,6 +4673,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (maintenanceRes.error) setLoginError(maintenanceRes.error.message);
     if (mediaRes.error) setLoginError(mediaRes.error.message);
     if (rentalsRes.error) setLoginError(rentalsRes.error.message);
+    if (rentalRequestsRes.error) setLoginError(rentalRequestsRes.error.message);
     setCars(carsRes.data || []);
     setGarageRequests(garagesRes.data || []);
     setPhotoRequests(photosRes.data || []);
@@ -4645,6 +4681,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setMaintenanceCenters(maintenanceRes.data || []);
     setIssueMedia(mediaRes.data || []);
     setRentals(rentalsRes.data || []);
+    setRentalRequests(rentalRequestsRes.data || []);
     setLoading(false);
   }
 
@@ -4733,6 +4770,21 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (!supabase || !user) return;
     setBusyId(item.id);
     const { error } = await supabase.rpc("set_garage_status", {
+      p_id: item.id,
+      p_status: nextStatus,
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    await loadAll();
+  }
+
+  async function updateRentalRequestStatus(item, nextStatus) {
+    if (!supabase || !user) return;
+    setBusyId(item.id);
+    const { error } = await supabase.rpc("set_rental_status", {
       p_id: item.id,
       p_status: nextStatus,
     });
@@ -5036,6 +5088,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setAdminGarages([]);
     setMaintenanceCenters([]);
     setRentals([]);
+    setRentalRequests([]);
     setIssueMedia([]);
   }
 
@@ -5107,6 +5160,8 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         {[
           ["cars", t.adminCarsTab, cars.length],
           ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
+          ["garage", t.adminGarageTab, garageRequests.filter(g=>g.status==="pending").length],
+          ["rentalRequests", t.adminRentalRequestsTab, rentalRequests.filter(r=>r.status==="pending").length],
           ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
           ["rentals", t.adminRentalsTab, rentals.length],
           ["media", t.adminMediaTab, issueMedia.length],
@@ -5185,6 +5240,35 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                       {t.adminApprove}
                     </button>
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "rejected")}
+                      style={{ background: "transparent", color: C.red, border: `1px solid ${C.red}88`, borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      {t.adminReject}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : tab === "rentalRequests" ? (
+        <div className="flex flex-col gap-2.5">
+          {rentalRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoRentalRequests}</p>}
+          {rentalRequests.map((g) => (
+            <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+              {g.photo_url && <img src={g.photo_url} alt={g.rental_name} style={{ width: "100%", height: 130, objectFit: "cover" }} />}
+              <div style={{ padding: 12 }}>
+                <div style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.rental_name}</div>
+                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
+                <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
+                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
+                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
+                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>{t.adminViewReceipt}</a>}
+                {g.status === "pending" && (
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    <button disabled={busyId === g.id} onClick={() => updateRentalRequestStatus(g, "approved")}
+                      style={{ background: "#2F7D32", color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      {t.adminApprove}
+                    </button>
+                    <button disabled={busyId === g.id} onClick={() => updateRentalRequestStatus(g, "rejected")}
                       style={{ background: "transparent", color: C.red, border: `1px solid ${C.red}88`, borderRadius: 8, padding: 9, fontWeight: 800 }}>
                       {t.adminReject}
                     </button>
