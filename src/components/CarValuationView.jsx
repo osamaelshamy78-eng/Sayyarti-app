@@ -46,8 +46,10 @@ export default function CarValuationView({ lang }) {
     country: "",
     make: "",
     model: "",
+    trim: "",
     year: "",
     mileage: "",
+    engineSize: "",
     specs: "",
     condition: "",
     defects: "",
@@ -141,6 +143,18 @@ export default function CarValuationView({ lang }) {
           </div>
         </div>
 
+        <div>
+          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+            {isAr ? "الفئة/التريم (اختياري)" : "Trim / Grade (optional)"}
+          </label>
+          <input
+            style={inputStyle}
+            value={form.trim}
+            onChange={set("trim")}
+            placeholder={isAr ? "مثال: LE، Limited، GLX" : "e.g. LE, Limited, GLX"}
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "السنة" : "Year"}</label>
@@ -150,6 +164,18 @@ export default function CarValuationView({ lang }) {
             <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الكيلومترات" : "Mileage (km)"}</label>
             <input type="number" style={inputStyle} value={form.mileage} onChange={set("mileage")} placeholder={isAr ? "مثال: 85000" : "e.g. 85000"} />
           </div>
+        </div>
+
+        <div>
+          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+            {isAr ? "سعة المحرك (اختياري)" : "Engine size (optional)"}
+          </label>
+          <input
+            style={inputStyle}
+            value={form.engineSize}
+            onChange={set("engineSize")}
+            placeholder={isAr ? "مثال: 2.0L، V6 3.5L" : "e.g. 2.0L, V6 3.5L"}
+          />
         </div>
 
         <div>
