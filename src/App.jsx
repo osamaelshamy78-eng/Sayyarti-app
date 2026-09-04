@@ -23,6 +23,7 @@ import {
   RotateCcw,
   Trash2,
   Tag,
+  KeyRound,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
@@ -1885,6 +1886,7 @@ function routeFromPath(pathname) {
   if (path === "/cars/submitted") return { view: "cars", carMode: "submitted" };
   if (path === "/buy-car") return { view: "buy-car" };
   if (path === "/valuation") return { view: "valuation" };
+  if (path === "/rentals") return { view: "rentals" };
   if (path === "/admin") return { view: "admin" };
 
   const fixMatch = path.match(/^\/fix\/([^/]+)$/);
@@ -2405,6 +2407,7 @@ const T = {
     adminCarsTab: "Cars",
     adminManageGaragesTab: "Manage Garages",
     adminMaintenanceTab: "Maintenance Centers",
+    adminRentalsTab: "Car Rentals",
     adminMediaTab: "Fault Media",
     adminAddMedia: "Add fault photo/video",
     adminMediaIssue: "Fault",
@@ -2415,6 +2418,7 @@ const T = {
     adminMediaEmpty: "No uploaded fault media yet.",
     adminAddGarage: "Add Garage",
     adminAddMaintenance: "Add Maintenance Center",
+    adminAddRental: "Add Rental Company",
     adminDelete: "Delete",
     adminCountry: "Country",
     adminRequestsCount: "requests",
@@ -2449,6 +2453,9 @@ const T = {
       "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
     navDiagnosis: "Photo Diagnosis",
     navValuation: "Car Valuation",
+    navRentals: "Car Rentals",
+    rentalsHeading: "Car Rentals",
+    rentalsSub: "Pick a country to browse rental companies",
     backHome: "Home",
   },
   ar: {
@@ -2561,6 +2568,7 @@ const T = {
     adminCarsTab: "السيارات",
     adminManageGaragesTab: "إدارة الجراجات",
     adminMaintenanceTab: "مراكز الصيانة",
+    adminRentalsTab: "تأجير السيارات",
     adminMediaTab: "صور وفيديو الأعطال",
     adminAddMedia: "إضافة صورة / فيديو للعطل",
     adminMediaIssue: "العطل",
@@ -2571,6 +2579,7 @@ const T = {
     adminMediaEmpty: "لا توجد وسائط مرفوعة للأعطال.",
     adminAddGarage: "إضافة جراج",
     adminAddMaintenance: "إضافة مركز صيانة",
+    adminAddRental: "إضافة شركة تأجير",
     adminDelete: "حذف",
     adminCountry: "الدولة",
     adminRequestsCount: "طلب",
@@ -2605,6 +2614,9 @@ const T = {
       "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
     navDiagnosis: "تشخيص بالصورة",
     navValuation: "تقييم سعر السيارة",
+    navRentals: "تأجير السيارات",
+    rentalsHeading: "تأجير السيارات",
+    rentalsSub: "اختر دولة لتصفح شركات التأجير",
     backHome: "الرئيسية",
   },
 };
@@ -2863,6 +2875,7 @@ const MAIN_SECTIONS = [
   { id: "parts", icon: Settings, labelKey: "navParts" },
   { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
   { id: "valuation", icon: Tag, labelKey: "navValuation" },
+  { id: "rentals", icon: KeyRound, labelKey: "navRentals" },
 ];
 
 function MainSectionsGrid({ lang, t, onOpenSection }) {
@@ -3833,6 +3846,106 @@ const MAINTENANCE_CENTERS = {
   },
 };
 
+const CAR_RENTALS = {
+  uae: {
+    en: "United Arab Emirates",
+    ar: "الإمارات العربية المتحدة",
+    list: [
+      {
+        name: "National Car Rental",
+        area: { en: "Branches across the UAE incl. airports", ar: "فروع في كل الإمارات وداخل المطارات" },
+        note: { en: "Economy, full-size & luxury sedans", ar: "سيارات اقتصادية وفاخرة" },
+      },
+      {
+        name: "Fast Rent A Car",
+        area: { en: "Largest branch network in the UAE", ar: "أكبر شبكة فروع في الإمارات" },
+        note: { en: "Daily, weekly & monthly rentals at competitive rates", ar: "إيجار يومي وأسبوعي وشهري بأسعار تنافسية" },
+      },
+      {
+        name: "Sanam (Enterprise / National / Alamo)",
+        area: { en: "13 branches across the UAE", ar: "13 فرع في كل الإمارات" },
+        note: { en: "Part of Al Tayer Group, operating since 1994", ar: "جزء من مجموعة الطاير، شغالة من 1994" },
+      },
+    ],
+  },
+  ksa: {
+    en: "Saudi Arabia",
+    ar: "المملكة العربية السعودية",
+    list: [
+      {
+        name: "Key Rent A Car",
+        area: { en: "50+ branches across Saudi Arabia", ar: "أكتر من 50 فرع في السعودية" },
+        note: { en: "Corporate & individual rentals, wide vehicle range", ar: "تأجير للأفراد والشركات، تشكيلة واسعة من السيارات" },
+      },
+      {
+        name: "Abu Dhiab Rent A Car",
+        area: { en: "50+ branches, since 1968", ar: "أكتر من 50 فرع، تأسست 1968" },
+        note: { en: "First licensed car rental company in Saudi Arabia", ar: "أول شركة تأجير سيارات مرخصة في السعودية" },
+      },
+      {
+        name: "Lumi Rental",
+        area: { en: "Riyadh, Jeddah & major cities/airports", ar: "الرياض وجدة والمدن والمطارات الرئيسية" },
+        note: { en: "Listed on Tadawul, app-based booking with 24/7 assistance", ar: "مدرجة في تداول، حجز عبر التطبيق ومساعدة على مدار الساعة" },
+      },
+    ],
+  },
+  egypt: {
+    en: "Egypt",
+    ar: "مصر",
+    list: [
+      {
+        name: "Europcar Egypt",
+        area: { en: "Cairo & major cities", ar: "القاهرة والمدن الرئيسية" },
+        note: { en: "Global brand present in 140+ countries", ar: "علامة عالمية موجودة في أكتر من 140 دولة" },
+      },
+      {
+        name: "Hertz Egypt",
+        area: { en: "Cairo branches incl. airport", ar: "فروع في القاهرة وداخل المطار" },
+        note: { en: "One of the oldest and largest global rental brands", ar: "من أقدم وأكبر شركات تأجير السيارات العالمية" },
+      },
+      {
+        name: "Al Fahd Auto Group",
+        area: { en: "Cairo", ar: "القاهرة" },
+        note: { en: "Daily, monthly & long-term plans with comprehensive insurance", ar: "خطط يومية وشهرية وطويلة الأمد مع تأمين شامل" },
+      },
+    ],
+  },
+};
+
+function RentalsView({ lang, t, country, setCountry, isRTL }) {
+  const [dbRentals, setDbRentals] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    let active = true;
+    if (supabase) {
+      supabase.from("car_rentals").select("*").eq("country", country).eq("is_active", true).order("created_at", { ascending: true })
+        .then(({ data }) => { if (active) { setDbRentals(data || []); setLoaded(true); } });
+    }
+    return () => { active = false; };
+  }, [country]);
+  const staticData = CAR_RENTALS[country] || CAR_RENTALS.uae;
+  const items = loaded && dbRentals.length ? dbRentals : staticData.list.map((p, i) => ({ id: `static-${i}`, name_en: p.name, name_ar: p.name, area_en: p.area.en, area_ar: p.area.ar, note_en: p.note.en, note_ar: p.note.ar }));
+  const countries = ["uae", "ksa", "egypt"];
+  return (
+    <div className="px-5 pt-5 pb-6">
+      <h1 style={{ color:C.cream, fontSize:21, fontWeight:700, margin:0 }}>{t.rentalsHeading}</h1>
+      <p style={{ color:C.creamDim, fontSize:13, marginTop:4, marginBottom:14 }}>{t.rentalsSub}</p>
+      <div className="flex gap-2 mb-4">{countries.map(code => <button key={code} onClick={()=>setCountry(code)} style={{flex:1,border:`1px solid ${code===country?C.amber:C.panelLine}`,background:code===country?`${C.amber}18`:C.panel,color:code===country?C.amber:C.creamDim,borderRadius:10,padding:"9px 6px",fontSize:11.5,fontWeight:600}}>{CAR_RENTALS[code][lang]}</button>)}</div>
+      <div className="flex flex-col gap-2.5">
+        {items.map(p => <button key={p.id} onClick={()=>window.open(p.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((lang==='ar'?p.name_ar:p.name_en)+" "+(lang==='ar'?p.area_ar:p.area_en))}`,"_blank")} className="w-full" style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden",padding:0,cursor:"pointer",textAlign:isRTL?"right":"left",display:"block"}}>
+          {p.photo_url && <img src={p.photo_url} alt={lang==='ar'?p.name_ar:p.name_en} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+          <div style={{padding:"14px 16px"}}>
+            <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{lang==='ar'?p.name_ar:p.name_en}</span><MapPin size={15} color={C.amber}/></div>
+            <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{lang==='ar'?p.area_ar:p.area_en}</div>
+            <div style={{color:C.creamDim,fontSize:12.5,marginTop:5,lineHeight:1.5}}>{lang==='ar'?p.note_ar:p.note_en}</div>
+            <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+          </div>
+        </button>)}
+      </div>
+    </div>
+  );
+}
+
 function MaintenanceView({ lang, t, country, setCountry, isRTL }) {
   const [dbCenters, setDbCenters] = useState([]);
   const [loaded, setLoaded] = useState(false);
@@ -4426,10 +4539,13 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [photoRequests, setPhotoRequests] = useState([]);
   const [adminGarages, setAdminGarages] = useState([]);
   const [maintenanceCenters, setMaintenanceCenters] = useState([]);
+  const [rentals, setRentals] = useState([]);
   const [garageForm, setGarageForm] = useState({ garage_name: "", owner_name: "", phone: "", address: "", country: "uae", rank: 0, photo_url: "" });
   const [garagePhotoFile, setGaragePhotoFile] = useState(null);
   const [maintenancePhotoFile, setMaintenancePhotoFile] = useState(null);
   const [maintenanceForm, setMaintenanceForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+  const [rentalPhotoFile, setRentalPhotoFile] = useState(null);
+  const [rentalForm, setRentalForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaIssueId, setMediaIssueId] = useState(Object.keys(ISSUES)[0] || "");
   const [mediaLang, setMediaLang] = useState(lang);
@@ -4506,13 +4622,14 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
       supabase.from("garage_listings").select("*").eq("status", "approved").order("created_at", { ascending: false }),
       supabase.from("maintenance_centers").select("*").order("country").order("created_at", { ascending: false }),
       supabase.from("issue_media").select("*").order("sort_order").order("created_at", { ascending: false }),
+      supabase.from("car_rentals").select("*").order("country").order("created_at", { ascending: false }),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
@@ -4520,12 +4637,14 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (adminGaragesRes.error) setLoginError(adminGaragesRes.error.message);
     if (maintenanceRes.error) setLoginError(maintenanceRes.error.message);
     if (mediaRes.error) setLoginError(mediaRes.error.message);
+    if (rentalsRes.error) setLoginError(rentalsRes.error.message);
     setCars(carsRes.data || []);
     setGarageRequests(garagesRes.data || []);
     setPhotoRequests(photosRes.data || []);
     setAdminGarages(adminGaragesRes.data || []);
     setMaintenanceCenters(maintenanceRes.data || []);
     setIssueMedia(mediaRes.data || []);
+    setRentals(rentalsRes.data || []);
     setLoading(false);
   }
 
@@ -4746,6 +4865,38 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     await loadAll();
   }
 
+  async function addRental() {
+    if (!supabase || !user) return;
+    setLoginError("");
+    setBusyId("new-rental");
+    try {
+      const f = rentalForm;
+      if (!f.name_en.trim() && !f.name_ar.trim()) throw new Error(lang === "ar" ? "اكتب اسم شركة التأجير." : "Enter the rental company name.");
+      const uploadedPhotoUrl = await uploadAdminPhoto(rentalPhotoFile, "rental");
+      const { error } = await supabase.rpc("admin_create_rental", {
+        p_country: f.country, p_name_en: f.name_en, p_name_ar: f.name_ar, p_area_en: f.area_en, p_area_ar: f.area_ar,
+        p_note_en: f.note_en, p_note_ar: f.note_ar, p_map_link: f.map_link || null, p_photo_url: uploadedPhotoUrl || null
+      });
+      if (error) throw error;
+      setRentalForm({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+      setRentalPhotoFile(null);
+      await loadAll();
+    } catch (error) {
+      setLoginError(error?.message || t.adminUpdateError);
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function deleteRental(id) {
+    if (!supabase || !user || !window.confirm(lang === "ar" ? "حذف شركة التأجير؟" : "Delete this rental company?")) return;
+    setBusyId(id);
+    const { error } = await supabase.rpc("admin_delete_rental", { p_id: id });
+    setBusyId(null);
+    if (error) { setLoginError(error.message); return; }
+    await loadAll();
+  }
+
   async function compressImageForUpload(file) {
     if (!file || !file.type.startsWith("image/")) return file;
     const img = new Image();
@@ -4884,6 +5035,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setPhotoRequests([]);
     setAdminGarages([]);
     setMaintenanceCenters([]);
+    setRentals([]);
     setIssueMedia([]);
   }
 
@@ -4956,6 +5108,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           ["cars", t.adminCarsTab, cars.length],
           ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
           ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
+          ["rentals", t.adminRentalsTab, rentals.length],
           ["media", t.adminMediaTab, issueMedia.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
@@ -5088,6 +5241,30 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               <div style={{padding:12}}>
                 <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
                 <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
+              </div>
+            </div>)}
+          </div>
+        </div>
+      ) : tab === "rentals" ? (
+        <div>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddRental}</div>
+            <select value={rentalForm.country} onChange={e=>setRentalForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
+            {[["name_en","Name (EN)"],["name_ar","الاسم (AR)"],["area_en","Area (EN)"],["area_ar","المنطقة (AR)"],["note_en","Description (EN)"],["note_ar","الوصف (AR)"],["map_link","Maps link"]].map(([k,ph]) => <input key={k} placeholder={ph} value={rentalForm[k]} onChange={e=>setRentalForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة شركة التأجير" : "Rental company photo"}</label>
+              <input type="file" accept="image/*" onChange={e=>setRentalPhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
+              {rentalPhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{rentalPhotoFile.name}</div>}
+              {rentalPhotoFile && <img src={URL.createObjectURL(rentalPhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
+            </div>
+            <button disabled={busyId === "new-rental"} onClick={addRental} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-rental" ? "..." : t.adminAddRental}</button>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {rentals.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+              {m.photo_url && <img src={m.photo_url} alt={lang === "ar" ? m.name_ar : m.name_en} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
+              <div style={{padding:12}}>
+                <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
+                <button disabled={busyId===m.id} onClick={()=>deleteRental(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
           </div>
@@ -5415,6 +5592,12 @@ export default function App() {
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
               <CarValuationView lang={lang} />
+            </>
+          )}
+          {view === "rentals" && (
+            <>
+              <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
+              <RentalsView lang={lang} t={t} country={country} setCountry={setCountry} isRTL={isRTL} />
             </>
           )}
           {view === "admin" && (
