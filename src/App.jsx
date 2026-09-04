@@ -2411,6 +2411,12 @@ const T = {
     adminRentalRequestsTab: "Rental Requests",
     adminMaintenanceTab: "Maintenance Centers",
     adminRentalsTab: "Car Rentals",
+    adminValuationTab: "Car Valuation",
+    adminValuationTitle: "Car Valuation (with photos)",
+    adminValuationHint: "Admin-only tool. Upload real photos of the car for a more accurate AI estimate.",
+    adminValuationPhotos: "Car photos (optional, up to 6)",
+    adminValuationBtn: "Get estimate",
+    adminValuationRunning: "Analyzing...",
     adminMediaTab: "Fault Media",
     adminAddMedia: "Add fault photo/video",
     adminMediaIssue: "Fault",
@@ -2576,6 +2582,12 @@ const T = {
     adminRentalRequestsTab: "طلبات التأجير",
     adminMaintenanceTab: "مراكز الصيانة",
     adminRentalsTab: "تأجير السيارات",
+    adminValuationTab: "تقييم السعر",
+    adminValuationTitle: "تقييم سعر السيارة (بالصور)",
+    adminValuationHint: "أداة خاصة بالأدمن بس. ارفع صور حقيقية للسيارة عشان تقدير أدق بالذكاء الاصطناعي.",
+    adminValuationPhotos: "صور السيارة (اختياري، لحد 6 صور)",
+    adminValuationBtn: "احصل على التقييم",
+    adminValuationRunning: "جاري التحليل...",
     adminMediaTab: "صور وفيديو الأعطال",
     adminAddMedia: "إضافة صورة / فيديو للعطل",
     adminMediaIssue: "العطل",
@@ -4589,6 +4601,11 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [maintenanceForm, setMaintenanceForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
   const [rentalPhotoFile, setRentalPhotoFile] = useState(null);
   const [rentalForm, setRentalForm] = useState({ country: "uae", name_en: "", name_ar: "", area_en: "", area_ar: "", note_en: "", note_ar: "", map_link: "" });
+  const [valuationForm, setValuationForm] = useState({ country: "uae", make: "", model: "", trim: "", year: "", mileage: "", engineSize: "", specs: "", condition: "", defects: "" });
+  const [valuationPhotos, setValuationPhotos] = useState([]);
+  const [valuationLoading, setValuationLoading] = useState(false);
+  const [valuationResult, setValuationResult] = useState(null);
+  const [valuationError, setValuationError] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaIssueId, setMediaIssueId] = useState(Object.keys(ISSUES)[0] || "");
   const [mediaLang, setMediaLang] = useState(lang);
@@ -4958,6 +4975,37 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     await loadAll();
   }
 
+  async function runAdminValuation() {
+    if (!supabase || !user) return;
+    setValuationError("");
+    setValuationResult(null);
+    setValuationLoading(true);
+    try {
+      const imageUrls = [];
+      for (const file of valuationPhotos) {
+        imageUrls.push(await uploadAdminPhoto(file, "valuation"));
+      }
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      const res = await fetch("https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/car-valuation-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          apikey: supabase.supabaseKey,
+        },
+        body: JSON.stringify({ ...valuationForm, lang, imageUrls }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t.adminUpdateError);
+      setValuationResult(data.estimate);
+    } catch (err) {
+      setValuationError(err?.message || t.adminUpdateError);
+    } finally {
+      setValuationLoading(false);
+    }
+  }
+
   async function compressImageForUpload(file) {
     if (!file || !file.type.startsWith("image/")) return file;
     const img = new Image();
@@ -5173,6 +5221,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
           ["rentalRequests", t.adminRentalRequestsTab, rentalRequests.filter(r=>r.status==="pending").length],
           ["maintenance", t.adminMaintenanceTab, maintenanceCenters.length],
           ["rentals", t.adminRentalsTab, rentals.length],
+          ["valuation", t.adminValuationTab, "AI"],
           ["media", t.adminMediaTab, issueMedia.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
@@ -5361,6 +5410,60 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               </div>
             </div>)}
           </div>
+        </div>
+      ) : tab === "valuation" ? (
+        <div>
+          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 4 }}>{t.adminValuationTitle}</div>
+            <div style={{ color: C.creamDim, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>{t.adminValuationHint}</div>
+            <select value={valuationForm.country} onChange={e=>setValuationForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
+            <select value={valuationForm.make} onChange={e=>setValuationForm(v=>({...v,make:e.target.value,model:""}))} style={fieldStyle}>
+              <option value="">{lang==="ar"?"الماركة":"Make"}</option>
+              {CAR_MAKES.map(m => <option key={m} value={m}>{m}</option>)}
+            </select>
+            {(CAR_MODELS[valuationForm.make]||[]).length ? (
+              <select value={valuationForm.model} onChange={e=>setValuationForm(v=>({...v,model:e.target.value}))} style={fieldStyle}>
+                <option value="">{lang==="ar"?"الموديل":"Model"}</option>
+                {CAR_MODELS[valuationForm.make].map(m => <option key={m} value={m}>{m}</option>)}
+              </select>
+            ) : (
+              <input placeholder={lang==="ar"?"الموديل":"Model"} value={valuationForm.model} onChange={e=>setValuationForm(v=>({...v,model:e.target.value}))} style={fieldStyle} />
+            )}
+            <input placeholder={lang==="ar"?"الفئة/التريم (اختياري)":"Trim (optional)"} value={valuationForm.trim} onChange={e=>setValuationForm(v=>({...v,trim:e.target.value}))} style={fieldStyle} />
+            <input type="number" placeholder={lang==="ar"?"السنة":"Year"} value={valuationForm.year} onChange={e=>setValuationForm(v=>({...v,year:e.target.value}))} style={fieldStyle} />
+            <input type="number" placeholder={lang==="ar"?"الكيلومترات":"Mileage (km)"} value={valuationForm.mileage} onChange={e=>setValuationForm(v=>({...v,mileage:e.target.value}))} style={fieldStyle} />
+            <input placeholder={lang==="ar"?"سعة المحرك (اختياري)":"Engine size (optional)"} value={valuationForm.engineSize} onChange={e=>setValuationForm(v=>({...v,engineSize:e.target.value}))} style={fieldStyle} />
+            <select value={valuationForm.specs} onChange={e=>setValuationForm(v=>({...v,specs:e.target.value}))} style={fieldStyle}>
+              <option value="">{lang==="ar"?"المواصفات":"Specs"}</option>
+              <option value="gulf">{lang==="ar"?"خليجي":"Gulf"}</option>
+              <option value="american">{lang==="ar"?"أمريكي":"American"}</option>
+            </select>
+            <select value={valuationForm.condition} onChange={e=>setValuationForm(v=>({...v,condition:e.target.value}))} style={fieldStyle}>
+              <option value="">{lang==="ar"?"الحالة العامة":"Condition"}</option>
+              <option value="excellent">{lang==="ar"?"ممتازة":"Excellent"}</option>
+              <option value="good">{lang==="ar"?"جيدة":"Good"}</option>
+              <option value="fair">{lang==="ar"?"فيها أعطال":"Has issues"}</option>
+            </select>
+            <textarea rows={2} placeholder={lang==="ar"?"عيوب (اختياري)":"Defects (optional)"} value={valuationForm.defects} onChange={e=>setValuationForm(v=>({...v,defects:e.target.value}))} style={{...fieldStyle, resize:"vertical"}} />
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{t.adminValuationPhotos}</label>
+              <input type="file" accept="image/*" multiple onChange={e=>setValuationPhotos(Array.from(e.target.files||[]).slice(0,6))} style={{ ...fieldStyle, padding:9 }} />
+              {valuationPhotos.length > 0 && (
+                <div className="flex gap-2 flex-wrap" style={{ marginTop: 8 }}>
+                  {valuationPhotos.map((f,i) => <img key={i} src={URL.createObjectURL(f)} alt="" style={{ width:64, height:64, objectFit:"cover", borderRadius:8 }} />)}
+                </div>
+              )}
+            </div>
+            <button disabled={valuationLoading || !valuationForm.make || !valuationForm.model || !valuationForm.year || !valuationForm.mileage} onClick={runAdminValuation} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:11,fontWeight:900 }}>
+              {valuationLoading ? t.adminValuationRunning : t.adminValuationBtn}
+            </button>
+          </div>
+          {valuationError && <div style={{ color: C.red, fontSize:12.5, background:`${C.red}14`, border:`1px solid ${C.red}55`, borderRadius:10, padding:"10px 12px", marginBottom:12 }}>{valuationError}</div>}
+          {valuationResult && (
+            <div style={{ background: C.panel, border: `1px solid ${C.amberDim}`, borderRadius: 14, padding: 14, whiteSpace:"pre-wrap", color:C.cream, fontSize:13, lineHeight:1.7 }}>
+              {valuationResult}
+            </div>
+          )}
         </div>
       ) : tab === "media" ? (
         <div>
