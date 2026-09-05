@@ -185,12 +185,12 @@ export default function PhotoDiagnosisView({ lang }) {
   return (
     <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>KARAJY AI</div>
+        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
         <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
           {isAr ? "شخّص مشكلة سيارتك بالصورة" : "Understand your car problem from a photo"}
         </h1>
         <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
-          {isAr ? "ارفع صورة أو فيديو، واحكي لكراجي إيه اللي حصل. بدون كود عطل وبدون شراء باقة." : "Upload a photo or video and tell Karaji what happened. No fault code and no package required."}
+          {isAr ? "ارفع صورة أو فيديو، واحكي لسيارتي إيه اللي حصل. بدون كود عطل وبدون شراء باقة." : "Upload a photo or video and tell Sayyarti what happened. No fault code and no package required."}
         </p>
       </div>
 
@@ -226,7 +226,7 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "2. احكي لكراجي إيه اللي حصل" : "2. Tell Karaji what happened"}</div>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "2. احكي لسيارتي إيه اللي حصل" : "2. Tell Sayyarti what happened"}</div>
         <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "مثال: العربية بدأت تخرج دخان أبيض من الكبوت..." : "Example: the car started making a strange noise when I brake..."} rows={4} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", minHeight: 95, background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 12, color: C.cream, padding: "11px 12px", outline: "none", fontFamily: "inherit", fontSize: 13, lineHeight: 1.55 }} />
       </div>
 

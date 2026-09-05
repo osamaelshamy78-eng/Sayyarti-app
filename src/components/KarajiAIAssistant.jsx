@@ -193,7 +193,7 @@ export default function KarajiAIAssistant() {
         }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 12 }}>
             <div>
-              <div style={{ color: C.amber, fontSize: 10, fontWeight: 900, letterSpacing: ".08em" }}>KARAJY AI</div>
+              <div style={{ color: C.amber, fontSize: 10, fontWeight: 900, letterSpacing: ".08em" }}>SAYYARTI AI</div>
               <div style={{ color: C.cream, fontSize: 17, fontWeight: 900, marginTop: 2 }}>{isAr ? "مساعد سيارتك الذكي" : "Your AI car assistant"}</div>
             </div>
             <button type="button" onClick={() => setOpen(false)} aria-label={isAr ? "إغلاق" : "Close"} style={{ background: "transparent", border: `1px solid ${C.line}`, color: C.dim, borderRadius: 9, width: 32, height: 32, flex: "0 0 auto" }}>×</button>
@@ -243,7 +243,7 @@ export default function KarajiAIAssistant() {
         </div>
       )}
 
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-label="Karaji AI" style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.asphalt}`, background: C.amber, color: C.asphalt, boxShadow: "0 8px 24px rgba(0,0,0,.35)", fontSize: 11, fontWeight: 950, cursor: "pointer" }}>
+      <button type="button" onClick={() => setOpen((value) => !value)} aria-label="Sayyarti AI" style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.asphalt}`, background: C.amber, color: C.asphalt, boxShadow: "0 8px 24px rgba(0,0,0,.35)", fontSize: 11, fontWeight: 950, cursor: "pointer" }}>
         <div style={{ fontSize: 18, lineHeight: 1 }}>✦</div>
         AI
       </button>

@@ -91,7 +91,7 @@ export default function CarValuationView({ lang }) {
   return (
     <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>KARAJI AI</div>
+        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
         <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
           {isAr ? "قيّم سعر سيارتك" : "Estimate your car's price"}
         </h1>

@@ -165,13 +165,13 @@ export default function Fix3DLibrary() {
       <div className="fix3d-shell">
         <div className="fix3d-head">
           <div>
-            <div className="fix3d-brand">KARAJY · 3D FIX LAB</div>
+            <div className="fix3d-brand">SAYYARTI · 3D FIX LAB</div>
             <div className="fix3d-sub">{lang === "ar" ? "مكتبة تجريبية لشرح الإصلاحات بتفاعل ثلاثي الأبعاد" : "Prototype library for interactive 3D repair guidance"}</div>
           </div>
           <div className="fix3d-lang">
             <button type="button" onClick={() => setLang("en")}>EN</button>
             <button type="button" onClick={() => setLang("ar")}>AR</button>
-            <button type="button" className="fix3d-back" onClick={() => (window.location.href = "/")}>← Karaji</button>
+            <button type="button" className="fix3d-back" onClick={() => (window.location.href = "/")}>← Sayyarti</button>
           </div>
         </div>
 
