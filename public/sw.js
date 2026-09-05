@@ -1,4 +1,4 @@
-const CACHE_NAME = "karaji-v2";
+const CACHE_NAME = "sayyarti-v3";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();
@@ -22,7 +22,7 @@ async function injectLanguageBridge(response, pathname) {
 
   const html = await response.text();
   const script = pathname.startsWith("/legal")
-    ? `<script>(function(){try{var l=localStorage.getItem("karajy-language")==="ar"?"ar":"en";document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";var a=document.getElementById("arContent"),e=document.getElementById("enContent"),na=document.getElementById("navAr"),ne=document.getElementById("navEn");if(a)a.classList.toggle("hidden",l!=="ar");if(e)e.classList.toggle("hidden",l==="ar");if(na)na.classList.toggle("hidden",l!=="ar");if(ne)ne.classList.toggle("hidden",l==="ar");var b=document.getElementById("backBtn"),bt=document.getElementById("backText");if(b)b.href="/";if(bt)bt.textContent=l==="ar"?"العودة إلى كراجي":"Back to Karaji";}catch(_){}})();</script>`
+    ? `<script>(function(){try{var l=localStorage.getItem("karajy-language")==="ar"?"ar":"en";document.documentElement.lang=l;document.documentElement.dir=l==="ar"?"rtl":"ltr";var a=document.getElementById("arContent"),e=document.getElementById("enContent"),na=document.getElementById("navAr"),ne=document.getElementById("navEn");if(a)a.classList.toggle("hidden",l!=="ar");if(e)e.classList.toggle("hidden",l==="ar");if(na)na.classList.toggle("hidden",l!=="ar");if(ne)ne.classList.toggle("hidden",l==="ar");var b=document.getElementById("backBtn"),bt=document.getElementById("backText");if(b)b.href="/";if(bt)bt.textContent=l==="ar"?"العودة إلى سيارتي":"Back to Sayyarti";}catch(_){}})();</script>`
     : `<script>(function(){try{if(localStorage.getItem("karajy-language")==="ar"){var b=document.getElementById("arBtn");if(b)b.click();}}catch(_){}})();</script>`;
 
   return new Response(
