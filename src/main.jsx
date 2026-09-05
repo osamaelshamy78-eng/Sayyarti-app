@@ -51,3 +51,11 @@ if (!isFix3DRoute) {
   startCarCountryEnhancer();
   startMaintenanceNavFix();
 }
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.error("Sayyarti service worker registration failed:", err);
+    });
+  });
+}
