@@ -125,7 +125,7 @@ function addApprovalHook(button, card, request) {
     });
 
     if (error) {
-      console.error("Karaji approval confirmation failed", error);
+      console.error("Sayyarti approval confirmation failed", error);
       button.disabled = false;
       window.alert(error.message || "Could not confirm code sending");
       return;

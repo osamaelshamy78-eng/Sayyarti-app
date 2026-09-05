@@ -1928,38 +1928,38 @@ function routePathForCategory(category) {
 function applySeoMeta({ lang, view, activeIssueId, activeCategory, activeObdCode }) {
   if (typeof document === "undefined") return;
   const isArabic = lang === "ar";
-  let title = "Karaji — Car Issues & Trusted Garages";
+  let title = "Sayyarti — Car Issues & Trusted Garages";
   let description = isArabic
-    ? "كراجي يساعدك في تشخيص أعطال السيارات، معرفة أكواد OBD والعثور على الجراج المناسب."
-    : "Karaji helps you diagnose car problems, understand OBD fault codes and find trusted garages.";
+    ? "سيارتي يساعدك في تشخيص أعطال السيارات، معرفة أكواد OBD والعثور على الجراج المناسب."
+    : "Sayyarti helps you diagnose car problems, understand OBD fault codes and find trusted garages.";
 
   if (view === "issue" && activeIssueId && ISSUES[activeIssueId]) {
     const item = ISSUES[activeIssueId][lang];
-    title = `${item.title} | Karaji`;
+    title = `${item.title} | Sayyarti`;
     description = isArabic
-      ? `${item.title}: الأعراض والأسباب وخطوات الفحص والإصلاح على كراجي.`
-      : `${item.title}: symptoms, common causes and practical diagnostic steps on Karaji.`;
+      ? `${item.title}: الأعراض والأسباب وخطوات الفحص والإصلاح على سيارتي.`
+      : `${item.title}: symptoms, common causes and practical diagnostic steps on Sayyarti.`;
   } else if (view === "obd" && activeObdCode && OBD_CODES[activeObdCode]) {
     const item = OBD_CODES[activeObdCode][lang];
-    title = `${activeObdCode} — ${item.title} | Karaji`;
+    title = `${activeObdCode} — ${item.title} | Sayyarti`;
     description = `${item.title}. ${item.meaning}`;
   } else if (view === "category" && activeCategory) {
-    title = `${activeCategory[lang]} — Car Problems & Fixes | Karaji`;
+    title = `${activeCategory[lang]} — Car Problems & Fixes | Sayyarti`;
     description = isArabic
       ? `دليل أعطال ${activeCategory.ar}: الأعراض والأسباب وطرق الفحص والإصلاح.`
       : `${activeCategory.en} problems: symptoms, causes and practical repair guidance.`;
   } else if (view === "fix") {
-    title = isArabic ? "تشخيص أعطال السيارات | كراجي" : "Car Fault Diagnosis | Karaji";
+    title = isArabic ? "تشخيص أعطال السيارات | سيارتي" : "Car Fault Diagnosis | Sayyarti";
     description = isArabic
       ? "ابحث عن عطل سيارتك، افحص أكواد OBD وشاهد دليل الأعطال والإصلاح."
       : "Search car problems, check OBD-II codes and browse practical repair guides.";
   } else if (view === "guide") {
-    title = isArabic ? "دليل لمبات السيارة | كراجي" : "Car Warning Lights Guide | Karaji";
+    title = isArabic ? "دليل لمبات السيارة | سيارتي" : "Car Warning Lights Guide | Sayyarti";
     description = isArabic
       ? "افهم لمبات التحذير في لوحة القيادة واعرف الخطوة التالية."
       : "Understand dashboard warning lights and know what to check next.";
   } else if (view === "garages") {
-    title = isArabic ? "جراجات وورش سيارات | كراجي" : "Car Garages & Workshops | Karaji";
+    title = isArabic ? "جراجات وورش سيارات | سيارتي" : "Car Garages & Workshops | Sayyarti";
     description = isArabic
       ? "اعثر على جراجات وورش سيارات حسب الدولة والموقع."
       : "Find car garages and workshops by country and location.";
@@ -1996,7 +1996,7 @@ function applySeoMeta({ lang, view, activeIssueId, activeCategory, activeObdCode
     description,
     url: window.location.href,
     inLanguage: lang,
-    isPartOf: { "@type": "WebSite", name: "Karaji", url: window.location.origin },
+    isPartOf: { "@type": "WebSite", name: "Sayyarti", url: window.location.origin },
   });
 }
 
@@ -2298,7 +2298,7 @@ const SPARE_PARTS = {
 --------------------------------------------------------------- */
 const T = {
   en: {
-    wordmark: "Karaji",
+    wordmark: "Sayyarti",
     tagline: "Diagnose car issues & find trusted garages",
     navHome: "Home",
     navIssues: "Issues",
@@ -2385,7 +2385,7 @@ const T = {
     carContact: "Contact Seller",
     carNoDb:
       "The cars marketplace isn't connected yet. Once Supabase is set up, listings will appear here.",
-    adminTitle: "Karajy Admin",
+    adminTitle: "Sayyarti Admin",
     adminMenuLabel: "Dashboard",
     adminRememberMe: "Remember me / Stay signed in",
     adminSubtitle: "Manage car listings",
@@ -2470,7 +2470,7 @@ const T = {
     backHome: "Home",
   },
   ar: {
-    wordmark: "كراجي",
+    wordmark: "سيارتي",
     tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
     navHome: "الرئيسية",
     navIssues: "الأعطال",
@@ -2556,7 +2556,7 @@ const T = {
     carLoading: "جاري تحميل الإعلانات...",
     carContact: "تواصل مع البائع",
     carNoDb: "سوق السيارات لسه مش متصل بقاعدة البيانات. بعد إعداد Supabase هتظهر الإعلانات هنا.",
-    adminTitle: "إدارة كراجي",
+    adminTitle: "إدارة سيارتي",
     adminSubtitle: "إدارة إعلانات السيارات",
     adminEmail: "اسم المستخدم / البريد الإلكتروني",
     adminPassword: "كلمة المرور",
@@ -4864,7 +4864,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (!phone || !code) return;
     const clean = String(phone).replace(/[^\d]/g, "");
     const msg = encodeURIComponent(
-      `كود كراجي لتشخيص الصور: ${code}\nالرصيد: ${credits} تشخيص\nاستخدم الكود داخل قسم تشخيص بالصور في تطبيق كراجي.`
+      `كود سيارتي لتشخيص الصور: ${code}\nالرصيد: ${credits} تشخيص\nاستخدم الكود داخل قسم تشخيص بالصور في تطبيق سيارتي.`
     );
     window.open(`https://wa.me/${clean}?text=${msg}`, "_blank");
   }

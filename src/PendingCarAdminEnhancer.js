@@ -139,7 +139,7 @@ export function startPendingCarAdminEnhancer() {
   let timer = null;
   const run = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => loadPending().catch((error) => console.error("Karaji pending car enhancer:", error)), 400);
+    timer = setTimeout(() => loadPending().catch((error) => console.error("Sayyarti pending car enhancer:", error)), 400);
   };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run, { once: true });
   else run();

@@ -126,7 +126,7 @@ async function addDeleteButtons() {
 
       const { error } = await supabase.from("car_listings").delete().eq("id", listing.id);
       if (error) {
-        console.error("Karaji car delete failed:", error);
+        console.error("Sayyarti car delete failed:", error);
         window.alert(arabic ? "تعذر حذف السيارة. حاول مرة أخرى." : "Could not delete the car listing. Please try again.");
         deleteButton.disabled = false;
         deleteButton.style.cursor = "pointer";
@@ -148,7 +148,7 @@ export function startAdminCarDeleteEnhancer() {
   let timer = null;
   const run = () => {
     clearTimeout(timer);
-    timer = setTimeout(() => addDeleteButtons().catch((error) => console.error("Karaji admin car enhancer:", error)), 250);
+    timer = setTimeout(() => addDeleteButtons().catch((error) => console.error("Sayyarti admin car enhancer:", error)), 250);
   };
 
   if (document.readyState === "loading") {

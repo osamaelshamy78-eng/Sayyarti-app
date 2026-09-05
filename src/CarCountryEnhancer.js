@@ -95,7 +95,7 @@ function navigateTo(path) {
 }
 
 function findOriginalAIButton() {
-  return Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Karaji AI");
+  return Array.from(document.querySelectorAll("button")).find((b) => b.getAttribute("aria-label") === "Sayyarti AI");
 }
 
 function hideUnexpectedServiceButton() {
