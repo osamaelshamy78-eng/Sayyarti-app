@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "online.sayyarti.app",
+        "sha256_cert_fingerprints": ["8A:39:C9:EE:87:96:89:AF:91:38:ED:79:6A:49:B4:ED:3D:66:05:A3:63:5F:4B:0E:9D:EF:39:BF:C1:94:DF:B7"]
+      }
+    }]
