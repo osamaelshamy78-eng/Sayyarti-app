@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const SITE_URL = "https://www.karaji.online";
+const SITE_URL = "https://www.sayyarti.online";
 const dist = path.join(root, "dist");
 const source = fs.readFileSync(path.join(root, "src", "App.jsx"), "utf8");
 const template = fs.readFileSync(path.join(dist, "index.html"), "utf8");
@@ -56,36 +56,36 @@ const categories = extractCategories();
 
 const issuePaths = issues.map((x) => ({
   path: `/fault/${slugify(x.title)}`,
-  title: `${x.title} | Karaji`,
-  description: `${x.title}: symptoms, common causes and practical diagnostic steps on Karaji.`,
+  title: `${x.title} | Sayyarti`,
+  description: `${x.title}: symptoms, common causes and practical diagnostic steps on Sayyarti.`,
   heading: x.title,
   text: `Learn the common symptoms, possible causes and practical next diagnostic steps for ${x.title}.`,
 }));
 
 const obdPaths = obdCodes.map((x) => ({
   path: `/obd/${x.id}`,
-  title: `${x.id} — ${x.title} | Karaji`,
-  description: `${x.id}: ${x.title}. Understand what the code means and what to check next with Karaji.`,
+  title: `${x.id} — ${x.title} | Sayyarti`,
+  description: `${x.id}: ${x.title}. Understand what the code means and what to check next with Sayyarti.`,
   heading: `${x.id} — ${x.title}`,
   text: `Understand what ${x.id} means, the system involved, and the next diagnostic step.`,
 }));
 
 const categoryPaths = categories.map((id) => ({
   path: `/fix/${id}`,
-  title: `${id} car problems and fixes | Karaji`,
-  description: `Browse ${id} car problems, symptoms, causes and repair guidance on Karaji.`,
+  title: `${id} car problems and fixes | Sayyarti`,
+  description: `Browse ${id} car problems, symptoms, causes and repair guidance on Sayyarti.`,
   heading: `${id} car problems and fixes`,
   text: `Browse common ${id} problems, symptoms, causes and practical repair guidance.`,
 }));
 
 const sectionPaths = [
-  { path: "/fix", title: "Car Fault Diagnosis | Karaji", description: "Search car problems, check OBD-II codes and browse practical repair guides.", heading: "Car Fault Diagnosis", text: "Search common car faults and OBD-II codes and open a dedicated guide." },
-  { path: "/guide", title: "Car Warning Lights Guide | Karaji", description: "Understand dashboard warning lights and know what to check next.", heading: "Car Warning Lights Guide", text: "Understand dashboard warning lights and the next checks to perform." },
-  { path: "/garages", title: "Car Garages & Workshops | Karaji", description: "Find car garages and workshops by country and location.", heading: "Car Garages & Workshops", text: "Find garage listings by country and location." },
-  { path: "/maintenance", title: "Car Maintenance Guide | Karaji", description: "Browse practical car maintenance information on Karaji.", heading: "Car Maintenance Guide", text: "Browse maintenance information for common vehicle needs." },
-  { path: "/parts", title: "Car Spare Parts | Karaji", description: "Browse car spare parts information on Karaji.", heading: "Car Spare Parts", text: "Explore spare-parts information available through Karaji." },
-  { path: "/diagnosis", title: "Car Photo Diagnosis | Karaji", description: "Use Karaji to explore photo-based car diagnosis.", heading: "Car Photo Diagnosis", text: "Use the diagnosis feature to investigate a car problem from a photo." },
-  { path: "/cars", title: "My Cars | Karaji", description: "Manage your cars in Karaji.", heading: "My Cars", text: "Manage vehicles and keep your car information available in Karaji." },
+  { path: "/fix", title: "Car Fault Diagnosis | Sayyarti", description: "Search car problems, check OBD-II codes and browse practical repair guides.", heading: "Car Fault Diagnosis", text: "Search common car faults and OBD-II codes and open a dedicated guide." },
+  { path: "/guide", title: "Car Warning Lights Guide | Sayyarti", description: "Understand dashboard warning lights and know what to check next.", heading: "Car Warning Lights Guide", text: "Understand dashboard warning lights and the next checks to perform." },
+  { path: "/garages", title: "Car Garages & Workshops | Sayyarti", description: "Find car garages and workshops by country and location.", heading: "Car Garages & Workshops", text: "Find garage listings by country and location." },
+  { path: "/maintenance", title: "Car Maintenance Guide | Sayyarti", description: "Browse practical car maintenance information on Sayyarti.", heading: "Car Maintenance Guide", text: "Browse maintenance information for common vehicle needs." },
+  { path: "/parts", title: "Car Spare Parts | Sayyarti", description: "Browse car spare parts information on Sayyarti.", heading: "Car Spare Parts", text: "Explore spare-parts information available through Sayyarti." },
+  { path: "/diagnosis", title: "Car Photo Diagnosis | Sayyarti", description: "Use Sayyarti to explore photo-based car diagnosis.", heading: "Car Photo Diagnosis", text: "Use the diagnosis feature to investigate a car problem from a photo." },
+  { path: "/cars", title: "My Cars | Sayyarti", description: "Manage your cars in Sayyarti.", heading: "My Cars", text: "Manage vehicles and keep your car information available in Sayyarti." },
 ];
 
 const pages = [...sectionPaths, ...categoryPaths, ...issuePaths, ...obdPaths];
@@ -98,7 +98,7 @@ function renderPage(page) {
     name: page.title,
     description: page.description,
     url: canonical,
-    isPartOf: { "@type": "WebSite", name: "Karaji", url: `${SITE_URL}/` },
+    isPartOf: { "@type": "WebSite", name: "Sayyarti", url: `${SITE_URL}/` },
     inLanguage: "en",
   }).replace(/</g, "\\u003c");
 
@@ -107,7 +107,7 @@ function renderPage(page) {
   html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(page.title)}</title>`);
   html = html.replace(/<meta name="description" content="[^"]*"\s*\/>/i, `<meta name="description" content="${escapeHtml(page.description)}" />`);
   html = html.replace(/<\/head>/i, `<link rel="canonical" href="${canonical}" />\n    <script type="application/ld+json">${jsonLd}</script>\n  </head>`);
-  const fallback = `<main style="max-width:760px;margin:0 auto;padding:24px;font-family:Arial,sans-serif"><h1>${escapeHtml(page.heading)}</h1><p>${escapeHtml(page.text)}</p><p>Karaji provides bilingual Arabic/English car fault guides, OBD-II code explanations, maintenance information and garage discovery.</p></main>`;
+  const fallback = `<main style="max-width:760px;margin:0 auto;padding:24px;font-family:Arial,sans-serif"><h1>${escapeHtml(page.heading)}</h1><p>${escapeHtml(page.text)}</p><p>Sayyarti provides bilingual Arabic/English car fault guides, OBD-II code explanations, maintenance information and garage discovery.</p></main>`;
   html = html.replace('<div id="root"></div>', `<div id="root">${fallback}</div>`);
   return html;
 }
