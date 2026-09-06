@@ -2632,7 +2632,7 @@ const T = {
     maintenanceSub: "اختر الدولة عشان تشوف السلاسل الموثوقة",
     maintenanceNote:
       "سلاسل صيانة سريعة وطنية/إقليمية من مصادر عامة، تأكد من أقرب فرع والمواعيد والأسعار قبل ما تروح.",
-    navDiagnosis: "تشخيص بالصورة",
+    navDiagnosis: "التشخيص الذكي",
     navValuation: "تقييم سعر السيارة",
     navRentals: "تأجير السيارات",
     rentalsHeading: "تأجير السيارات",
@@ -2894,8 +2894,8 @@ const MAIN_SECTIONS = [
   { id: "buy-car", icon: Search, labelKey: "navBuyCar" },
   { id: "cars", icon: Car, labelKey: "navCars" },
   { id: "parts", icon: Settings, labelKey: "navParts" },
-  { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis" },
-  { id: "valuation", icon: Tag, labelKey: "navValuation" },
+  { id: "diagnosis", icon: Camera, labelKey: "navDiagnosis", isAI: true },
+  { id: "valuation", icon: Tag, labelKey: "navValuation", isAI: true },
   { id: "rentals", icon: KeyRound, labelKey: "navRentals" },
 ];
 
@@ -2920,6 +2920,7 @@ function MainSectionsGrid({ lang, t, onOpenSection }) {
             <div
               className="flex items-center justify-center rounded-full"
               style={{
+                position: "relative",
                 width: 44,
                 height: 44,
                 background: `${C.amber}18`,
@@ -2927,6 +2928,26 @@ function MainSectionsGrid({ lang, t, onOpenSection }) {
               }}
             >
               <Icon size={20} color={C.amber} strokeWidth={1.8} />
+              {s.isAI && (
+                <span
+                  style={{
+                    position: "absolute",
+                    top: -7,
+                    insetInlineEnd: -9,
+                    background: C.blue,
+                    color: "#fff",
+                    fontSize: 8.5,
+                    fontWeight: 800,
+                    letterSpacing: 0.3,
+                    borderRadius: 999,
+                    padding: "2px 5px",
+                    lineHeight: 1,
+                    border: `1.5px solid ${C.asphalt}`,
+                  }}
+                >
+                  AI
+                </span>
+              )}
             </div>
             <span
               style={{
