@@ -2461,7 +2461,7 @@ const T = {
     maintenanceSub: "Pick a country to browse trusted quick-service chains",
     maintenanceNote:
       "National/regional quick-service chains from public sources — confirm the nearest branch, hours & pricing before visiting.",
-    navDiagnosis: "Photo Diagnosis",
+    navDiagnosis: "Smart Diagnosis",
     navValuation: "Car Valuation",
     navRentals: "Car Rentals",
     rentalsHeading: "Car Rentals",
