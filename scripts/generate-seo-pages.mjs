@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
-const SITE_URL = "https://www.sayyarti.online";
+const SITE_URL = "https://sayyarti.online";
 const dist = path.join(root, "dist");
 const source = fs.readFileSync(path.join(root, "src", "App.jsx"), "utf8");
 const template = fs.readFileSync(path.join(dist, "index.html"), "utf8");
