@@ -22,6 +22,7 @@ export default function PhotoDiagnosisView({ lang }) {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
+  const [resultCategory, setResultCategory] = useState("general");
   const [error, setError] = useState(null);
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -147,6 +148,7 @@ export default function PhotoDiagnosisView({ lang }) {
         return;
       }
       setResult(data.diagnosis);
+      setResultCategory(data.category || "general");
     } catch (err) {
       setError(isAr ? "تعذر قراءة الملف. جرّب صورة أو فيديو أوضح وأقصر." : "Could not read the file. Try a clearer photo or a shorter video.");
     } finally {
@@ -177,7 +179,8 @@ export default function PhotoDiagnosisView({ lang }) {
     longPressTriggeredRef.current = true;
   };
   const openGarages = () => {
-    window.history.pushState({}, "", "/garages");
+    const path = resultCategory && resultCategory !== "general" ? `/garages?specialty=${resultCategory}` : "/garages";
+    window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
   const openYouTube = () => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(issueDescription || "car problem diagnosis")}`, "_blank", "noopener,noreferrer");
