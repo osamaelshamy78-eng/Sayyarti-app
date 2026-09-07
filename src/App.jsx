@@ -2012,6 +2012,8 @@ const GARAGES = {
           en: "Bosch-certified Toyota & Lexus hybrid specialist",
           ar: "متخصص معتمد من بوش لسيارات تويوتا ولكزس الهجينة",
         },
+        specialty: "electrical",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "AAA Auto Garage",
@@ -2020,6 +2022,8 @@ const GARAGES = {
           en: "Full-service garage with home service option",
           ar: "ورشة متكاملة الخدمات مع خدمة منزلية",
         },
+        specialty: "general",
+        lat: 25.1385, lng: 55.2277,
       },
       {
         name: "Kings Auto Garage",
@@ -2028,6 +2032,8 @@ const GARAGES = {
           en: "German luxury car repair specialist",
           ar: "متخصص في إصلاح السيارات الألمانية الفاخرة",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "Aarya Auto Repair Body Shop",
@@ -2036,6 +2042,8 @@ const GARAGES = {
           en: "Specialist in Rolls Royce, Bentley, Porsche & more",
           ar: "متخصص في رولز رويس وبنتلي وبورش وغيرها",
         },
+        specialty: "general",
+        lat: 24.4539, lng: 54.3773,
       },
       {
         name: "ZDegree",
@@ -2044,6 +2052,8 @@ const GARAGES = {
           en: "Large multi-branch service network",
           ar: "شبكة خدمة كبيرة متعددة الفروع",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "Royal Swiss Auto Services",
@@ -2055,6 +2065,8 @@ const GARAGES = {
           en: "Luxury car workshop, 6 branches across the UAE",
           ar: "ورشة سيارات فاخرة بـ ٦ فروع في الإمارات",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "CarMate Auto Care",
@@ -2063,6 +2075,8 @@ const GARAGES = {
           en: "Trusted auto care with free vehicle collection",
           ar: "مركز صيانة موثوق مع خدمة استلام مجانية",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "Max Garage",
@@ -2071,6 +2085,8 @@ const GARAGES = {
           en: "Independent multi-brand garage, trusted since the 1980s",
           ar: "ورشة مستقلة متعددة الماركات، موثوقة منذ الثمانينيات",
         },
+        specialty: "general",
+        lat: 25.1385, lng: 55.2277,
       },
       {
         name: "Orange Auto",
@@ -2079,6 +2095,8 @@ const GARAGES = {
           en: "Family-owned specialist in BMW, Audi & Porsche",
           ar: "ورشة عائلية متخصصة في بي إم دبليو وأودي وبورش",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
       {
         name: "Drums Auto Service Center",
@@ -2087,6 +2105,8 @@ const GARAGES = {
           en: "Full-service multi-brand workshop with 1,500+ reviews",
           ar: "ورشة متكاملة الخدمات لكل الماركات، بأكتر من 1500 تقييم",
         },
+        specialty: "general",
+        lat: 24.34, lng: 54.49,
       },
       {
         name: "KM Garage",
@@ -2095,6 +2115,8 @@ const GARAGES = {
           en: "ISO 9001-certified workshop, operating since 1983",
           ar: "ورشة معتمدة بشهادة ISO 9001، شغالة من سنة 1983",
         },
+        specialty: "general",
+        lat: 25.2048, lng: 55.2708,
       },
     ],
   },
@@ -2109,6 +2131,8 @@ const GARAGES = {
           en: "Well-equipped workshop, strong with Jeep, Chrysler, Dodge",
           ar: "ورشة مجهزة جيدًا، قوية في جيب وكرايسلر ودودج",
         },
+        specialty: "general",
+        lat: 24.7136, lng: 46.6753,
       },
       {
         name: "Technocar",
@@ -2117,6 +2141,8 @@ const GARAGES = {
           en: "Loyal customer base, competitive rates",
           ar: "قاعدة عملاء وفية وأسعار تنافسية",
         },
+        specialty: "general",
+        lat: 24.7136, lng: 46.6753,
       },
       {
         name: "Fix Auto Service (Gulf Motors Company)",
@@ -2125,6 +2151,8 @@ const GARAGES = {
           en: "Global Fix Network partner in the Kingdom",
           ar: "شريك شبكة Fix العالمية في المملكة",
         },
+        specialty: "general",
+        lat: 24.7136, lng: 46.6753,
       },
     ],
   },
@@ -2139,6 +2167,8 @@ const GARAGES = {
           en: "Multi-brand car service center",
           ar: "مركز صيانة سيارات متعدد الماركات",
         },
+        specialty: "general",
+        lat: 30.0444, lng: 31.2357,
       },
       {
         name: "CRANK BMW & MINI",
@@ -2147,6 +2177,8 @@ const GARAGES = {
           en: "BMW & MINI specialist workshop",
           ar: "ورشة متخصصة في BMW و MINI",
         },
+        specialty: "general",
+        lat: 30.0444, lng: 31.2357,
       },
       {
         name: "Jaguar Joseph Tito Service Centre",
@@ -2155,6 +2187,8 @@ const GARAGES = {
           en: "Jaguar specialist service center",
           ar: "مركز خدمة متخصص في جاكوار",
         },
+        specialty: "general",
+        lat: 30.0444, lng: 31.2357,
       },
       {
         name: "A To Z Car Service",
@@ -2163,6 +2197,8 @@ const GARAGES = {
           en: "Multi-brand car service center",
           ar: "مركز صيانة سيارات متعدد الماركات",
         },
+        specialty: "general",
+        lat: 30.0131, lng: 31.4197,
       },
       {
         name: "King of French Renault Company",
@@ -2171,6 +2207,8 @@ const GARAGES = {
           en: "Renault specialist, genuine parts",
           ar: "متخصص في رينو بقطع غيار أصلية",
         },
+        specialty: "general",
+        lat: 31.2001, lng: 29.9187,
       },
       {
         name: "Nacita Auto Care",
@@ -2179,6 +2217,8 @@ const GARAGES = {
           en: "Multi-branch mechanical repair specialist",
           ar: "متخصص في الإصلاح الميكانيكي بعدة فروع",
         },
+        specialty: "engine",
+        lat: 30.0271, lng: 31.4967,
       },
     ],
   },
@@ -3572,9 +3612,28 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
   );
 }
 
+function haversineKm(lat1, lng1, lat2, lng2) {
+  if ([lat1, lng1, lat2, lng2].some((v) => v == null)) return null;
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClearQuote }) {
   const [showGarageForm, setShowGarageForm] = useState(false);
   const [dbGarages, setDbGarages] = useState([]);
+  const [userLoc, setUserLoc] = useState(null);
+  const [specialty] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get("specialty") || null;
+    } catch {
+      return null;
+    }
+  });
   const data = GARAGES[country];
   useEffect(() => {
     let active = true;
@@ -3584,6 +3643,57 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
     }
     return () => { active = false; };
   }, [country]);
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { timeout: 6000, maximumAge: 300000 }
+    );
+  }, []);
+
+  const combinedGarages = [
+    ...data.list.map((g, i) => ({
+      key: `static-${i}`,
+      name: g.name,
+      area: g.area[lang],
+      note: g.note[lang],
+      specialty: g.specialty || "general",
+      lat: g.lat,
+      lng: g.lng,
+      photoUrl: null,
+      photoUrls: null,
+      mapLink: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${g.name} ${g.area.en} ${data.en}`)}`,
+    })),
+    ...dbGarages.map((g) => ({
+      key: g.id,
+      name: g.garage_name,
+      area: g.address,
+      note: "",
+      specialty: g.specialty || "general",
+      lat: g.lat,
+      lng: g.lng,
+      photoUrl: g.photo_url,
+      photoUrls: null,
+      mapLink: g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.garage_name + " " + g.address)}`,
+    })),
+  ].map((g) => ({
+    ...g,
+    distanceKm: userLoc ? haversineKm(userLoc.lat, userLoc.lng, g.lat, g.lng) : null,
+  }));
+
+  combinedGarages.sort((a, b) => {
+    if (specialty) {
+      const aMatch = a.specialty === specialty ? 0 : 1;
+      const bMatch = b.specialty === specialty ? 0 : 1;
+      if (aMatch !== bMatch) return aMatch - bMatch;
+    }
+    if (a.distanceKm != null && b.distanceKm != null) return a.distanceKm - b.distanceKm;
+    if (a.distanceKm != null) return -1;
+    if (b.distanceKm != null) return 1;
+    return 0;
+  });
+
   return (
     <div className="px-5 pt-5 pb-6">
       <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
@@ -3645,54 +3755,45 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {data.list.map((g, i) => (
+        {combinedGarages.map((g) => (
           <button
-            key={i}
-            onClick={() =>
-              window.open(
-                `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                  `${g.name} ${g.area.en} ${data.en}`
-                )}`,
-                "_blank"
-              )
-            }
+            key={g.key}
+            onClick={() => window.open(g.mapLink, "_blank")}
             className="w-full"
             style={{
               background: C.panel,
               border: `1px solid ${C.panelLine}`,
               borderRadius: 14,
-              padding: "14px 16px",
+              overflow: "hidden",
+              padding: 0,
               cursor: "pointer",
               textAlign: isRTL ? "right" : "left",
               display: "block",
             }}
           >
-            <div className="flex items-start justify-between gap-2">
-              <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{g.name}</span>
-              <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
-            </div>
-            <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
-              {g.area[lang]}
-            </div>
-            <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
-              {g.note[lang]}
-            </div>
-            <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 600 }}>
-              {t.openInMaps}
-            </div>
-          </button>
-        ))}
-        {dbGarages.map((g) => (
-          <button key={g.id} onClick={() => window.open(g.map_link || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.garage_name + " " + g.address)}`, "_blank")} className="w-full" style={{ background:C.panel, border:`1px solid ${C.panelLine}`, borderRadius:14, overflow:"hidden", padding:0, cursor:"pointer", textAlign:isRTL?"right":"left", display:"block" }}>
-            {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{width:"100%",height:130,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
-            <div style={{padding:"14px 16px"}}>
-              <div className="flex items-start justify-between gap-2"><span style={{color:C.cream,fontSize:14,fontWeight:700}}>{g.garage_name}</span><MapPin size={15} color={C.amber} /></div>
-              <div style={{color:C.amberDim,fontSize:11.5,marginTop:3,fontWeight:600}}>{g.address}</div>
-              <div style={{color:C.blue,fontSize:11,marginTop:7,fontWeight:600}}>{t.openInMaps}</div>
+            {g.photoUrl && (
+              <img src={g.photoUrl} alt={g.name} style={{ width: "100%", height: 130, objectFit: "cover", display: "block" }} onError={(e) => (e.currentTarget.style.display = "none")} />
+            )}
+            <div style={{ padding: "14px 16px" }}>
+              <div className="flex items-start justify-between gap-2">
+                <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{g.name}</span>
+                <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
+              </div>
+              <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
+                {g.area}
+                {g.distanceKm != null && ` · ${g.distanceKm.toFixed(1)} ${lang === "ar" ? "كم" : "km"}`}
+              </div>
+              {g.note && (
+                <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
+                  {g.note}
+                </div>
+              )}
+              <div style={{ color: C.blue, fontSize: 11, marginTop: 7, fontWeight: 600 }}>
+                {t.openInMaps}
+              </div>
             </div>
           </button>
         ))}
-
       </div>
 
       <GarageListingForm
