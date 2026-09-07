@@ -41,6 +41,7 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
     lng: null,
     map_link: "",
     rank: null,
+    specialty: "general",
   });
 
   const [photoFile, setPhotoFile] = useState(null);
@@ -178,6 +179,7 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
         p_photo_url: photoUrl,
         p_receipt_url: receiptUrl,
         p_country: country,
+        p_specialty: form.specialty,
       });
 
       if (submitError) {
@@ -213,6 +215,7 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
       lng: null,
       map_link: "",
       rank: null,
+      specialty: "general",
     });
     setPhotoFile(null);
     setReceiptFile(null);
@@ -316,6 +319,20 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
                         تم تحديد الموقع بنجاح ✓
                       </p>
                     )}
+                  </Field>
+
+                  <Field label="تخصص الجراج">
+                    <select
+                      className="input"
+                      value={form.specialty}
+                      onChange={(e) => handleChange("specialty", e.target.value)}
+                    >
+                      <option value="general">خدمة عامة / كل الأعطال</option>
+                      <option value="engine">المكينة والعادم</option>
+                      <option value="electrical">الكهرباء والبطارية</option>
+                      <option value="ac">التكييف</option>
+                      <option value="brakes">الفرامل والشاسيه</option>
+                    </select>
                   </Field>
 
                   <Field label="صورة الجراج">
