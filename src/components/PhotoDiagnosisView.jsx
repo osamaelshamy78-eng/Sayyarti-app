@@ -23,6 +23,10 @@ export default function PhotoDiagnosisView({ lang }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [resultCategory, setResultCategory] = useState("general");
+  const [estimatedCost, setEstimatedCost] = useState(null);
+  const [carCountry, setCarCountry] = useState("uae");
+  const [carMakeModel, setCarMakeModel] = useState("");
+  const [carYear, setCarYear] = useState("");
   const [error, setError] = useState(null);
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
@@ -122,9 +126,14 @@ export default function PhotoDiagnosisView({ lang }) {
       setError(isAr ? "من فضلك اختر صورة أو فيديو أولًا" : "Please choose a photo or video first.");
       return;
     }
+    if (!carMakeModel.trim() || !carYear.trim()) {
+      setError(isAr ? "من فضلك اكتب ماركة وموديل السيارة وسنة الصنع عشان نقدر نحسب تكلفة الإصلاح التقريبية" : "Please enter the car's make/model and year so we can estimate the repair cost.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
+    setEstimatedCost(null);
     try {
       const isVideo = mediaFile.type.startsWith("video/");
       const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [mediaFile];
@@ -140,6 +149,9 @@ export default function PhotoDiagnosisView({ lang }) {
           mediaType: "image/jpeg",
           mediaKind: isVideo ? "video" : "image",
           frameCount: imagesBase64.length,
+          country: carCountry,
+          carMakeModel: carMakeModel.trim(),
+          carYear: carYear.trim(),
         }),
       });
       const data = await res.json();
@@ -149,6 +161,7 @@ export default function PhotoDiagnosisView({ lang }) {
       }
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
+      setEstimatedCost(data.estimatedCost || null);
     } catch (err) {
       setError(isAr ? "تعذر قراءة الملف. جرّب صورة أو فيديو أوضح وأقصر." : "Could not read the file. Try a clearer photo or a shorter video.");
     } finally {
@@ -229,7 +242,44 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "2. احكي لسيارتي إيه اللي حصل" : "2. Tell Sayyarti what happened"}</div>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "2. بيانات سيارتك" : "2. Your car's details"}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
+          <div>
+            <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة والموديل" : "Make & model"}</label>
+            <input
+              value={carMakeModel}
+              onChange={(e) => setCarMakeModel(e.target.value)}
+              placeholder={isAr ? "مثال: تويوتا كامري" : "e.g. Toyota Camry"}
+              style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+            />
+          </div>
+          <div>
+            <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "سنة الصنع" : "Year"}</label>
+            <input
+              type="number"
+              value={carYear}
+              onChange={(e) => setCarYear(e.target.value)}
+              placeholder={isAr ? "مثال: 2019" : "e.g. 2019"}
+              style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+            />
+          </div>
+        </div>
+        <div>
+          <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
+          <select
+            value={carCountry}
+            onChange={(e) => setCarCountry(e.target.value)}
+            style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+          >
+            <option value="uae">{isAr ? "الإمارات" : "UAE"}</option>
+            <option value="ksa">{isAr ? "السعودية" : "Saudi Arabia"}</option>
+            <option value="egypt">{isAr ? "مصر" : "Egypt"}</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "3. احكي لسيارتي إيه اللي حصل" : "3. Tell Sayyarti what happened"}</div>
         <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "مثال: العربية بدأت تخرج دخان أبيض من الكبوت..." : "Example: the car started making a strange noise when I brake..."} rows={4} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", minHeight: 95, background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 12, color: C.cream, padding: "11px 12px", outline: "none", fontFamily: "inherit", fontSize: 13, lineHeight: 1.55 }} />
       </div>
 
@@ -250,6 +300,13 @@ export default function PhotoDiagnosisView({ lang }) {
             <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "نتيجة التحليل" : "ANALYSIS RESULT"}</div>
             <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result}</div>
           </div>
+          {estimatedCost && (
+            <div style={{ background: C.panel, border: `1px solid ${C.amber}55`, borderRadius: 16, padding: 14, marginTop: 10 }}>
+              <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "تكلفة الإصلاح التقريبية" : "ESTIMATED REPAIR COST"}</div>
+              <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{estimatedCost}</div>
+              <div style={{ color: C.dim, fontSize: 10, marginTop: 8, lineHeight: 1.5 }}>{isAr ? "تقدير تقريبي بناءً على أسعار السوق، السعر الفعلي بيختلف حسب نوع السيارة وحالة الجراج." : "An approximate market-based estimate. Actual price varies by garage and car condition."}</div>
+            </div>
+          )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
             <button type="button" onClick={openGarages} style={{ background: C.amber, color: C.asphalt, border: "none", borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 900, cursor: "pointer" }}>{isAr ? "جراجات قريبة" : "Nearby garages"}</button>
             <button type="button" onClick={openYouTube} style={{ background: "transparent", color: C.cream, border: `1px solid ${C.line}`, borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>{isAr ? "فيديوهات الإصلاح" : "Repair videos"}</button>
