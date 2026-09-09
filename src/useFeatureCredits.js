@@ -5,6 +5,7 @@ import { supabase } from "./supabaseClient";
 export function useFeatureCredits(feature, userId) {
   const [creditsRemaining, setCreditsRemaining] = useState(null);
   const [freeUsed, setFreeUsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const refresh = useCallback(async () => {
@@ -13,11 +14,15 @@ export function useFeatureCredits(feature, userId) {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
-      .from("user_credits")
-      .select("credits_remaining, free_diagnosis_used, free_valuation_used")
-      .eq("user_id", userId)
-      .maybeSingle();
+    const [creditsRes, adminRes] = await Promise.all([
+      supabase
+        .from("user_credits")
+        .select("credits_remaining, free_diagnosis_used, free_valuation_used")
+        .eq("user_id", userId)
+        .maybeSingle(),
+      supabase.rpc("is_car_admin"),
+    ]);
+    const data = creditsRes.data;
     if (data) {
       setCreditsRemaining(data.credits_remaining ?? 0);
       setFreeUsed(feature === "diagnosis" ? !!data.free_diagnosis_used : !!data.free_valuation_used);
@@ -26,6 +31,7 @@ export function useFeatureCredits(feature, userId) {
       setCreditsRemaining(0);
       setFreeUsed(false);
     }
+    setIsAdmin(adminRes.data === true);
     setLoading(false);
   }, [feature, userId]);
 
@@ -33,5 +39,5 @@ export function useFeatureCredits(feature, userId) {
     refresh();
   }, [refresh]);
 
-  return { creditsRemaining, freeUsed, loading, refresh };
+  return { creditsRemaining, freeUsed, isAdmin, loading, refresh };
 }
