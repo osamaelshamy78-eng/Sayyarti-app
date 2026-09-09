@@ -4714,6 +4714,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [garageRequests, setGarageRequests] = useState([]);
   const [rentalRequests, setRentalRequests] = useState([]);
   const [photoRequests, setPhotoRequests] = useState([]);
+  const [creditRequests, setCreditRequests] = useState([]);
   const [adminGarages, setAdminGarages] = useState([]);
   const [maintenanceCenters, setMaintenanceCenters] = useState([]);
   const [rentals, setRentals] = useState([]);
@@ -4804,7 +4805,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes, rentalRequestsRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes, rentalRequestsRes, creditRequestsRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
@@ -4813,6 +4814,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       supabase.from("issue_media").select("*").order("sort_order").order("created_at", { ascending: false }),
       supabase.from("car_rentals").select("*").order("country").order("created_at", { ascending: false }),
       supabase.rpc("get_rental_admin_requests"),
+      supabase.rpc("admin_list_credit_purchase_requests"),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
@@ -4822,6 +4824,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     if (mediaRes.error) setLoginError(mediaRes.error.message);
     if (rentalsRes.error) setLoginError(rentalsRes.error.message);
     if (rentalRequestsRes.error) setLoginError(rentalRequestsRes.error.message);
+    if (creditRequestsRes.error) setLoginError(creditRequestsRes.error.message);
     setCars(carsRes.data || []);
     setGarageRequests(garagesRes.data || []);
     setPhotoRequests(photosRes.data || []);
@@ -4830,6 +4833,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setIssueMedia(mediaRes.data || []);
     setRentals(rentalsRes.data || []);
     setRentalRequests(rentalRequestsRes.data || []);
+    setCreditRequests(creditRequestsRes.data || []);
     setLoading(false);
   }
 
@@ -4979,6 +4983,38 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       return;
     }
     setGeneratedCodes((prev) => { const next = { ...prev }; delete next[item.id]; return next; });
+    await loadAll();
+  }
+
+  async function approveCreditPurchase(item) {
+    if (!supabase || !user) return;
+    setBusyId(item.id);
+    setLoginError("");
+    const { error } = await supabase.rpc("admin_approve_credit_purchase", {
+      p_request_id: item.id,
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
+    await loadAll();
+  }
+
+  async function rejectCreditPurchase(item) {
+    if (!supabase || !user) return;
+    const ok = window.confirm(lang === "ar" ? "هل تريد رفض طلب شراء الكريديتس ده؟" : "Decline this credit purchase request?");
+    if (!ok) return;
+    setBusyId(item.id);
+    setLoginError("");
+    const { error } = await supabase.rpc("admin_reject_credit_purchase", {
+      p_request_id: item.id,
+    });
+    setBusyId(null);
+    if (error) {
+      setLoginError(error.message);
+      return;
+    }
     await loadAll();
   }
 
@@ -5338,6 +5374,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       <div className="flex gap-2 mb-4 overflow-x-auto" style={{ paddingBottom: 3 }}>
         {[
           ["cars", t.adminCarsTab, cars.length],
+          ["creditRequests", lang === "ar" ? "طلبات كريديتس" : "Credit requests", creditRequests.filter(r=>r.status==="pending").length],
           ["manageGarages", t.adminManageGaragesTab, adminGarages.length],
           ["garage", t.adminGarageTab, garageRequests.filter(g=>g.status==="pending").length],
           ["rentalRequests", t.adminRentalRequestsTab, rentalRequests.filter(r=>r.status==="pending").length],
@@ -5399,6 +5436,45 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
               </div>
             );
           })}
+        </div>
+      ) : tab === "creditRequests" ? (
+        <div className="flex flex-col gap-2.5">
+          {creditRequests.length === 0 && (
+            <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>
+              {lang === "ar" ? "مفيش طلبات شراء كريديتس" : "No credit purchase requests"}
+            </p>
+          )}
+          {creditRequests.map((r) => (
+            <div key={r.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12 }}>
+              <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>
+                {lang === "ar" ? "طلب شراء كريديتس" : "Credit purchase request"}
+              </div>
+              <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>
+                {lang === "ar" ? "الكمية" : "Amount"}: {r.credits_requested} {lang === "ar" ? "كريديت" : "credits"}
+              </div>
+              <div style={{ color: r.status === "approved" ? "#7BC67B" : r.status === "rejected" ? "#F06A5F" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
+                {t.adminStatus}: {r.status}
+              </div>
+              {r.receipt_url && (
+                <a href={r.receipt_url} target="_blank" rel="noreferrer"
+                  style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>
+                  {t.adminViewReceipt}
+                </a>
+              )}
+              {r.status === "pending" && (
+                <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                  <button disabled={busyId === r.id} onClick={() => approveCreditPurchase(r)}
+                    style={{ flex: 1, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                    {busyId === r.id ? t.adminApproving : (lang === "ar" ? "وافق وزوّد الرصيد" : "Approve & add credits")}
+                  </button>
+                  <button disabled={busyId === r.id} onClick={() => rejectCreditPurchase(r)}
+                    style={{ flex: 1, background: "transparent", color: "#F06A5F", border: "1px solid #F06A5F66", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                    {t.adminReject}
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       ) : tab === "garage" ? (
         <div className="flex flex-col gap-2.5">
