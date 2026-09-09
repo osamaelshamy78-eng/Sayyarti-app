@@ -47,7 +47,7 @@ const inputStyle = {
 export default function CarValuationView({ lang }) {
   const isAr = lang === "ar";
   const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
-  const { creditsRemaining, freeUsed, loading: creditsLoading, refresh: refreshCredits } = useFeatureCredits(
+  const { creditsRemaining, freeUsed, isAdmin, loading: creditsLoading, refresh: refreshCredits } = useFeatureCredits(
     "valuation",
     user?.id
   );
@@ -109,6 +109,8 @@ export default function CarValuationView({ lang }) {
 
   const statusLabel = creditsLoading
     ? (isAr ? "جاري تحميل رصيدك..." : "Loading your balance...")
+    : isAdmin
+    ? (isAr ? "🛠️ وصول أدمن — بدون حدود" : "🛠️ Admin access — unlimited")
     : !freeUsed
     ? (isAr ? "🎁 عندك محاولة مجانية واحدة" : "🎁 You have one free try")
     : creditsRemaining > 0
