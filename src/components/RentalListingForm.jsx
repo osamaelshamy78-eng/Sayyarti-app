@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import { useCustomerAuth } from "../useCustomerAuth";
 
 // ===== Bank account details =====
 const BANK_DETAILS = {
@@ -123,6 +124,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
   const isAr = lang !== "en";
   const t = isAr ? T.ar : T.en;
   const dir = isAr ? "rtl" : "ltr";
+  const { user, checking, signInWithGoogle } = useCustomerAuth();
 
   const [step, setStep] = useState(1);
   const [takenRanks, setTakenRanks] = useState([]);
@@ -338,7 +340,27 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
         </div>
 
         <div className="px-5 py-5">
-          {success ? (
+          {checking ? (
+            <p className="text-center text-gray-400 text-sm py-10">{isAr ? "جاري التحقق..." : "Checking..."}</p>
+          ) : !user ? (
+            <div className="text-center py-8">
+              <div className="text-3xl mb-3">🔐</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {isAr ? "سجّل دخولك عشان تضيف إعلانك" : "Sign in to add your listing"}
+              </h3>
+              <p className="text-gray-500 text-sm mb-6">
+                {isAr
+                  ? "تسجيل الدخول بجوجل مطلوب عشان نربط الطلب بحسابك ونمنع الطلبات الوهمية."
+                  : "Signing in with Google links the request to your account and helps prevent fake requests."}
+              </p>
+              <button
+                onClick={signInWithGoogle}
+                className="w-full py-3 rounded-xl bg-gray-900 text-white font-semibold"
+              >
+                {isAr ? "تسجيل الدخول بجوجل" : "Sign in with Google"}
+              </button>
+            </div>
+          ) : success ? (
             <div className="text-center py-6">
               <div className="w-16 h-16 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
                 ✓

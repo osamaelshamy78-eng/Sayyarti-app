@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../supabaseClient";
+import { useCustomerAuth } from "../useCustomerAuth";
 
 // ===== بيانات الحساب البنكي =====
 const BANK_DETAILS = {
@@ -28,6 +29,7 @@ const RANK_LABELS = {
 };
 
 export default function GarageListingForm({ isOpen, onClose, country = "uae" }) {
+  const { user, checking, signInWithGoogle } = useCustomerAuth();
   const [step, setStep] = useState(1); // 1: بيانات الجراج, 2: الترتيب والدفع
   const [takenRanks, setTakenRanks] = useState([]);
   const [loadingRanks, setLoadingRanks] = useState(true);
@@ -246,7 +248,23 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
         </div>
 
         <div className="px-5 py-5">
-          {success ? (
+          {checking ? (
+            <p className="text-center text-gray-400 text-sm py-10">جاري التحقق...</p>
+          ) : !user ? (
+            <div className="text-center py-8">
+              <div className="text-3xl mb-3">🔐</div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">سجّل دخولك عشان تضيف جراجك</h3>
+              <p className="text-gray-500 text-sm mb-6">
+                تسجيل الدخول بجوجل مطلوب عشان نربط الطلب بحسابك ونمنع الطلبات الوهمية.
+              </p>
+              <button
+                onClick={signInWithGoogle}
+                className="w-full py-3 rounded-xl bg-gray-900 text-white font-semibold flex items-center justify-center gap-2"
+              >
+                تسجيل الدخول بجوجل
+              </button>
+            </div>
+          ) : success ? (
             <div className="text-center py-10">
               <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl mx-auto mb-4">
                 ✓

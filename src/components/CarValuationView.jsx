@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { CAR_MAKES, CAR_MODELS } from "./CarForm.jsx";
 import { useCustomerAuth } from "../useCustomerAuth";
-import { useFeatureCredits } from "../useFeatureCredits";
 import CustomerAuthGate from "./CustomerAuthGate";
 import BuyCreditForm from "./BuyCreditForm";
 
@@ -47,10 +46,6 @@ const inputStyle = {
 export default function CarValuationView({ lang }) {
   const isAr = lang === "ar";
   const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
-  const { creditsRemaining, freeUsed, isAdmin, loading: creditsLoading, refresh: refreshCredits } = useFeatureCredits(
-    "valuation",
-    user?.id
-  );
   const [form, setForm] = useState({
     country: "",
     make: "",
@@ -67,6 +62,7 @@ export default function CarValuationView({ lang }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [showBuyCredit, setShowBuyCredit] = useState(false);
+  const [needsCreditsMsg, setNeedsCreditsMsg] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value, ...(key === "make" ? { model: "" } : {}) }));
   const modelOptions = form.make && form.make !== "Other" ? CAR_MODELS[form.make] || [] : [];
@@ -90,32 +86,21 @@ export default function CarValuationView({ lang }) {
       });
       const data = await res.json();
       if (res.status === 402 || data.needsCredits) {
-        setShowBuyCredit(true);
-        refreshCredits();
+        setNeedsCreditsMsg(true);
         return;
       }
       if (!res.ok) {
         setError(data.error || (isAr ? "حصل خطأ، حاول تاني" : "Something went wrong, please try again."));
         return;
       }
+      setNeedsCreditsMsg(false);
       setResult(data);
-      refreshCredits();
     } catch (err) {
       setError(isAr ? "تعذر الاتصال بالخادم، تأكد من الإنترنت وحاول تاني" : "Could not connect. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  const statusLabel = creditsLoading
-    ? (isAr ? "جاري تحميل رصيدك..." : "Loading your balance...")
-    : isAdmin
-    ? (isAr ? "🛠️ وصول أدمن — بدون حدود" : "🛠️ Admin access — unlimited")
-    : !freeUsed
-    ? (isAr ? "🎁 عندك محاولة مجانية واحدة" : "🎁 You have one free try")
-    : creditsRemaining > 0
-    ? (isAr ? `رصيدك: ${creditsRemaining} كريديت` : `Your balance: ${creditsRemaining} credits`)
-    : (isAr ? "خلصت تجربتك المجانية — اشترِ كريديت عشان تكمل" : "Free trial used — buy credits to continue");
 
   return (
     <CustomerAuthGate
@@ -140,9 +125,6 @@ export default function CarValuationView({ lang }) {
               ? "دخّل بيانات سيارتك وهيدور الذكاء الاصطناعي على إعلانات حقيقية مشابهة في سوقك ويديك نطاق سعر تقريبي."
               : "Enter your car's details and the AI will search real comparable listings in your market for an estimated price range."}
           </p>
-          <div style={{ marginTop: 10, display: "inline-block", background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 10, padding: "6px 10px", color: C.amber, fontSize: 11, fontWeight: 800 }}>
-            {statusLabel}
-          </div>
         </div>
 
         <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12, display: "grid", gap: 10 }}>
@@ -320,6 +302,21 @@ export default function CarValuationView({ lang }) {
         {error && (
           <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>
             {error}
+          </div>
+        )}
+
+        {needsCreditsMsg && (
+          <div style={{ marginTop: 10, background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 12, padding: "12px 14px" }}>
+            <div style={{ color: C.cream, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+              {isAr ? "خلصت محاولتك المجانية. اشترِ كريديتس عشان تكمل." : "You've used your free try. Buy credits to continue."}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowBuyCredit(true)}
+              style={{ width: "100%", background: C.amber, color: C.asphalt, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
+            >
+              {isAr ? "اشترِ كريديتس" : "Buy credits"}
+            </button>
           </div>
         )}
 

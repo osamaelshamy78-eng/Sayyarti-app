@@ -1,6 +1,8 @@
 import React from "react";
 import { supabase } from "../supabaseClient";
 import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
+import { useCustomerAuth } from "../useCustomerAuth";
+import CustomerAuthGate from "./CustomerAuthGate";
 
 const C = {
   asphalt: "#14171C",
@@ -96,6 +98,7 @@ function Field({ label, children }) {
 }
 
 export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, onSubmitted }) {
+  const { user, checking, signInWithGoogle, signOut } = useCustomerAuth();
   const [form, setForm] = React.useState({
     make: "",
     makeOther: "",
@@ -182,20 +185,19 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
     setSubmitting(true);
     try {
       const photoUrls = photos.length ? await uploadPhotos() : [];
-      const { error } = await supabase.from("car_listings").insert({
-        make_model: `${effectiveMake} ${effectiveModel}`.trim(),
-        status: "approved",
-        year: form.year || null,
-        price: form.price || null,
-        mileage: form.mileage || null,
-        chassis_number: form.chassis.trim(),
-        city: form.city || null,
-        country: form.country || null,
-        specs: form.specs || null,
-        phone: form.phone.trim(),
-        description: form.description || null,
-        photo_url: photoUrls[0] || null,
-        photo_urls: photoUrls,
+      const { error } = await supabase.rpc("submit_car_listing", {
+        p_make_model: `${effectiveMake} ${effectiveModel}`.trim(),
+        p_chassis_number: form.chassis.trim(),
+        p_phone: form.phone.trim(),
+        p_year: form.year || null,
+        p_price: form.price || null,
+        p_mileage: form.mileage || null,
+        p_city: form.city || null,
+        p_country: form.country || null,
+        p_specs: form.specs || null,
+        p_description: form.description || null,
+        p_photo_url: photoUrls[0] || null,
+        p_photo_urls: photoUrls,
       });
       if (error) throw error;
       if (typeof onSubmitted === "function") onSubmitted();
@@ -210,6 +212,17 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
   }
 
   return (
+    <CustomerAuthGate
+      lang={lang}
+      user={user}
+      checking={checking}
+      signInWithGoogle={signInWithGoogle}
+      signOut={signOut}
+      titleAr="سجّل دخولك عشان تضيف إعلان"
+      titleEn="Sign in to add a listing"
+      descAr="تسجيل الدخول بجوجل مطلوب عشان نربط الإعلان بحسابك ونمنع الإعلانات الوهمية."
+      descEn="Signing in with Google links the listing to your account and helps us prevent fake listings."
+    >
     <div className="pb-8">
       <button
         onClick={onClose}
@@ -375,5 +388,6 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
         </div>
       </form>
     </div>
+    </CustomerAuthGate>
   );
 }

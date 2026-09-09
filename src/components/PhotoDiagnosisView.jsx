@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useCustomerAuth } from "../useCustomerAuth";
-import { useFeatureCredits } from "../useFeatureCredits";
 import CustomerAuthGate from "./CustomerAuthGate";
 import BuyCreditForm from "./BuyCreditForm";
 
@@ -22,10 +21,6 @@ const C = {
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
   const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
-  const { creditsRemaining, freeUsed, isAdmin, loading: creditsLoading, refresh: refreshCredits } = useFeatureCredits(
-    "diagnosis",
-    user?.id
-  );
   const [issueDescription, setIssueDescription] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -38,6 +33,7 @@ export default function PhotoDiagnosisView({ lang }) {
   const [carYear, setCarYear] = useState("");
   const [error, setError] = useState(null);
   const [showBuyCredit, setShowBuyCredit] = useState(false);
+  const [needsCreditsMsg, setNeedsCreditsMsg] = useState(false);
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -168,18 +164,17 @@ export default function PhotoDiagnosisView({ lang }) {
       });
       const data = await res.json();
       if (res.status === 402 || data.needsCredits) {
-        setShowBuyCredit(true);
-        refreshCredits();
+        setNeedsCreditsMsg(true);
         return;
       }
       if (!res.ok) {
         setError(data.error || (isAr ? "حصل خطأ أثناء التحليل، حاول تاني" : "Something went wrong while analyzing the media."));
         return;
       }
+      setNeedsCreditsMsg(false);
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
       setEstimatedCost(data.estimatedCost || null);
-      refreshCredits();
     } catch (err) {
       setError(isAr ? "تعذر قراءة الملف. جرّب صورة أو فيديو أوضح وأقصر." : "Could not read the file. Try a clearer photo or a shorter video.");
     } finally {
@@ -216,16 +211,6 @@ export default function PhotoDiagnosisView({ lang }) {
   };
   const openYouTube = () => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(issueDescription || "car problem diagnosis")}`, "_blank", "noopener,noreferrer");
 
-  const statusLabel = creditsLoading
-    ? (isAr ? "جاري تحميل رصيدك..." : "Loading your balance...")
-    : isAdmin
-    ? (isAr ? "🛠️ وصول أدمن — بدون حدود" : "🛠️ Admin access — unlimited")
-    : !freeUsed
-    ? (isAr ? "🎁 عندك محاولة مجانية واحدة" : "🎁 You have one free try")
-    : creditsRemaining > 0
-    ? (isAr ? `رصيدك: ${creditsRemaining} كريديت` : `Your balance: ${creditsRemaining} credits`)
-    : (isAr ? "خلصت تجربتك المجانية — اشترِ كريديت عشان تكمل" : "Free trial used — buy credits to continue");
-
   return (
     <CustomerAuthGate
       lang={lang}
@@ -247,9 +232,6 @@ export default function PhotoDiagnosisView({ lang }) {
           <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
             {isAr ? "ارفع صورة أو فيديو، واحكي لسيارتي إيه اللي حصل." : "Upload a photo or video and tell Sayyarti what happened."}
           </p>
-          <div style={{ marginTop: 10, display: "inline-block", background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 10, padding: "6px 10px", color: C.amber, fontSize: 11, fontWeight: 800 }}>
-            {statusLabel}
-          </div>
         </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7, marginBottom: 12 }}>
@@ -335,6 +317,21 @@ export default function PhotoDiagnosisView({ lang }) {
         </button>
 
         {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>{error}</div>}
+
+        {needsCreditsMsg && (
+          <div style={{ marginTop: 10, background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 12, padding: "12px 14px" }}>
+            <div style={{ color: C.cream, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+              {isAr ? "خلصت محاولتك المجانية. اشترِ كريديتس عشان تكمل." : "You've used your free try. Buy credits to continue."}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowBuyCredit(true)}
+              style={{ width: "100%", background: C.amber, color: C.asphalt, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
+            >
+              {isAr ? "اشترِ كريديتس" : "Buy credits"}
+            </button>
+          </div>
+        )}
 
         {result && (
           <div style={{ marginTop: 14 }}>
