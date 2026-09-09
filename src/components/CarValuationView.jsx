@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { CAR_MAKES, CAR_MODELS } from "./CarForm.jsx";
+import { useCustomerAuth } from "../useCustomerAuth";
+import { useFeatureCredits } from "../useFeatureCredits";
+import CustomerAuthGate from "./CustomerAuthGate";
+import BuyCreditForm from "./BuyCreditForm";
 
 const EDGE_FUNCTION_URL =
   "https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/car-valuation";
@@ -42,6 +46,11 @@ const inputStyle = {
 
 export default function CarValuationView({ lang }) {
   const isAr = lang === "ar";
+  const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
+  const { creditsRemaining, freeUsed, loading: creditsLoading, refresh: refreshCredits } = useFeatureCredits(
+    "valuation",
+    user?.id
+  );
   const [form, setForm] = useState({
     country: "",
     make: "",
@@ -57,6 +66,7 @@ export default function CarValuationView({ lang }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [showBuyCredit, setShowBuyCredit] = useState(false);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value, ...(key === "make" ? { model: "" } : {}) }));
   const modelOptions = form.make && form.make !== "Other" ? CAR_MODELS[form.make] || [] : [];
@@ -72,15 +82,24 @@ export default function CarValuationView({ lang }) {
     try {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ ...form, lang }),
       });
       const data = await res.json();
+      if (res.status === 402 || data.needsCredits) {
+        setShowBuyCredit(true);
+        refreshCredits();
+        return;
+      }
       if (!res.ok) {
         setError(data.error || (isAr ? "حصل خطأ، حاول تاني" : "Something went wrong, please try again."));
         return;
       }
       setResult(data);
+      refreshCredits();
     } catch (err) {
       setError(isAr ? "تعذر الاتصال بالخادم، تأكد من الإنترنت وحاول تاني" : "Could not connect. Check your connection and try again.");
     } finally {
@@ -88,213 +107,243 @@ export default function CarValuationView({ lang }) {
     }
   };
 
-  return (
-    <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
-        <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
-          {isAr ? "قيّم سعر سيارتك" : "Estimate your car's price"}
-        </h1>
-        <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
-          {isAr
-            ? "دخّل بيانات سيارتك وهيدور الذكاء الاصطناعي على إعلانات حقيقية مشابهة في سوقك ويديك نطاق سعر تقريبي."
-            : "Enter your car's details and the AI will search real comparable listings in your market for an estimated price range."}
-        </p>
-      </div>
+  const statusLabel = creditsLoading
+    ? (isAr ? "جاري تحميل رصيدك..." : "Loading your balance...")
+    : !freeUsed
+    ? (isAr ? "🎁 عندك محاولة مجانية واحدة" : "🎁 You have one free try")
+    : creditsRemaining > 0
+    ? (isAr ? `رصيدك: ${creditsRemaining} كريديت` : `Your balance: ${creditsRemaining} credits`)
+    : (isAr ? "خلصت تجربتك المجانية — اشترِ كريديت عشان تكمل" : "Free trial used — buy credits to continue");
 
-      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12, display: "grid", gap: 10 }}>
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
-          <select style={inputStyle} value={form.country} onChange={set("country")}>
-            <option value="">{isAr ? "اختر الدولة" : "Select country"}</option>
-            {COUNTRIES.map((c) => (
-              <option key={c.code} value={c.code}>{isAr ? c.ar : c.en}</option>
-            ))}
-          </select>
+  return (
+    <CustomerAuthGate
+      lang={lang}
+      user={user}
+      checking={checking}
+      signInWithGoogle={signInWithGoogle}
+      signOut={signOut}
+      titleAr="سجّل دخولك عشان تجرب مجانًا"
+      titleEn="Sign in to try it free"
+      descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."
+      descEn="One free try per account. After that, you can buy credits to keep going."
+    >
+      <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
+          <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
+            {isAr ? "قيّم سعر سيارتك" : "Estimate your car's price"}
+          </h1>
+          <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
+            {isAr
+              ? "دخّل بيانات سيارتك وهيدور الذكاء الاصطناعي على إعلانات حقيقية مشابهة في سوقك ويديك نطاق سعر تقريبي."
+              : "Enter your car's details and the AI will search real comparable listings in your market for an estimated price range."}
+          </p>
+          <div style={{ marginTop: 10, display: "inline-block", background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 10, padding: "6px 10px", color: C.amber, fontSize: 11, fontWeight: 800 }}>
+            {statusLabel}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12, display: "grid", gap: 10 }}>
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة" : "Make"}</label>
-            <select style={inputStyle} value={form.make} onChange={set("make")}>
-              <option value="">{isAr ? "اختر" : "Select"}</option>
-              {CAR_MAKES.map((m) => (
-                <option key={m} value={m}>{m}</option>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
+            <select style={inputStyle} value={form.country} onChange={set("country")}>
+              <option value="">{isAr ? "اختر الدولة" : "Select country"}</option>
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{isAr ? c.ar : c.en}</option>
               ))}
             </select>
           </div>
-          <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الموديل" : "Model"}</label>
-            {modelOptions.length ? (
-              <select style={inputStyle} value={form.model} onChange={set("model")}>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة" : "Make"}</label>
+              <select style={inputStyle} value={form.make} onChange={set("make")}>
                 <option value="">{isAr ? "اختر" : "Select"}</option>
-                {modelOptions.map((m) => (
+                {CAR_MAKES.map((m) => (
                   <option key={m} value={m}>{m}</option>
                 ))}
               </select>
-            ) : (
-              <input
-                style={inputStyle}
-                value={form.model}
-                onChange={set("model")}
-                placeholder={isAr ? "اكتب الموديل" : "Type the model"}
-              />
+            </div>
+            <div>
+              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الموديل" : "Model"}</label>
+              {modelOptions.length ? (
+                <select style={inputStyle} value={form.model} onChange={set("model")}>
+                  <option value="">{isAr ? "اختر" : "Select"}</option>
+                  {modelOptions.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  style={inputStyle}
+                  value={form.model}
+                  onChange={set("model")}
+                  placeholder={isAr ? "اكتب الموديل" : "Type the model"}
+                />
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+              {isAr ? "الفئة/التريم (اختياري)" : "Trim / Grade (optional)"}
+            </label>
+            <input
+              style={inputStyle}
+              value={form.trim}
+              onChange={set("trim")}
+              placeholder={isAr ? "مثال: LE، Limited، GLX" : "e.g. LE, Limited, GLX"}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "السنة" : "Year"}</label>
+              <input type="number" style={inputStyle} value={form.year} onChange={set("year")} placeholder={isAr ? "مثال: 2019" : "e.g. 2019"} />
+            </div>
+            <div>
+              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الكيلومترات" : "Mileage (km)"}</label>
+              <input type="number" style={inputStyle} value={form.mileage} onChange={set("mileage")} placeholder={isAr ? "مثال: 85000" : "e.g. 85000"} />
+            </div>
+          </div>
+
+          <div>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+              {isAr ? "سعة المحرك (اختياري)" : "Engine size (optional)"}
+            </label>
+            <input
+              style={inputStyle}
+              value={form.engineSize}
+              onChange={set("engineSize")}
+              placeholder={isAr ? "مثال: 2.0L، V6 3.5L" : "e.g. 2.0L, V6 3.5L"}
+            />
+          </div>
+
+          <div>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "المواصفات" : "Specs"}</label>
+            <div className="flex gap-2">
+              {[
+                { id: "gulf", en: "Gulf specs", ar: "خليجي" },
+                { id: "american", en: "American specs", ar: "أمريكي" },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, specs: f.specs === s.id ? "" : s.id }))}
+                  style={{
+                    flex: 1,
+                    padding: "9px 10px",
+                    borderRadius: 10,
+                    fontSize: 12.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: `1px solid ${form.specs === s.id ? C.amber : C.line}`,
+                    background: form.specs === s.id ? `${C.amber}1A` : C.asphalt,
+                    color: form.specs === s.id ? C.amber : C.dim,
+                  }}
+                >
+                  {isAr ? s.ar : s.en}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "الحالة العامة" : "Overall condition"}</label>
+            <div className="flex gap-2">
+              {CONDITIONS.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setForm((f) => ({ ...f, condition: f.condition === c.id ? "" : c.id }))}
+                  style={{
+                    flex: 1,
+                    padding: "9px 6px",
+                    borderRadius: 10,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    border: `1px solid ${form.condition === c.id ? C.amber : C.line}`,
+                    background: form.condition === c.id ? `${C.amber}1A` : C.asphalt,
+                    color: form.condition === c.id ? C.amber : C.dim,
+                  }}
+                >
+                  {isAr ? c.ar : c.en}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+              {isAr ? "أي عيوب تحب تذكرها؟ (اختياري)" : "Any defects to mention? (optional)"}
+            </label>
+            <textarea
+              rows={3}
+              style={{ ...inputStyle, resize: "vertical", minHeight: 70, fontFamily: "inherit" }}
+              value={form.defects}
+              onChange={set("defects")}
+              placeholder={isAr ? "مثال: خدوش في الباب، حادثة بسيطة قديمة..." : "e.g. scratches on the door, an old minor accident..."}
+            />
+          </div>
+        </div>
+
+        <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}55`, borderRadius: 13, padding: "11px 12px", marginBottom: 12 }}>
+          <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>
+            {isAr
+              ? "التقييم تقديري وبناءً على إعلانات السوق الحالية، مش تقييم رسمي معتمد."
+              : "This is an approximate estimate based on current market listings, not an official valuation."}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!canSubmit || loading}
+          style={{
+            width: "100%",
+            background: !canSubmit || loading ? `${C.amber}88` : C.amber,
+            color: C.asphalt,
+            border: "none",
+            borderRadius: 13,
+            padding: "14px 16px",
+            cursor: !canSubmit || loading ? "not-allowed" : "pointer",
+            fontSize: 14.5,
+            fontWeight: 900,
+          }}
+        >
+          {loading ? (isAr ? "جاري البحث والتحليل..." : "Searching & analyzing...") : (isAr ? "قيّم السيارة" : "Get price estimate")}
+        </button>
+
+        {error && (
+          <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>
+            {error}
+          </div>
+        )}
+
+        {result && (
+          <div style={{ marginTop: 14 }}>
+            <div style={{ background: C.panel, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
+              <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>
+                {isAr ? "التقييم التقريبي" : "ESTIMATED VALUE"}
+              </div>
+              <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result.estimate}</div>
+            </div>
+            {result.creditsRemaining != null && (
+              <div style={{ marginTop: 9, color: C.dim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>
+                {isAr ? `الرصيد المتبقي: ${result.creditsRemaining}` : `Credits remaining: ${result.creditsRemaining}`}
+              </div>
             )}
           </div>
-        </div>
-
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
-            {isAr ? "الفئة/التريم (اختياري)" : "Trim / Grade (optional)"}
-          </label>
-          <input
-            style={inputStyle}
-            value={form.trim}
-            onChange={set("trim")}
-            placeholder={isAr ? "مثال: LE، Limited، GLX" : "e.g. LE, Limited, GLX"}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "السنة" : "Year"}</label>
-            <input type="number" style={inputStyle} value={form.year} onChange={set("year")} placeholder={isAr ? "مثال: 2019" : "e.g. 2019"} />
-          </div>
-          <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الكيلومترات" : "Mileage (km)"}</label>
-            <input type="number" style={inputStyle} value={form.mileage} onChange={set("mileage")} placeholder={isAr ? "مثال: 85000" : "e.g. 85000"} />
-          </div>
-        </div>
-
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
-            {isAr ? "سعة المحرك (اختياري)" : "Engine size (optional)"}
-          </label>
-          <input
-            style={inputStyle}
-            value={form.engineSize}
-            onChange={set("engineSize")}
-            placeholder={isAr ? "مثال: 2.0L، V6 3.5L" : "e.g. 2.0L, V6 3.5L"}
-          />
-        </div>
-
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "المواصفات" : "Specs"}</label>
-          <div className="flex gap-2">
-            {[
-              { id: "gulf", en: "Gulf specs", ar: "خليجي" },
-              { id: "american", en: "American specs", ar: "أمريكي" },
-            ].map((s) => (
-              <button
-                key={s.id}
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, specs: f.specs === s.id ? "" : s.id }))}
-                style={{
-                  flex: 1,
-                  padding: "9px 10px",
-                  borderRadius: 10,
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  border: `1px solid ${form.specs === s.id ? C.amber : C.line}`,
-                  background: form.specs === s.id ? `${C.amber}1A` : C.asphalt,
-                  color: form.specs === s.id ? C.amber : C.dim,
-                }}
-              >
-                {isAr ? s.ar : s.en}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "الحالة العامة" : "Overall condition"}</label>
-          <div className="flex gap-2">
-            {CONDITIONS.map((c) => (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setForm((f) => ({ ...f, condition: f.condition === c.id ? "" : c.id }))}
-                style={{
-                  flex: 1,
-                  padding: "9px 6px",
-                  borderRadius: 10,
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  border: `1px solid ${form.condition === c.id ? C.amber : C.line}`,
-                  background: form.condition === c.id ? `${C.amber}1A` : C.asphalt,
-                  color: form.condition === c.id ? C.amber : C.dim,
-                }}
-              >
-                {isAr ? c.ar : c.en}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
-            {isAr ? "أي عيوب تحب تذكرها؟ (اختياري)" : "Any defects to mention? (optional)"}
-          </label>
-          <textarea
-            rows={3}
-            style={{ ...inputStyle, resize: "vertical", minHeight: 70, fontFamily: "inherit" }}
-            value={form.defects}
-            onChange={set("defects")}
-            placeholder={isAr ? "مثال: خدوش في الباب، حادثة بسيطة قديمة..." : "e.g. scratches on the door, an old minor accident..."}
-          />
-        </div>
+        )}
       </div>
 
-      <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}55`, borderRadius: 13, padding: "11px 12px", marginBottom: 12 }}>
-        <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>
-          {isAr
-            ? "التقييم تقديري وبناءً على إعلانات السوق الحالية، مش تقييم رسمي معتمد."
-            : "This is an approximate estimate based on current market listings, not an official valuation."}
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={!canSubmit || loading}
-        style={{
-          width: "100%",
-          background: !canSubmit || loading ? `${C.amber}88` : C.amber,
-          color: C.asphalt,
-          border: "none",
-          borderRadius: 13,
-          padding: "14px 16px",
-          cursor: !canSubmit || loading ? "not-allowed" : "pointer",
-          fontSize: 14.5,
-          fontWeight: 900,
-        }}
-      >
-        {loading ? (isAr ? "جاري البحث والتحليل..." : "Searching & analyzing...") : (isAr ? "قيّم السيارة مجانًا" : "Get price estimate — Free")}
-      </button>
-
-      {error && (
-        <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>
-          {error}
-        </div>
-      )}
-
-      {result && (
-        <div style={{ marginTop: 14 }}>
-          <div style={{ background: C.panel, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
-            <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>
-              {isAr ? "التقييم التقريبي" : "ESTIMATED VALUE"}
-            </div>
-            <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result.estimate}</div>
-          </div>
-          {result.creditsRemaining != null && (
-            <div style={{ marginTop: 9, color: C.dim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>
-              {isAr ? `الرصيد المتبقي: ${result.creditsRemaining}` : `Credits remaining: ${result.creditsRemaining}`}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+      <BuyCreditForm
+        isOpen={showBuyCredit}
+        onClose={() => setShowBuyCredit(false)}
+        lang={lang}
+        userEmail={user?.email}
+      />
+    </CustomerAuthGate>
   );
 }

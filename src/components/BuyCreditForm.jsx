@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "../supabaseClient"; // عدّل المسار ده لو ملف supabase عندك في مكان مختلف
+import { supabase } from "../supabaseClient";
 
 // ===== بيانات الحساب البنكي (نفس حساب الجراجات) =====
 const BANK_DETAILS = {
@@ -12,19 +12,18 @@ const BANK_DETAILS = {
   routing: "202620103",
 };
 
-// ===== باقات الرصيد =====
+// ===== باقات الرصيد (رصيد مشترك: تشخيص صور + تقييم سعر) =====
 const PACKAGES = [
   { id: "trial", credits: 3, price: 9, labelAr: "تجربة", labelEn: "Trial" },
   { id: "standard", credits: 10, price: 25, labelAr: "قياسية", labelEn: "Standard" },
   { id: "saver", credits: 25, price: 50, labelAr: "موفرة", labelEn: "Saver" },
 ];
 
-export default function BuyCreditForm({ isOpen, onClose, lang }) {
+export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
   const isAr = lang === "ar";
 
   const [step, setStep] = useState(1); // 1: اختيار الباقة, 2: الدفع
   const [selectedPkg, setSelectedPkg] = useState(null);
-  const [whatsapp, setWhatsapp] = useState("");
   const [receiptFile, setReceiptFile] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -75,11 +74,11 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
     }
     try {
       await window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-        garage_name: "طلب شراء رصيد تشخيص بالصور",
-        owner_name: "طلب تشخيص صورة",
-        phone: payload.whatsapp,
-        address: `باقة التشخيص: ${payload.pkg.labelAr} — ${payload.pkg.credits} تشخيص`,
-        map_link: "Photo Diagnosis / Credit Purchase",
+        garage_name: "طلب شراء كريديتس (سيارتي)",
+        owner_name: payload.email || "غير معروف",
+        phone: payload.email || "-",
+        address: `الباقة: ${payload.pkg.labelAr} — ${payload.pkg.credits} كريديت`,
+        map_link: "Credit Purchase Request",
         rank: `Credits: ${payload.pkg.credits}`,
         price: payload.pkg.price,
       });
@@ -89,7 +88,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
   }
 
   function validateStep2() {
-    if (!whatsapp.trim()) return t("من فضلك اكتب رقم الواتساب", "Please enter your WhatsApp number");
     if (!receiptFile) return t("من فضلك ارفع صورة إيصال التحويل", "Please upload the transfer receipt");
     if (!confirmed) return t("من فضلك أكّد أنك قمت بتحويل المبلغ", "Please confirm you made the transfer");
     return "";
@@ -108,15 +106,14 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
     try {
       const receiptUrl = await uploadReceipt(receiptFile);
 
-      const { error: insertError } = await supabase.rpc("submit_photo_diagnosis_request", {
-        p_whatsapp_number: whatsapp.trim(),
-        p_package_credits: selectedPkg.credits,
+      const { error: insertError } = await supabase.rpc("submit_credit_purchase", {
+        p_credits_requested: selectedPkg.credits,
         p_receipt_url: receiptUrl,
       });
 
       if (insertError) throw insertError;
 
-      sendNotificationEmail({ whatsapp: whatsapp.trim(), pkg: selectedPkg });
+      sendNotificationEmail({ email: userEmail, pkg: selectedPkg });
       setSuccess(true);
     } catch (err) {
       console.error(err);
@@ -129,7 +126,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
   function resetAndClose() {
     setStep(1);
     setSelectedPkg(null);
-    setWhatsapp("");
     setReceiptFile(null);
     setConfirmed(false);
     setError("");
@@ -147,7 +143,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
       <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h3 className="font-bold text-gray-900">
-            {t("اشترِ رصيد تشخيص", "Buy Diagnosis Credit")}
+            {t("اشترِ كريديتس", "Buy Credits")}
           </h3>
           <button
             onClick={resetAndClose}
@@ -168,8 +164,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
               </h3>
               <p className="text-gray-500 text-sm mb-6">
                 {t(
-                  "هنراجع إيصال التحويل ونبعتلك كود الرصيد على الواتساب قريباً.",
-                  "We'll review the receipt and send your credit code on WhatsApp soon."
+                  "هنراجع إيصال التحويل ونضيف الرصيد لحسابك تلقائيًا — مفيش كود هتحتاج تكتبه.",
+                  "We'll review the receipt and add the credits to your account automatically — no code needed."
                 )}
               </p>
               <button
@@ -191,8 +187,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
                 <div className="space-y-4">
                   <p className="text-sm text-gray-500">
                     {t(
-                      "كل كريدت = تشخيص واحد لصورة واحدة. اختار الباقة المناسبة لك:",
-                      "Each credit = one photo diagnosis. Choose the package that suits you:"
+                      "كل كريدت = تشخيص صورة واحد أو تقييم سعر سيارة واحد. اختار الباقة المناسبة لك:",
+                      "Each credit = one photo diagnosis or one car valuation. Choose the package that suits you:"
                     )}
                   </p>
 
@@ -213,7 +209,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
                               {isAr ? pkg.labelAr : pkg.labelEn}
                             </div>
                             <div className="text-xs text-gray-500 mt-1">
-                              {t(`${pkg.credits} تشخيص`, `${pkg.credits} diagnoses`)}
+                              {t(`${pkg.credits} كريديت`, `${pkg.credits} credits`)}
                             </div>
                           </div>
                           <div className="font-bold text-gray-900">
@@ -238,8 +234,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
                   <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
                     <p className="text-sm font-semibold text-gray-800">
                       {t(
-                        `المبلغ المطلوب: ${selectedPkg.price} درهم (${selectedPkg.credits} تشخيص)`,
-                        `Amount due: ${selectedPkg.price} AED (${selectedPkg.credits} diagnoses)`
+                        `المبلغ المطلوب: ${selectedPkg.price} درهم (${selectedPkg.credits} كريديت)`,
+                        `Amount due: ${selectedPkg.price} AED (${selectedPkg.credits} credits)`
                       )}
                     </p>
                     <p className="text-xs text-gray-500 mb-2">
@@ -257,18 +253,12 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
                     <BankRow label={t("العملة", "Currency")} value={BANK_DETAILS.currency} />
                   </div>
 
-                  <Field label={t("رقم الواتساب", "WhatsApp number")}>
-                    <input
-                      className="input"
-                      type="tel"
-                      value={whatsapp}
-                      onChange={(e) => setWhatsapp(e.target.value)}
-                      placeholder="05xxxxxxxx"
-                    />
-                    <p className="mt-1 text-xs text-gray-400">
-                      {t("هنبعتلك كود الرصيد عليه بعد المراجعة", "We'll send your credit code here after review")}
-                    </p>
-                  </Field>
+                  {userEmail && (
+                    <div className="text-xs text-gray-400">
+                      {t("الرصيد هيتضاف لحساب: ", "Credits will be added to: ")}
+                      <span className="font-semibold text-gray-600">{userEmail}</span>
+                    </div>
+                  )}
 
                   <Field label={t("صورة إيصال التحويل", "Transfer receipt photo")}>
                     <input
@@ -298,7 +288,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang }) {
                     </button>
                     <button
                       onClick={handleSubmit}
-                      disabled={submitting || !whatsapp.trim() || !receiptFile || !confirmed}
+                      disabled={submitting || !receiptFile || !confirmed}
                       className="flex-[2] py-3 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-40"
                     >
                       {submitting ? t("جاري الإرسال...", "Sending...") : t("أرسل الطلب", "Submit request")}
