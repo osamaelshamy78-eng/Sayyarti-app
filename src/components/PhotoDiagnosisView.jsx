@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useCustomerAuth } from "../useCustomerAuth";
+import CustomerAuthGate from "./CustomerAuthGate";
+import BuyCreditForm from "./BuyCreditForm";
 
 const EDGE_FUNCTION_URL =
   "https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/smart-endpoint";
@@ -17,6 +20,7 @@ const C = {
 
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
+  const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
   const [issueDescription, setIssueDescription] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -28,6 +32,8 @@ export default function PhotoDiagnosisView({ lang }) {
   const [carMakeModel, setCarMakeModel] = useState("");
   const [carYear, setCarYear] = useState("");
   const [error, setError] = useState(null);
+  const [showBuyCredit, setShowBuyCredit] = useState(false);
+  const [needsCreditsMsg, setNeedsCreditsMsg] = useState(false);
   const galleryInputRef = useRef(null);
   const cameraInputRef = useRef(null);
   const videoInputRef = useRef(null);
@@ -140,9 +146,11 @@ export default function PhotoDiagnosisView({ lang }) {
       const imagesBase64 = await Promise.all(imageFiles.map(fileToBase64));
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({
-          freeMode: true,
           description: issueDescription.trim(),
           imagesBase64,
           imageBase64: imagesBase64[0],
@@ -152,13 +160,19 @@ export default function PhotoDiagnosisView({ lang }) {
           country: carCountry,
           carMakeModel: carMakeModel.trim(),
           carYear: carYear.trim(),
+          lang,
         }),
       });
       const data = await res.json();
+      if (res.status === 402 || data.needsCredits) {
+        setNeedsCreditsMsg(true);
+        return;
+      }
       if (!res.ok) {
         setError(data.error || (isAr ? "حصل خطأ أثناء التحليل، حاول تاني" : "Something went wrong while analyzing the media."));
         return;
       }
+      setNeedsCreditsMsg(false);
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
       setEstimatedCost(data.estimatedCost || null);
@@ -199,6 +213,17 @@ export default function PhotoDiagnosisView({ lang }) {
   const openYouTube = () => window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(issueDescription || "car problem diagnosis")}`, "_blank", "noopener,noreferrer");
 
   return (
+    <CustomerAuthGate
+      lang={lang}
+      user={user}
+      checking={checking}
+      signInWithGoogle={signInWithGoogle}
+      signOut={signOut}
+      titleAr="سجّل دخولك عشان تجرب مجانًا"
+      titleEn="Sign in to try it free"
+      descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."
+      descEn="One free try per account. After that, you can buy credits to keep going."
+    >
     <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
       <div style={{ marginBottom: 16 }}>
         <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
@@ -294,6 +319,21 @@ export default function PhotoDiagnosisView({ lang }) {
 
       {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>{error}</div>}
 
+      {needsCreditsMsg && (
+        <div style={{ marginTop: 10, background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 12, padding: "12px 14px" }}>
+          <div style={{ color: C.cream, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+            {isAr ? "خلصت محاولتك المجانية. اشترِ كريديتس عشان تكمل." : "You've used your free try. Buy credits to continue."}
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowBuyCredit(true)}
+            style={{ width: "100%", background: C.amber, color: C.asphalt, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
+          >
+            {isAr ? "اشترِ كريديتس" : "Buy credits"}
+          </button>
+        </div>
+      )}
+
       {result && (
         <div style={{ marginTop: 14 }}>
           <div style={{ background: C.panel, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
@@ -315,5 +355,13 @@ export default function PhotoDiagnosisView({ lang }) {
         </div>
       )}
     </div>
+
+    <BuyCreditForm
+      isOpen={showBuyCredit}
+      onClose={() => setShowBuyCredit(false)}
+      lang={lang}
+      userEmail={user?.email}
+    />
+    </CustomerAuthGate>
   );
 }
