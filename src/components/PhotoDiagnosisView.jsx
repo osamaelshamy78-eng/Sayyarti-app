@@ -72,6 +72,42 @@ export default function PhotoDiagnosisView({ lang }) {
       reader.readAsDataURL(file);
     });
 
+  const compressImageFile = (file) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          const max = 1280;
+          const width = img.naturalWidth || 1280;
+          const height = img.naturalHeight || 720;
+          const scale = Math.min(1, max / Math.max(width, height));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(width * scale));
+          canvas.height = Math.max(1, Math.round(height * scale));
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              URL.revokeObjectURL(objectUrl);
+              if (!blob) return reject(new Error("Could not compress image"));
+              resolve(new File([blob], "photo.jpg", { type: "image/jpeg" }));
+            },
+            "image/jpeg",
+            0.72
+          );
+        } catch (err) {
+          URL.revokeObjectURL(objectUrl);
+          reject(err);
+        }
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Could not read image"));
+      };
+      img.src = objectUrl;
+    });
+
   const canvasFrameToFile = (video, time, index) =>
     new Promise((resolve, reject) => {
       const handleSeeked = () => {
@@ -138,7 +174,7 @@ export default function PhotoDiagnosisView({ lang }) {
     setResult(null);
     try {
       const isVideo = mediaFile.type.startsWith("video/");
-      const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [mediaFile];
+      const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [await compressImageFile(mediaFile)];
       const imagesBase64 = await Promise.all(imageFiles.map(fileToBase64));
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
