@@ -33,6 +33,7 @@ export default function PhotoDiagnosisView({ lang }) {
   const [carMakeModel, setCarMakeModel] = useState("");
   const [carYear, setCarYear] = useState("");
   const [error, setError] = useState(null);
+  const [sentSizeKb, setSentSizeKb] = useState(null);
   const [showBuyCredit, setShowBuyCredit] = useState(false);
   const [needsCreditsMsg, setNeedsCreditsMsg] = useState(false);
   const galleryInputRef = useRef(null);
@@ -175,24 +176,34 @@ export default function PhotoDiagnosisView({ lang }) {
     try {
       const isVideo = mediaFile.type.startsWith("video/");
       const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [await compressImageFile(mediaFile)];
+      const totalKb = Math.round(imageFiles.reduce((sum, f) => sum + f.size, 0) / 1024);
+      setSentSizeKb(totalKb);
       const imagesBase64 = await Promise.all(imageFiles.map(fileToBase64));
-      const res = await fetch(EDGE_FUNCTION_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          action: "diagnose",
-          description: issueDescription.trim(),
-          imagesBase64,
-          imageBase64: imagesBase64[0],
-          mediaType: "image/jpeg",
-          mediaKind: isVideo ? "video" : "image",
-          frameCount: imagesBase64.length,
-          lang,
-        }),
-      });
+      const controller = new AbortController();
+      const abortTimer = setTimeout(() => controller.abort(), 60000);
+      let res;
+      try {
+        res = await fetch(EDGE_FUNCTION_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            action: "diagnose",
+            description: issueDescription.trim(),
+            imagesBase64,
+            imageBase64: imagesBase64[0],
+            mediaType: "image/jpeg",
+            mediaKind: isVideo ? "video" : "image",
+            frameCount: imagesBase64.length,
+            lang,
+          }),
+        });
+      } finally {
+        clearTimeout(abortTimer);
+      }
       const data = await res.json();
       if (res.status === 402 || data.needsCredits) {
         setNeedsCreditsMsg(true);
@@ -206,7 +217,11 @@ export default function PhotoDiagnosisView({ lang }) {
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
     } catch (err) {
-      setError(isAr ? "تعذر قراءة الملف. جرّب صورة أو فيديو أوضح وأقصر." : "Could not read the file. Try a clearer photo or a shorter video.");
+      setError(
+        (isAr ? "خطأ تقني: " : "Technical error: ") +
+        (err && err.name ? err.name + " — " : "") +
+        (err && err.message ? err.message : String(err))
+      );
     } finally {
       setLoadingDiagnose(false);
     }
@@ -393,6 +408,11 @@ export default function PhotoDiagnosisView({ lang }) {
       <button type="button" onClick={handleDiagnose} disabled={loadingDiagnose} style={{ width: "100%", background: loadingDiagnose ? `${C.amber}88` : C.amber, color: C.asphalt, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loadingDiagnose ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900, marginBottom: 9 }}>
         {loadingDiagnose ? (isAr ? "جاري التشخيص..." : "Diagnosing...") : (isAr ? "شخّص المشكلة" : "Diagnose the problem")}
       </button>
+      {sentSizeKb != null && (
+        <div style={{ color: C.dim, fontSize: 10.5, textAlign: "center", marginTop: -5, marginBottom: 9 }}>
+          {isAr ? `حجم الملف المرسل: ${sentSizeKb} كيلوبايت` : `File size sent: ${sentSizeKb} KB`}
+        </div>
+      )}
 
       <button type="button" onClick={handleGetCost} disabled={loadingCost} style={{ width: "100%", background: "transparent", color: C.cream, border: `1px solid ${C.amber}`, borderRadius: 13, padding: "13px 16px", cursor: loadingCost ? "wait" : "pointer", fontSize: 14, fontWeight: 800 }}>
         {loadingCost ? (isAr ? "جاري حساب التكلفة..." : "Estimating cost...") : (isAr ? "اعرف تكلفة الإصلاح التقريبية" : "Get estimated repair cost")}
