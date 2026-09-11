@@ -24,7 +24,8 @@ export default function PhotoDiagnosisView({ lang }) {
   const [issueDescription, setIssueDescription] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingDiagnose, setLoadingDiagnose] = useState(false);
+  const [loadingCost, setLoadingCost] = useState(false);
   const [result, setResult] = useState(null);
   const [resultCategory, setResultCategory] = useState("general");
   const [estimatedCost, setEstimatedCost] = useState(null);
@@ -127,19 +128,14 @@ export default function PhotoDiagnosisView({ lang }) {
       video.load();
     });
 
-  const handleAnalyze = async () => {
+  const handleDiagnose = async () => {
     if (!mediaFile) {
       setError(isAr ? "من فضلك اختر صورة أو فيديو أولًا" : "Please choose a photo or video first.");
       return;
     }
-    if (!carMakeModel.trim() || !carYear.trim()) {
-      setError(isAr ? "من فضلك اكتب ماركة وموديل السيارة وسنة الصنع عشان نقدر نحسب تكلفة الإصلاح التقريبية" : "Please enter the car's make/model and year so we can estimate the repair cost.");
-      return;
-    }
-    setLoading(true);
+    setLoadingDiagnose(true);
     setError(null);
     setResult(null);
-    setEstimatedCost(null);
     try {
       const isVideo = mediaFile.type.startsWith("video/");
       const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [mediaFile];
@@ -151,15 +147,13 @@ export default function PhotoDiagnosisView({ lang }) {
           Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({
+          action: "diagnose",
           description: issueDescription.trim(),
           imagesBase64,
           imageBase64: imagesBase64[0],
           mediaType: "image/jpeg",
           mediaKind: isVideo ? "video" : "image",
           frameCount: imagesBase64.length,
-          country: carCountry,
-          carMakeModel: carMakeModel.trim(),
-          carYear: carYear.trim(),
           lang,
         }),
       });
@@ -175,11 +169,57 @@ export default function PhotoDiagnosisView({ lang }) {
       setNeedsCreditsMsg(false);
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
-      setEstimatedCost(data.estimatedCost || null);
     } catch (err) {
       setError(isAr ? "تعذر قراءة الملف. جرّب صورة أو فيديو أوضح وأقصر." : "Could not read the file. Try a clearer photo or a shorter video.");
     } finally {
-      setLoading(false);
+      setLoadingDiagnose(false);
+    }
+  };
+
+  const handleGetCost = async () => {
+    if (!carMakeModel.trim() || !carYear.trim()) {
+      setError(isAr ? "من فضلك اكتب ماركة وموديل السيارة وسنة الصنع" : "Please enter the car's make/model and year.");
+      return;
+    }
+    if (!issueDescription.trim()) {
+      setError(isAr ? "من فضلك اكتب وصف مختصر للمشكلة عشان نقدر نحسب التكلفة" : "Please describe the problem so we can estimate the cost.");
+      return;
+    }
+    setLoadingCost(true);
+    setError(null);
+    setEstimatedCost(null);
+    try {
+      const res = await fetch(EDGE_FUNCTION_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          action: "cost",
+          description: issueDescription.trim(),
+          country: carCountry,
+          carMakeModel: carMakeModel.trim(),
+          carYear: carYear.trim(),
+          category: resultCategory,
+          lang,
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 402 || data.needsCredits) {
+        setNeedsCreditsMsg(true);
+        return;
+      }
+      if (!res.ok) {
+        setError(data.error || (isAr ? "حصل خطأ أثناء حساب التكلفة، حاول تاني" : "Something went wrong while estimating the cost."));
+        return;
+      }
+      setNeedsCreditsMsg(false);
+      setEstimatedCost(data.estimatedCost);
+    } catch (err) {
+      setError(isAr ? "تعذر الاتصال بالخادم، تأكد من الإنترنت وحاول تاني" : "Could not connect. Check your connection and try again.");
+    } finally {
+      setLoadingCost(false);
     }
   };
 
@@ -267,7 +307,8 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "2. بيانات سيارتك" : "2. Your car's details"}</div>
+        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 2 }}>{isAr ? "2. بيانات سيارتك" : "2. Your car's details"}</div>
+        <div style={{ color: C.dim, fontSize: 11, marginBottom: 9 }}>{isAr ? "مطلوبة بس لو عايز تعرف تكلفة الإصلاح التقريبية" : "Only needed if you want the estimated repair cost"}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
           <div>
             <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة والموديل" : "Make & model"}</label>
@@ -313,8 +354,12 @@ export default function PhotoDiagnosisView({ lang }) {
         <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>{isAr ? "التشخيص إرشادي وليس بديلًا عن فحص فني مؤهل، خصوصًا في الفرامل والوقود وارتفاع الحرارة والإيرباج." : "This is guidance, not a substitute for a qualified inspection, especially for brakes, fuel, overheating or airbag issues."}</div>
       </div>
 
-      <button type="button" onClick={handleAnalyze} disabled={loading} style={{ width: "100%", background: loading ? `${C.amber}88` : C.amber, color: C.asphalt, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loading ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900 }}>
-        {loading ? (isAr ? "جاري التحليل..." : "Analyzing...") : (isAr ? "حلّل المشكلة مجانًا" : "Analyze the problem — Free")}
+      <button type="button" onClick={handleDiagnose} disabled={loadingDiagnose} style={{ width: "100%", background: loadingDiagnose ? `${C.amber}88` : C.amber, color: C.asphalt, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loadingDiagnose ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900, marginBottom: 9 }}>
+        {loadingDiagnose ? (isAr ? "جاري التشخيص..." : "Diagnosing...") : (isAr ? "شخّص المشكلة" : "Diagnose the problem")}
+      </button>
+
+      <button type="button" onClick={handleGetCost} disabled={loadingCost} style={{ width: "100%", background: "transparent", color: C.cream, border: `1px solid ${C.amber}`, borderRadius: 13, padding: "13px 16px", cursor: loadingCost ? "wait" : "pointer", fontSize: 14, fontWeight: 800 }}>
+        {loadingCost ? (isAr ? "جاري حساب التكلفة..." : "Estimating cost...") : (isAr ? "اعرف تكلفة الإصلاح التقريبية" : "Get estimated repair cost")}
       </button>
 
       {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>{error}</div>}
@@ -340,18 +385,19 @@ export default function PhotoDiagnosisView({ lang }) {
             <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "نتيجة التحليل" : "ANALYSIS RESULT"}</div>
             <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result}</div>
           </div>
-          {estimatedCost && (
-            <div style={{ background: C.panel, border: `1px solid ${C.amber}55`, borderRadius: 16, padding: 14, marginTop: 10 }}>
-              <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "تكلفة الإصلاح التقريبية" : "ESTIMATED REPAIR COST"}</div>
-              <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{estimatedCost}</div>
-              <div style={{ color: C.dim, fontSize: 10, marginTop: 8, lineHeight: 1.5 }}>{isAr ? "تقدير تقريبي بناءً على أسعار السوق، السعر الفعلي بيختلف حسب نوع السيارة وحالة الجراج." : "An approximate market-based estimate. Actual price varies by garage and car condition."}</div>
-            </div>
-          )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
             <button type="button" onClick={openGarages} style={{ background: C.amber, color: C.asphalt, border: "none", borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 900, cursor: "pointer" }}>{isAr ? "جراجات قريبة" : "Nearby garages"}</button>
             <button type="button" onClick={openYouTube} style={{ background: "transparent", color: C.cream, border: `1px solid ${C.line}`, borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>{isAr ? "فيديوهات الإصلاح" : "Repair videos"}</button>
           </div>
           <div style={{ marginTop: 9, color: C.dim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>{isAr ? "لو النتيجة غير واضحة، جرّب صورة أقرب للجزء المتأثر أو أضف تفاصيل أكثر في الوصف." : "If the result is unclear, try a closer photo of the affected part or add more detail to the description."}</div>
+        </div>
+      )}
+
+      {estimatedCost && (
+        <div style={{ background: C.panel, border: `1px solid ${C.amber}55`, borderRadius: 16, padding: 14, marginTop: 10 }}>
+          <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "تكلفة الإصلاح التقريبية" : "ESTIMATED REPAIR COST"}</div>
+          <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{estimatedCost}</div>
+          <div style={{ color: C.dim, fontSize: 10, marginTop: 8, lineHeight: 1.5 }}>{isAr ? "تقدير تقريبي بناءً على أسعار السوق، السعر الفعلي بيختلف حسب نوع السيارة وحالة الجراج." : "An approximate market-based estimate. Actual price varies by garage and car condition."}</div>
         </div>
       )}
     </div>
