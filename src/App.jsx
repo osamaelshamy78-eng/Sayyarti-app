@@ -5771,6 +5771,14 @@ export default function App() {
     return () => clearInterval(id);
   }, []);
 
+  // Keep <html lang>/<html dir> in sync with the in-app language toggle,
+  // so external scripts (karaji-safety.js) and browsers/screen readers
+  // can correctly detect which language is actually showing.
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  }, [lang]);
+
   // --- URL routing + browser back-button support -----------------
   function navPush(path, replace = false) {
     try {
