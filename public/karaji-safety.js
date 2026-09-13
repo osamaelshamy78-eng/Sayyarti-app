@@ -248,6 +248,14 @@
   }
 
   observer = new MutationObserver(scheduleRun);
+
+  // Also react immediately when the page's own lang/dir attribute changes
+  // (this is how the React app now reports its current language). This is
+  // a separate, cheap observer scoped to a single element/attributes only,
+  // so it does not reintroduce the subtree-scanning performance issue.
+  const langAttrObserver = new MutationObserver(scheduleRun);
+  langAttrObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["lang", "dir"] });
+
   closeMenuOnOutsideClick();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", runNow);
   else runNow();
