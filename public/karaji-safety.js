@@ -77,20 +77,24 @@
     const ar=isArabic(),btn=document.createElement("button"); btn.type="button"; btn.dataset.karajiMenuItem=key;
     Object.assign(btn.style,{display:"flex",width:"100%",padding:"12px 16px",background:"none",border:"none",borderTop:`1px solid ${C.line}`,color:C.cream,fontSize:"13px",fontWeight:600,textAlign:ar?"right":"left",cursor:"pointer",flexDirection:ar?"row-reverse":"row",gap:"8px",boxSizing:"border-box"});
     const icon=document.createElement("span");
-    icon.textContent=key==="legal"?"⚖":key==="about"?"ⓘ":key==="sellCar"?"🚗":"+";
+    icon.textContent=key==="legal"?"⚖":key==="about"?"ⓘ":key==="sellCar"?"🚗":key==="whatsapp"?"💬":key==="call"?"📞":"+";
     icon.style.color=C.amber; icon.style.fontSize="16px"; icon.style.width="18px"; icon.style.flex="0 0 18px"; icon.style.textAlign="center";
     const label=document.createElement("span"); label.style.flex="1";
     label.textContent=key==="legal"?(ar?"قانوني":"Legal")
       :key==="about"?(ar?"عن التطبيق":"About the App")
       :key==="sellCar"?(ar?"عرض السيارة للبيع":"List Your Car for Sale")
+      :key==="whatsapp"?(ar?"تواصل عبر واتساب":"WhatsApp Us")
+      :key==="call"?(ar?"اتصل بينا":"Call Us")
       :(ar?"أضف جراجك مجانًا":"Add Your Garage Free");
     btn.append(icon,label);
     btn.onmouseenter=()=>{btn.style.background=`${C.amber}12`;btn.style.color=C.amber;};
     btn.onmouseleave=()=>{btn.style.background="none";btn.style.color=C.cream;};
     btn.onclick=()=>{
-      if(key==="legal") window.location.href="/legal/";
+      if(key==="legal") window.location.href="/legal/?lang="+(ar?"ar":"en");
       else if(key==="about") openAbout();
       else if(key==="sellCar") window.location.href="/cars/add";
+      else if(key==="whatsapp") window.open("https://wa.me/971558875606","_blank");
+      else if(key==="call") window.location.href="tel:+971558875606";
       else window.location.href="/free-garage/";
     };
     menu.appendChild(btn);
@@ -131,6 +135,8 @@
     hidePaidMenuGarageButton(menu);
     addNativeMenuItem(menu,"freeGarage");
     addNativeMenuItem(menu,"sellCar");
+    addNativeMenuItem(menu,"whatsapp");
+    addNativeMenuItem(menu,"call");
     addNativeMenuItem(menu,"legal");
     addNativeMenuItem(menu,"about");
   }
