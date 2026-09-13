@@ -73,8 +73,31 @@
   }
 
   function addNativeMenuItem(menu,key) {
-    if(menu.querySelector(`[data-karaji-menu-item="${key}"]`))return;
-    const ar=isArabic(),btn=document.createElement("button"); btn.type="button"; btn.dataset.karajiMenuItem=key;
+    const ar=isArabic();
+    const existing=menu.querySelector(`[data-karaji-menu-item="${key}"]`);
+    if(existing){
+      const existingLabel=existing.querySelector("span:last-child");
+      if(existingLabel){
+        existingLabel.textContent=key==="legal"?(ar?"قانوني":"Legal")
+          :key==="about"?(ar?"عن التطبيق":"About the App")
+          :key==="sellCar"?(ar?"عرض السيارة للبيع":"List Your Car for Sale")
+          :key==="whatsapp"?(ar?"تواصل عبر واتساب":"WhatsApp Us")
+          :key==="call"?(ar?"اتصل بينا":"Call Us")
+          :(ar?"أضف جراجك مجانًا":"Add Your Garage Free");
+      }
+      existing.style.textAlign=ar?"right":"left";
+      existing.style.flexDirection=ar?"row-reverse":"row";
+      existing.onclick=()=>{
+        if(key==="legal") window.location.href="/legal/?lang="+(ar?"ar":"en");
+        else if(key==="about") openAbout();
+        else if(key==="sellCar") window.location.href="/cars/add";
+        else if(key==="whatsapp") window.open("https://wa.me/971558875606","_blank");
+        else if(key==="call") window.location.href="tel:+971558875606";
+        else window.location.href="/free-garage/";
+      };
+      return;
+    }
+    const btn=document.createElement("button"); btn.type="button"; btn.dataset.karajiMenuItem=key;
     Object.assign(btn.style,{display:"flex",width:"100%",padding:"12px 16px",background:"none",border:"none",borderTop:`1px solid ${C.line}`,color:C.cream,fontSize:"13px",fontWeight:600,textAlign:ar?"right":"left",cursor:"pointer",flexDirection:ar?"row-reverse":"row",gap:"8px",boxSizing:"border-box"});
     const icon=document.createElement("span");
     icon.textContent=key==="legal"?"⚖":key==="about"?"ⓘ":key==="sellCar"?"🚗":key==="whatsapp"?"💬":key==="call"?"📞":"+";
