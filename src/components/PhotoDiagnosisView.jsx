@@ -26,6 +26,7 @@ export default function PhotoDiagnosisView({ lang }) {
   const [mediaPreview, setMediaPreview] = useState(null);
   const [loadingDiagnose, setLoadingDiagnose] = useState(false);
   const [loadingCost, setLoadingCost] = useState(false);
+  const [diagnoseStage, setDiagnoseStage] = useState(""); // "prepare" | "upload" | "analyze"
   const [result, setResult] = useState(null);
   const [resultCategory, setResultCategory] = useState("general");
   const [estimatedCost, setEstimatedCost] = useState(null);
@@ -174,6 +175,7 @@ export default function PhotoDiagnosisView({ lang }) {
     setError(null);
     setResult(null);
     try {
+      setDiagnoseStage("prepare");
       const isVideo = mediaFile.type.startsWith("video/");
       const imageFiles = isVideo ? await extractVideoFrames(mediaFile) : [await compressImageFile(mediaFile)];
       const totalKb = Math.round(imageFiles.reduce((sum, f) => sum + f.size, 0) / 1024);
@@ -181,6 +183,9 @@ export default function PhotoDiagnosisView({ lang }) {
       const imagesBase64 = await Promise.all(imageFiles.map(fileToBase64));
       const controller = new AbortController();
       const abortTimer = setTimeout(() => controller.abort(), 60000);
+      // Upload is quick; after a few seconds the server is analyzing
+      setDiagnoseStage("upload");
+      const stageTimer = setTimeout(() => setDiagnoseStage("analyze"), 3000);
       let res;
       try {
         res = await fetch(EDGE_FUNCTION_URL, {
@@ -203,6 +208,7 @@ export default function PhotoDiagnosisView({ lang }) {
         });
       } finally {
         clearTimeout(abortTimer);
+        clearTimeout(stageTimer);
       }
       const data = await res.json();
       if (res.status === 402 || data.needsCredits) {
@@ -217,13 +223,20 @@ export default function PhotoDiagnosisView({ lang }) {
       setResult(data.diagnosis);
       setResultCategory(data.category || "general");
     } catch (err) {
-      setError(
-        (isAr ? "خطأ تقني: " : "Technical error: ") +
-        (err && err.name ? err.name + " — " : "") +
-        (err && err.message ? err.message : String(err))
-      );
+      if (err && err.name === "AbortError") {
+        setError(isAr
+          ? "التحليل أخد وقت أطول من المعتاد. تأكد من الإنترنت وجرب تاني."
+          : "The analysis took longer than usual. Check your connection and try again.");
+      } else {
+        setError(
+          (isAr ? "خطأ تقني: " : "Technical error: ") +
+          (err && err.name ? err.name + " — " : "") +
+          (err && err.message ? err.message : String(err))
+        );
+      }
     } finally {
       setLoadingDiagnose(false);
+      setDiagnoseStage("");
     }
   };
 
@@ -239,9 +252,12 @@ export default function PhotoDiagnosisView({ lang }) {
     setLoadingCost(true);
     setError(null);
     setEstimatedCost(null);
+    const costController = new AbortController();
+    const costTimer = setTimeout(() => costController.abort(), 60000);
     try {
       const res = await fetch(EDGE_FUNCTION_URL, {
         method: "POST",
+        signal: costController.signal,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -268,8 +284,15 @@ export default function PhotoDiagnosisView({ lang }) {
       setNeedsCreditsMsg(false);
       setEstimatedCost(data.estimatedCost);
     } catch (err) {
-      setError(isAr ? "تعذر الاتصال بالخادم، تأكد من الإنترنت وحاول تاني" : "Could not connect. Check your connection and try again.");
+      if (err && err.name === "AbortError") {
+        setError(isAr
+          ? "حساب التكلفة أخد وقت أطول من المعتاد، جرب تاني كمان شوية."
+          : "The cost estimate took longer than usual, please try again shortly.");
+      } else {
+        setError(isAr ? "تعذر الاتصال بالخادم، تأكد من الإنترنت وحاول تاني" : "Could not connect. Check your connection and try again.");
+      }
     } finally {
+      clearTimeout(costTimer);
       setLoadingCost(false);
     }
   };
@@ -406,7 +429,13 @@ export default function PhotoDiagnosisView({ lang }) {
       </div>
 
       <button type="button" onClick={handleDiagnose} disabled={loadingDiagnose} style={{ width: "100%", background: loadingDiagnose ? `${C.amber}88` : C.amber, color: C.asphalt, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loadingDiagnose ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900, marginBottom: 9 }}>
-        {loadingDiagnose ? (isAr ? "جاري التشخيص..." : "Diagnosing...") : (isAr ? "شخّص المشكلة" : "Diagnose the problem")}
+        {loadingDiagnose
+          ? diagnoseStage === "prepare"
+            ? (isAr ? "بنجهز الصورة..." : "Preparing photo...")
+            : diagnoseStage === "upload"
+              ? (isAr ? "بنرفع الصورة..." : "Uploading...")
+              : (isAr ? "بنحلل المشكلة... (ممكن ياخد لحد 30 ثانية)" : "Analyzing... (up to 30 seconds)")
+          : (isAr ? "شخّص المشكلة" : "Diagnose the problem")}
       </button>
       {sentSizeKb != null && (
         <div style={{ color: C.dim, fontSize: 10.5, textAlign: "center", marginTop: -5, marginBottom: 9 }}>
@@ -415,7 +444,7 @@ export default function PhotoDiagnosisView({ lang }) {
       )}
 
       <button type="button" onClick={handleGetCost} disabled={loadingCost} style={{ width: "100%", background: "transparent", color: C.cream, border: `1px solid ${C.amber}`, borderRadius: 13, padding: "13px 16px", cursor: loadingCost ? "wait" : "pointer", fontSize: 14, fontWeight: 800 }}>
-        {loadingCost ? (isAr ? "جاري حساب التكلفة..." : "Estimating cost...") : (isAr ? "اعرف تكلفة الإصلاح التقريبية" : "Get estimated repair cost")}
+        {loadingCost ? (isAr ? "بندور على الأسعار... (ممكن ياخد لحد 30 ثانية)" : "Searching prices... (up to 30 seconds)") : (isAr ? "اعرف تكلفة الإصلاح التقريبية" : "Get estimated repair cost")}
       </button>
 
       {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>{error}</div>}
