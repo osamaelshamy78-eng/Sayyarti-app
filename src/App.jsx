@@ -2750,6 +2750,8 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
 
         <button
           onClick={onToggleMenu}
+          aria-label={isRTL ? "القائمة" : "Menu"}
+          aria-expanded={menuOpen}
           className="flex items-center justify-center rounded-full"
           style={{
             width: 32,
