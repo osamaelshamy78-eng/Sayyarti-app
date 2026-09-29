@@ -28,9 +28,7 @@ const overlayStyle = {
   color: C.cream,
   display: "flex",
   flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  padding: "calc(env(safe-area-inset-top, 0px) + 72px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)",
+  padding: "calc(env(safe-area-inset-top, 0px) + 16px) 20px calc(env(safe-area-inset-bottom, 0px) + 24px)",
   overflowY: "auto",
   fontFamily: "'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif",
 };
@@ -71,18 +69,15 @@ export default function AppLoginGate({ children }) {
 
   return (
     <div style={overlayStyle} dir={isAr ? "rtl" : "ltr"}>
-      {/* Language switch, pinned at the top below the phone's status bar */}
+      {/* Top bar: language switch in the corner, away from the logo */}
+      <div style={{ width: "100%", display: "flex", justifyContent: "flex-end", flexShrink: 0 }}>
       <div
         role="group"
         aria-label="Language / اللغة"
         style={{
-          position: "absolute",
-          top: "calc(env(safe-area-inset-top, 0px) + 16px)",
-          left: "50%",
-          transform: "translateX(-50%)",
           display: "flex",
-          gap: 4,
-          padding: 4,
+          gap: 2,
+          padding: 3,
           borderRadius: 999,
           background: C.panel,
           border: `1px solid ${C.line}`,
@@ -97,8 +92,8 @@ export default function AppLoginGate({ children }) {
             style={{
               border: "none",
               borderRadius: 999,
-              padding: "8px 18px",
-              fontSize: 13,
+              padding: "6px 14px",
+              fontSize: 12.5,
               fontWeight: 700,
               cursor: "pointer",
               background: lang === code ? C.amber : "transparent",
@@ -110,7 +105,10 @@ export default function AppLoginGate({ children }) {
           </button>
         ))}
       </div>
+      </div>
 
+      {/* Logo + sign-in, centered in the remaining space */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "24px 4px" }}>
       <div style={{ width: "100%", maxWidth: 380, textAlign: "center" }}>
 
         <div
@@ -168,6 +166,7 @@ export default function AppLoginGate({ children }) {
             ? "بنستخدم حساب جوجل بتاعك لتسجيل الدخول بس، ومش بننشر أي حاجة باسمك."
             : "We only use your Google account to sign you in. We never post anything on your behalf."}
         </p>
+      </div>
       </div>
     </div>
   );
