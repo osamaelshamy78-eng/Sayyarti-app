@@ -12,9 +12,8 @@ import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 
-// Floating helpers load after the main screen is visible
-const KarajiAIAssistant = React.lazy(() => import("./components/KarajiAIAssistant"));
-const KarajiMaintenancePlanner = React.lazy(() => import("./components/KarajiMaintenancePlanner"));
+import KarajiAIAssistant from "./components/KarajiAIAssistant";
+import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
 
 class AppErrorBoundary extends Component {
@@ -41,10 +40,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       ) : (
         <>
           <App />
-          <Suspense fallback={null}>
-            <KarajiAIAssistant lang="ar" />
-            <KarajiMaintenancePlanner />
-          </Suspense>
+          <KarajiAIAssistant lang="ar" />
+          <KarajiMaintenancePlanner />
         </>
       )}
     </Suspense>
