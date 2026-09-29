@@ -5897,7 +5897,20 @@ function LazyFallback({ lang }) {
 
 export default function App() {
   const initialRoute = routeFromPath(typeof window !== "undefined" ? window.location.pathname : "/");
-  const [lang, setLang] = useState("en");
+  // Start in the language the user picked (login screen or last visit), else the phone's language
+  const [lang, setLang] = useState(() => {
+    try {
+      const saved = localStorage.getItem("karajy-language");
+      if (saved === "ar" || saved === "en") return saved;
+    } catch (e) {}
+    return (navigator.language || "").toLowerCase().startsWith("ar") ? "ar" : "en";
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem("karajy-language", lang);
+      localStorage.setItem("karajiLanguage", lang);
+    } catch (e) {}
+  }, [lang]);
   const [view, setView] = useState(initialRoute.view);
   const [activeCategory, setActiveCategory] = useState(initialRoute.activeCategory || null);
   const [activeIssueId, setActiveIssueId] = useState(initialRoute.activeIssueId || null);
