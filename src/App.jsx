@@ -5907,7 +5907,7 @@ export default function App() {
         />
         <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
-        <div className="flex-1 overflow-y-auto">
+        <div role="main" className="flex-1 overflow-y-auto">
           {view === "home" && (
             <HomeView
               lang={lang}
