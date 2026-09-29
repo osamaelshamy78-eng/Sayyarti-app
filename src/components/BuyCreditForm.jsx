@@ -138,9 +138,13 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
   return (
     <div
       dir={isAr ? "rtl" : "ltr"}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+      className="fixed inset-0 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+      style={{ zIndex: 10050 /* above the bottom nav (9990) and the AI button (10001) */ }}
     >
-      <div className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+      <div
+        className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl overflow-y-auto shadow-2xl"
+        style={{ maxHeight: "92dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <h3 className="font-bold text-gray-900">
             {t("اشترِ كريديتس", "Buy Credits")}
