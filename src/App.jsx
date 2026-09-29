@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import {
   Gauge,
   ChevronLeft,
@@ -27,9 +27,10 @@ import {
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
-import PhotoDiagnosisView from "./components/PhotoDiagnosisView";
-import CarValuationView from "./components/CarValuationView";
-import RentalListingForm from "./components/RentalListingForm";
+// Loaded only when the user opens these screens (smaller first load)
+const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
+const CarValuationView = lazy(() => import("./components/CarValuationView"));
+const RentalListingForm = lazy(() => import("./components/RentalListingForm"));
 import CarForm, { CAR_MAKES, CAR_MODELS } from "./components/CarForm";
 
 /* ---------------------------------------------------------------
@@ -2976,7 +2977,7 @@ function MainSectionsGrid({ lang, t, onOpenSection }) {
                     position: "absolute",
                     top: -7,
                     insetInlineEnd: -9,
-                    background: C.blue,
+                    background: "#3F6E96", // darker than C.blue for text contrast (4.5:1+)
                     color: "#fff",
                     fontSize: 8.5,
                     fontWeight: 800,
@@ -4119,7 +4120,9 @@ function RentalsView({ lang, t, country, setCountry, isRTL }) {
         </button>)}
       </div>
 
-      <RentalListingForm isOpen={showRentalForm} onClose={() => setShowRentalForm(false)} country={country} lang={lang} />
+      <Suspense fallback={null}>
+        <RentalListingForm isOpen={showRentalForm} onClose={() => setShowRentalForm(false)} country={country} lang={lang} />
+      </Suspense>
     </div>
   );
 }
@@ -5750,6 +5753,14 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
 /* ---------------------------------------------------------------
    App
 --------------------------------------------------------------- */
+function LazyFallback({ lang }) {
+  return (
+    <div style={{ padding: 32, textAlign: "center", color: C.creamDim, fontSize: 13 }}>
+      {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
+    </div>
+  );
+}
+
 export default function App() {
   const initialRoute = routeFromPath(typeof window !== "undefined" ? window.location.pathname : "/");
   const [lang, setLang] = useState("en");
@@ -5989,13 +6000,17 @@ export default function App() {
           {view === "diagnosis" && (
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
-              <PhotoDiagnosisView lang={lang} />
+              <Suspense fallback={<LazyFallback lang={lang} />}>
+                <PhotoDiagnosisView lang={lang} />
+              </Suspense>
             </>
           )}
           {view === "valuation" && (
             <>
               <BackHeader label={t.backHome} onBack={goHome} isRTL={isRTL} />
-              <CarValuationView lang={lang} />
+              <Suspense fallback={<LazyFallback lang={lang} />}>
+                <CarValuationView lang={lang} />
+              </Suspense>
             </>
           )}
           {view === "rentals" && (
