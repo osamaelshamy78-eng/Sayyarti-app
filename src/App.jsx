@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
 import {
   Gauge,
   ChevronLeft,
@@ -4162,7 +4162,125 @@ function MaintenanceView({ lang, t, country, setCountry, isRTL }) {
   );
 }
 
+/* Full-screen photo viewer: swipe between photos, X or phone Back closes it */
+function FullscreenGallery({ photos, startIndex, onClose, lang }) {
+  const scrollerRef = useRef(null);
+  const [current, setCurrent] = useState(startIndex);
+
+  useEffect(() => {
+    // Jump to the tapped photo
+    const el = scrollerRef.current;
+    if (el) el.scrollLeft = el.clientWidth * startIndex * (lang === "ar" ? -1 : 1);
+
+    // Phone Back button closes the viewer instead of leaving the page
+    try {
+      window.history.pushState(window.history.state, "", window.location.href);
+    } catch (e) {}
+    window.__karajiViewerClose = onClose;
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (e) => e.key === "Escape" && closeViewer();
+    window.addEventListener("keydown", onKey);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener("keydown", onKey);
+      if (window.__karajiViewerClose === onClose) window.__karajiViewerClose = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function closeViewer() {
+    try {
+      window.history.back(); // popstate handler in App calls onClose
+    } catch (e) {
+      onClose();
+    }
+  }
+
+  function handleScroll() {
+    const el = scrollerRef.current;
+    if (!el || !el.clientWidth) return;
+    setCurrent(Math.round(Math.abs(el.scrollLeft) / el.clientWidth));
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={lang === "ar" ? "عرض الصور" : "Photo viewer"}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "#000",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
+        className="flex items-center justify-between"
+        style={{ padding: "calc(env(safe-area-inset-top, 0px) + 12px) 16px 12px" }}
+      >
+        <span style={{ color: "#fff", fontSize: 14, fontWeight: 600 }}>
+          {photos.length > 1 ? `${current + 1} / ${photos.length}` : ""}
+        </span>
+        <button
+          onClick={closeViewer}
+          aria-label={lang === "ar" ? "إغلاق" : "Close"}
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 999,
+            border: "none",
+            background: "rgba(255,255,255,0.15)",
+            color: "#fff",
+            fontSize: 22,
+            lineHeight: 1,
+            cursor: "pointer",
+          }}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div
+        ref={scrollerRef}
+        onScroll={handleScroll}
+        style={{
+          flex: 1,
+          display: "flex",
+          overflowX: "auto",
+          scrollSnapType: "x mandatory",
+          scrollbarWidth: "none",
+        }}
+      >
+        {photos.map((url, i) => (
+          <div
+            key={i}
+            style={{
+              flex: "0 0 100%",
+              scrollSnapAlign: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              src={url}
+              alt=""
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CarDetailView({ lang, t, isRTL, car, onBack }) {
+  const [viewerIndex, setViewerIndex] = useState(null);
   const photos =
     car.photo_urls && car.photo_urls.length
       ? car.photo_urls
@@ -4175,6 +4293,15 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
     <div className="pb-6">
       <BackHeader label={t.navCars} onBack={onBack} isRTL={isRTL} />
 
+      {viewerIndex !== null && (
+        <FullscreenGallery
+          photos={photos}
+          startIndex={viewerIndex}
+          onClose={() => setViewerIndex(null)}
+          lang={lang}
+        />
+      )}
+
       {photos.length > 0 ? (
         <div
           className="flex gap-2 px-5 mb-4"
@@ -4185,6 +4312,7 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
               key={i}
               src={url}
               alt=""
+              onClick={() => setViewerIndex(i)}
               style={{
                 width: "85%",
                 height: 220,
@@ -4192,6 +4320,7 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
                 borderRadius: 14,
                 flexShrink: 0,
                 scrollSnapAlign: "start",
+                cursor: "zoom-in",
               }}
               onError={(e) => (e.target.style.opacity = 0.3)}
             />
@@ -5814,6 +5943,13 @@ export default function App() {
 
   useEffect(() => {
     function handlePopState() {
+      // If the full-screen photo viewer is open, Back only closes it
+      if (window.__karajiViewerClose) {
+        const closeViewer = window.__karajiViewerClose;
+        window.__karajiViewerClose = null;
+        closeViewer();
+        return;
+      }
       const route = routeFromPath(window.location.pathname);
       setView(route.view);
       setActiveCategory(route.activeCategory || null);
