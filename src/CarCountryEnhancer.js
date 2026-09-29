@@ -119,7 +119,8 @@ function styleAIAsBottomNavButton(button, arabic) {
   const label = arabic ? "مساعد السيارة الذكي" : "Car AI Ass";
   button.setAttribute("data-karaji-ai-bottom-button", "true");
   button.style.cssText = [
-    "position:fixed", "right:10px", "bottom:calc(8px + env(safe-area-inset-bottom))",
+    // Sit on the AI slot: last slot is on the right in English, on the left in Arabic (RTL)
+    "position:fixed", arabic ? "left:10px" : "right:10px", "bottom:calc(8px + env(safe-area-inset-bottom))",
     "width:calc((100vw - 32px) / 3)", "height:58px", "z-index:10001", "border:1px solid #2A2F38",
     "border-radius:12px", "background:#14171C", "color:#F2ECDD", "box-shadow:0 8px 24px rgba(0,0,0,.25)",
     "font-size:11px", "font-weight:800", "line-height:1.2", "cursor:pointer", "-webkit-tap-highlight-color:transparent",
