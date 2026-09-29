@@ -11,6 +11,7 @@ import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
+import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
 
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
@@ -38,11 +39,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       {isFix3DRoute ? (
         <Fix3DLibrary />
       ) : (
-        <>
+        <AppLoginGate>
           <App />
           <KarajiAIAssistant lang="ar" />
           <KarajiMaintenancePlanner />
-        </>
+        </AppLoginGate>
       )}
     </Suspense>
   </AppErrorBoundary>

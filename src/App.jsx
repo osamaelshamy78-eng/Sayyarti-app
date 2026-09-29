@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import GarageListingForm from "./components/GarageListingForm";
+import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
 const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
 const CarValuationView = lazy(() => import("./components/CarValuationView"));
@@ -2779,8 +2780,12 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
             overflow: "hidden",
             zIndex: 50,
             minWidth: 190,
+            width: 280,
+            maxWidth: "calc(100vw - 40px)",
           }}
         >
+          <ProfileMenuCard lang={lang} />
+
           <button
             onClick={onOpenAdmin}
             className="w-full flex items-center gap-2"
