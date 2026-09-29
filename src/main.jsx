@@ -10,10 +10,11 @@ import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
-import KarajiAIAssistant from "./components/KarajiAIAssistant";
-import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
+import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 
-const App = React.lazy(() => import("./App.jsx"));
+// Floating helpers load after the main screen is visible
+const KarajiAIAssistant = React.lazy(() => import("./components/KarajiAIAssistant"));
+const KarajiMaintenancePlanner = React.lazy(() => import("./components/KarajiMaintenancePlanner"));
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
 
 class AppErrorBoundary extends Component {
@@ -35,7 +36,17 @@ const isFix3DRoute = window.location.pathname === "/3d-fix" || window.location.h
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AppErrorBoundary>
     <Suspense fallback={<StartupFallback />}>
-      {isFix3DRoute ? <Fix3DLibrary /> : <><App /><KarajiAIAssistant lang="ar" /><KarajiMaintenancePlanner /></>}
+      {isFix3DRoute ? (
+        <Fix3DLibrary />
+      ) : (
+        <>
+          <App />
+          <Suspense fallback={null}>
+            <KarajiAIAssistant lang="ar" />
+            <KarajiMaintenancePlanner />
+          </Suspense>
+        </>
+      )}
     </Suspense>
   </AppErrorBoundary>
 );
