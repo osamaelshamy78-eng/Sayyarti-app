@@ -27,9 +27,11 @@ const overlayStyle = {
   background: C.asphalt,
   color: C.cream,
   display: "flex",
+  flexDirection: "column",
   alignItems: "center",
   justifyContent: "center",
-  padding: "24px",
+  padding: "calc(env(safe-area-inset-top, 0px) + 72px) 24px calc(env(safe-area-inset-bottom, 0px) + 24px)",
+  overflowY: "auto",
   fontFamily: "'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif",
 };
 
@@ -69,28 +71,47 @@ export default function AppLoginGate({ children }) {
 
   return (
     <div style={overlayStyle} dir={isAr ? "rtl" : "ltr"}>
+      {/* Language switch, pinned at the top below the phone's status bar */}
+      <div
+        role="group"
+        aria-label="Language / اللغة"
+        style={{
+          position: "absolute",
+          top: "calc(env(safe-area-inset-top, 0px) + 16px)",
+          left: "50%",
+          transform: "translateX(-50%)",
+          display: "flex",
+          gap: 4,
+          padding: 4,
+          borderRadius: 999,
+          background: C.panel,
+          border: `1px solid ${C.line}`,
+        }}
+      >
+        {["en", "ar"].map((code) => (
+          <button
+            key={code}
+            type="button"
+            onClick={() => switchLang(code)}
+            aria-pressed={lang === code}
+            style={{
+              border: "none",
+              borderRadius: 999,
+              padding: "8px 18px",
+              fontSize: 13,
+              fontWeight: 700,
+              cursor: "pointer",
+              background: lang === code ? C.amber : "transparent",
+              color: lang === code ? C.asphalt : C.dim,
+              fontFamily: code === "ar" ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif",
+            }}
+          >
+            {code === "ar" ? "العربية" : "English"}
+          </button>
+        ))}
+      </div>
+
       <div style={{ width: "100%", maxWidth: 380, textAlign: "center" }}>
-        <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 28 }}>
-          {["ar", "en"].map((code) => (
-            <button
-              key={code}
-              type="button"
-              onClick={() => switchLang(code)}
-              style={{
-                border: `1px solid ${C.line}`,
-                borderRadius: 999,
-                padding: "5px 14px",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                background: lang === code ? C.amber : "transparent",
-                color: lang === code ? C.asphalt : C.dim,
-              }}
-            >
-              {code === "ar" ? "عربي" : "English"}
-            </button>
-          ))}
-        </div>
 
         <div
           aria-hidden="true"
