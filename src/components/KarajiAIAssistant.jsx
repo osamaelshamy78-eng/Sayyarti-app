@@ -152,9 +152,8 @@ export default function KarajiAIAssistant() {
   };
 
   const openDiagnose = () => {
-    const target = Array.from(document.querySelectorAll("button")).find((b) => /diagnos|شخّص|عطل|fix/i.test(b.textContent || ""));
-    if (target) target.click();
-    else window.location.hash = "#diagnose";
+    window.history.pushState({}, "", "/diagnosis");
+    window.dispatchEvent(new PopStateEvent("popstate"));
     setOpen(false);
   };
 
