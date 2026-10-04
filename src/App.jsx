@@ -4892,18 +4892,11 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         }
         return;
       }
-      // Remember-me controls whether the admin session survives a full reload.
-      // Without the flag, an existing Supabase session from a previous visit is cleared.
-      const remembered = localStorage.getItem("karajy_admin_remember") === "1";
-      const currentVisit = sessionStorage.getItem("karajy_admin_session") === "1";
-      if (!remembered && !currentVisit) {
-        await supabase.auth.signOut();
-        if (active) {
-          setUser(null);
-          setChecking(false);
-        }
-        return;
-      }
+      // The whole app now requires Google sign-in (AppLoginGate), so the
+      // session here is the user's app session. Never sign it out from the
+      // admin page — that logged everyone out of the app and, because Google
+      // returned them to /admin, trapped them in a sign-in loop.
+      // Admin access is decided only by is_car_admin below.
       const { data: adminData, error: adminError } = await supabase.rpc("is_car_admin");
       if (!adminError && adminData === true) {
         if (active) {
@@ -4923,10 +4916,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
         }
         return;
       }
-      // Never sign the user out during a background permission check.
-      // The server-side RPCs still enforce admin permissions for every mutation.
+      // Signed in, but not an admin: keep them signed in to the app,
+      // just don't open the dashboard for them.
       if (active) {
-        setUser(currentUser);
+        setUser(null);
         setLoginError(t.adminInvalid);
         setChecking(false);
       }
