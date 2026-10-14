@@ -234,19 +234,6 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
     return data.publicUrl;
   }
 
-  function sendNotificationEmail(payload) {
-    if (!window.emailjs) return;
-    window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-      garage_name: payload.rental_name,
-      owner_name: payload.owner_name,
-      phone: payload.phone,
-      address: payload.address,
-      map_link: payload.map_link || (isAr ? "لم يتم تحديد الموقع بالـ GPS" : "GPS location not set"),
-      rank: T.ar.rankLabels[payload.rank],
-      price: RANK_PRICES[payload.rank],
-    });
-  }
-
   async function handleSubmit() {
     if (form.rank === null) {
       setError(t.errRank);
@@ -298,7 +285,6 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
 
       if (!requestId) throw new Error("no id");
 
-      sendNotificationEmail(form);
       setSuccess(true);
     } catch (err) {
       console.error(err);
