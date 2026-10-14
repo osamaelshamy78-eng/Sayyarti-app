@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { formatPrice, formatMileage } from "../carFormat";
 import { CheckCircle2, MessageCircle, Car, Info } from "lucide-react";
 import { supabase } from "../supabaseClient";
 import { useCloseOnBack } from "../backButton";
@@ -169,13 +170,13 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
             {car.make_model} {car.year ? `· ${car.year}` : ""}
           </h2>
           <span style={{ color: C.amber, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
-            {car.price}
+            {formatPrice(car.price, car.country, lang)}
           </span>
         </div>
 
         <div style={{ color: C.creamDim, fontSize: 12.5, marginBottom: 14 }}>
           {[car.city, countryLabel].filter(Boolean).join(" · ")}
-          {car.mileage ? ` · ${car.mileage} km` : ""}
+          {formatMileage(car.mileage, lang) ? ` · ${formatMileage(car.mileage, lang)}` : ""}
           {car.specs === "gulf" ? ` · ${t.carSpecsGulf}` : ""}
           {car.specs === "american" ? ` · ${t.carSpecsAmerican}` : ""}
         </div>
@@ -605,14 +606,14 @@ export function BuyCarView({ lang, t, isRTL }) {
                     {c.make_model} {c.year ? `· ${c.year}` : ""}
                   </span>
                   <span style={{ color: C.amber, fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
-                    {c.price}
+                    {formatPrice(c.price, c.country, lang)}
                   </span>
                 </div>
                 <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>
                   {[c.city, CAR_COUNTRIES.find((x) => x.code === c.country)?.[lang]]
                     .filter(Boolean)
                     .join(" · ")}
-                  {c.mileage ? ` · ${c.mileage} km` : ""}
+                  {formatMileage(c.mileage, lang) ? ` · ${formatMileage(c.mileage, lang)}` : ""}
                   {c.specs === "gulf" ? ` · ${t.carSpecsGulf}` : ""}
                   {c.specs === "american" ? ` · ${t.carSpecsAmerican}` : ""}
                 </div>

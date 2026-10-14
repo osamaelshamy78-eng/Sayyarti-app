@@ -100,7 +100,7 @@ function Field({ label, children }) {
 }
 
 export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, onSubmitted }) {
-  const { user, checking, signInWithGoogle, signOut } = useCustomerAuth();
+  const { user, checking, signInWithGoogle } = useCustomerAuth();
   const [form, setForm] = React.useState({
     make: "",
     makeOther: "",
@@ -223,7 +223,6 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
       user={user}
       checking={checking}
       signInWithGoogle={signInWithGoogle}
-      signOut={signOut}
       titleAr="سجّل دخولك عشان تضيف إعلان"
       titleEn="Sign in to add a listing"
       descAr="تسجيل الدخول بجوجل مطلوب عشان نربط الإعلان بحسابك ونمنع الإعلانات الوهمية."

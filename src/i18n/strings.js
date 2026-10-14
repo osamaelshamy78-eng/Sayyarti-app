@@ -171,7 +171,7 @@ export const T = {
     navRentals: "Car Rentals",
     rentalsHeading: "Car Rentals",
     rentalsSub: "Pick a country to browse rental companies",
-    addRentalBtn: "+ Add Your Rental Company",
+    addRentalBtn: "Add Your Rental Company",
     backHome: "Home",
   },
   ar: {
@@ -342,7 +342,7 @@ export const T = {
     navRentals: "تأجير السيارات",
     rentalsHeading: "تأجير السيارات",
     rentalsSub: "اختر دولة لتصفح شركات التأجير",
-    addRentalBtn: "+ أضف مكتبك",
+    addRentalBtn: "أضف مكتبك",
     backHome: "الرئيسية",
   },
 };
