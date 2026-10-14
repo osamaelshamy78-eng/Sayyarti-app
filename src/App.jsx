@@ -33,6 +33,7 @@ import AppMenuLinks from "./components/AppMenuLinks";
 import GarageNetworkCta from "./components/GarageNetworkCta";
 import PendingCars from "./components/PendingCars";
 import CarMedia from "./components/CarMedia";
+import { FindGarageButton, IssueGarageBanner, issueFilterFromUrl, garageMatchesIssue } from "./components/IssueGarages";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
 const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
@@ -3432,6 +3433,7 @@ function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIcon, isRT
         <h2 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 16px 0", lineHeight: 1.3, textAlign: "center" }}>
           {issue.title}
         </h2>
+        <FindGarageButton lang={lang} issuePath={routePathForIssue(issueId)} />
 
         <Section label={t.symptoms} color={C.blue}>
           <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
@@ -3592,6 +3594,7 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
       return null;
     }
   });
+  const [issueKey] = useState(issueFilterFromUrl);
   const data = GARAGES[country];
   useEffect(() => {
     let active = true;
@@ -3652,6 +3655,11 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
     return 0;
   });
 
+  // opened from an issue page: only garages whose text mentions that kind of work
+  const shownGarages = issueKey
+    ? combinedGarages.filter((g) => garageMatchesIssue([g.name, g.area, g.note].join(" "), issueKey))
+    : combinedGarages;
+
   return (
     <div className="px-5 pt-5 pb-6">
       <GarageNetworkCta lang={lang} />
@@ -3699,7 +3707,8 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {combinedGarages.map((g) => (
+        {issueKey && <IssueGarageBanner lang={lang} issueKey={issueKey} />}
+        {shownGarages.map((g) => (
           <button
             key={g.key}
             onClick={() => window.open(g.mapLink, "_blank")}
