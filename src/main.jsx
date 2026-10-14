@@ -1,7 +1,6 @@
 import React, { Component, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { startCarMediaEnhancer } from "./CarMediaEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startStripeReturnNotice } from "./StripeReturnNotice";
@@ -47,7 +46,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 );
 
 if (!isFix3DRoute) {
-  startCarMediaEnhancer();
   startKeyboardBehaviorFix();
   startOverlayBackHandler();
   startStripeReturnNotice();

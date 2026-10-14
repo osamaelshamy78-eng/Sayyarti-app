@@ -1,5 +1,6 @@
 import React from "react";
 import { CAR_COUNTRIES } from "../countries";
+import CarMedia, { CAR_MEDIA_ACCEPT, MAX_VIDEO_BYTES, isVideoFile } from "./CarMedia";
 import { supabase } from "../supabaseClient";
 import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
 import { useCustomerAuth } from "../useCustomerAuth";
@@ -140,6 +141,10 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
   function addPhotos(fileList) {
     const files = Array.from(fileList || []).slice(0, MAX_PHOTOS - photos.length);
     if (!files.length) return;
+    if (files.some((f) => isVideoFile(f) && f.size > MAX_VIDEO_BYTES)) {
+      window.alert(lang === "ar" ? "الفيديو القصير لازم يكون ١٥ ميجا أو أقل." : "Short car videos must be 15 MB or smaller.");
+      return;
+    }
     setUploadError("");
     setPhotos((cur) => [...cur, ...files]);
     setPreviews((cur) => [...cur, ...files.map((f) => URL.createObjectURL(f))]);
@@ -341,7 +346,12 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {previews.map((src, i) => (
               <div key={i} style={{ position: "relative", width: 72, height: 72 }}>
-                <img src={src} alt="" style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.panelLine}` }} />
+                <CarMedia src={src} video={isVideoFile(photos[i])} muted controls={false} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.panelLine}`, display: "block" }} />
+                {isVideoFile(photos[i]) && (
+                  <span style={{ position: "absolute", left: 4, bottom: 4, padding: "2px 5px", borderRadius: 5, background: "rgba(0,0,0,.72)", color: "#fff", fontSize: 8, fontWeight: 800, lineHeight: 1 }}>
+                    {lang === "ar" ? "فيديو" : "VIDEO"}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removePhoto(i)}
@@ -362,9 +372,13 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
                 }}
               >
                 <Camera size={20} />
+                <span style={{ fontSize: 9, marginLeft: 4, fontWeight: 700, textAlign: "center", lineHeight: 1.1 }}>
+                  {lang === "ar" ? "صور / فيديو" : "Photo / Video"}
+                </span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={CAR_MEDIA_ACCEPT}
+                  aria-label={lang === "ar" ? "إضافة صور أو فيديو" : "Add photos or videos"}
                   multiple
                   onChange={(e) => addPhotos(e.target.files)}
                   style={{ display: "none" }}

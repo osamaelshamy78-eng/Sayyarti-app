@@ -32,6 +32,7 @@ import { CAR_COUNTRIES } from "./countries";
 import AppMenuLinks from "./components/AppMenuLinks";
 import GarageNetworkCta from "./components/GarageNetworkCta";
 import PendingCars from "./components/PendingCars";
+import CarMedia from "./components/CarMedia";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
 const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
@@ -4202,9 +4203,8 @@ function FullscreenGallery({ photos, startIndex, onClose, lang }) {
               justifyContent: "center",
             }}
           >
-            <img
+            <CarMedia
               src={url}
-              alt=""
               style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
             />
           </div>
@@ -4243,10 +4243,9 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
           style={{ overflowX: "auto", scrollSnapType: "x mandatory" }}
         >
           {photos.map((url, i) => (
-            <img
+            <CarMedia
               key={i}
               src={url}
-              alt=""
               onClick={() => setViewerIndex(i)}
               style={{
                 width: "85%",
@@ -4638,7 +4637,7 @@ function BuyCarView({ lang, t, isRTL }) {
             >
               {(c.photo_url || (c.photo_urls && c.photo_urls[0])) && (
                 <div style={{ position: "relative" }}>
-                  <img
+                  <CarMedia
                     src={c.photo_url || c.photo_urls[0]}
                     alt={c.make_model}
                     style={{ width: "100%", height: 150, objectFit: "cover", display: "block" }}
@@ -5770,7 +5769,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
             <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
               {(c.photo_url || c.photo_urls?.[0]) && (
                 <div style={{ position: "relative" }}>
-                  <img src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
+                  <CarMedia src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
                   {c.status === "sold" && (
                     <div
                       aria-label={t.soldBadge}

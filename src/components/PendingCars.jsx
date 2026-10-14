@@ -1,4 +1,5 @@
 import React from "react";
+import CarMedia from "./CarMedia";
 
 // Admin: car listings waiting for approval, shown above the dashboard tabs.
 export default function PendingCars({ cars, lang, busyId, onApprove, onReject }) {
@@ -19,7 +20,7 @@ export default function PendingCars({ cars, lang, busyId, onApprove, onReject })
         const button = { flex: 1, padding: "9px 10px", border: "1px solid #F5B94288", borderRadius: 10, fontSize: 12, fontWeight: 800, cursor: busy ? "wait" : "pointer" };
         return (
           <div key={car.id} style={{ padding: 10, marginTop: 8, background: "#14171C", border: "1px solid #2A2F38", borderRadius: 12 }}>
-            {photo && <img src={photo} alt={car.make_model || "Car"} style={{ width: "100%", height: 130, objectFit: "cover", borderRadius: 9, marginBottom: 8 }} />}
+            {photo && <CarMedia src={photo} alt={car.make_model || "Car"} style={{ width: "100%", height: 130, objectFit: "cover", borderRadius: 9, marginBottom: 8, display: "block" }} />}
             <div style={{ color: "#F2ECDD", fontSize: 13, lineHeight: 1.6 }}>
               <strong>{car.make_model}{car.year ? ` · ${car.year}` : ""}</strong>
               <br />
