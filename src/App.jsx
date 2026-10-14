@@ -26,6 +26,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
+import { openReceipt } from "./receipts";
 import GarageListingForm from "./components/GarageListingForm";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
@@ -5538,10 +5539,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                   {t.adminStatus}: {p.status}
                 </div>
                 {p.receipt_url && (
-                  <a href={p.receipt_url} target="_blank" rel="noreferrer"
-                    style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>
+                  <button type="button" onClick={() => openReceipt(p.receipt_url)}
+                    style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>
                     {t.adminViewReceipt}
-                  </a>
+                  </button>
                 )}
                 {code && (
                   <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: C.asphalt, border: `1px solid ${C.amber}55` }}>
@@ -5588,10 +5589,10 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                 {t.adminStatus}: {r.status}
               </div>
               {r.receipt_url && (
-                <a href={r.receipt_url} target="_blank" rel="noreferrer"
-                  style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>
+                <button type="button" onClick={() => openReceipt(r.receipt_url)}
+                  style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>
                   {t.adminViewReceipt}
-                </a>
+                </button>
               )}
               {r.status === "pending" && (
                 <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
@@ -5620,7 +5621,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                 <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
                 <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
                 <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
-                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>{t.adminViewReceipt}</a>}
+                {g.receipt_url && <button type="button" onClick={() => openReceipt(g.receipt_url)} style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>{t.adminViewReceipt}</button>}
                 {g.status === "pending" && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "approved")}
@@ -5649,7 +5650,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
                 <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
                 <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
                 <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
-                {g.receipt_url && <a href={g.receipt_url} target="_blank" rel="noreferrer" style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8 }}>{t.adminViewReceipt}</a>}
+                {g.receipt_url && <button type="button" onClick={() => openReceipt(g.receipt_url)} style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>{t.adminViewReceipt}</button>}
                 {g.status === "pending" && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <button disabled={busyId === g.id} onClick={() => updateRentalRequestStatus(g, "approved")}
