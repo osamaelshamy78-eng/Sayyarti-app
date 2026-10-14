@@ -1,36 +1,34 @@
 import React, { useState } from "react";
+import { Plus, Car, MessageCircle, Phone, Scale, Info } from "lucide-react";
 import { useCloseOnBack } from "../backButton";
 
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942" };
 const PHONE = "971558875606";
+
+// One row of the ☰ menu: icon then label, in reading order (right-to-left in Arabic).
+export const MENU_ROW_STYLE = {
+  display: "flex", alignItems: "center", width: "100%", padding: "12px 16px", background: "none", border: "none",
+  borderTop: `1px solid ${C.line}`, color: C.cream, fontSize: 13, fontWeight: 600,
+  textAlign: "start", cursor: "pointer", gap: 10, boxSizing: "border-box",
+};
 
 // The links at the bottom of the header menu, and the About dialog one of them opens.
 export default function AppMenuLinks({ lang, onNavigate, onDone }) {
   const ar = lang === "ar";
   const [aboutOpen, setAboutOpen] = useState(false);
   const links = [
-    { icon: "+", label: ar ? "أضف جراجك مجانًا" : "Add Your Garage Free", go: () => { window.location.href = "/free-garage/"; } },
-    { icon: "🚗", label: ar ? "عرض السيارة للبيع" : "List Your Car for Sale", go: () => onNavigate("/cars/add") },
-    { icon: "💬", label: ar ? "تواصل عبر واتساب" : "WhatsApp Us", go: () => window.open(`https://wa.me/${PHONE}`, "_blank") },
-    { icon: "📞", label: ar ? "اتصل بينا" : "Call Us", go: () => { window.location.href = `tel:+${PHONE}`; } },
-    { icon: "⚖", label: ar ? "قانوني" : "Legal", go: () => { window.location.href = `/legal/?lang=${ar ? "ar" : "en"}`; } },
-    { icon: "ⓘ", label: ar ? "عن التطبيق" : "About the App", go: () => setAboutOpen(true), keepMenu: true },
+    { key: "garage", Icon: Plus, label: ar ? "أضف جراجك مجانًا" : "Add Your Garage Free", go: () => { window.location.href = "/free-garage/"; } },
+    { key: "sell", Icon: Car, label: ar ? "عرض السيارة للبيع" : "List Your Car for Sale", go: () => onNavigate("/cars/add") },
+    { key: "whatsapp", Icon: MessageCircle, label: ar ? "تواصل عبر واتساب" : "WhatsApp Us", go: () => window.open(`https://wa.me/${PHONE}`, "_blank") },
+    { key: "call", Icon: Phone, label: ar ? "اتصل بينا" : "Call Us", go: () => { window.location.href = `tel:+${PHONE}`; } },
+    { key: "legal", Icon: Scale, label: ar ? "قانوني" : "Legal", go: () => { window.location.href = `/legal/?lang=${ar ? "ar" : "en"}`; } },
+    { key: "about", Icon: Info, label: ar ? "عن التطبيق" : "About the App", go: () => setAboutOpen(true), keepMenu: true },
   ];
   return (
     <>
       {links.map((l) => (
-        <button
-          key={l.icon}
-          type="button"
-          onClick={() => { l.go(); if (!l.keepMenu) onDone(); }}
-          style={{
-            display: "flex", width: "100%", padding: "12px 16px", background: "none", border: "none",
-            borderTop: `1px solid ${C.line}`, color: C.cream, fontSize: 13, fontWeight: 600,
-            textAlign: ar ? "right" : "left", cursor: "pointer", flexDirection: ar ? "row-reverse" : "row",
-            gap: 8, boxSizing: "border-box",
-          }}
-        >
-          <span style={{ color: C.amber, fontSize: 16, width: 18, flex: "0 0 18px", textAlign: "center" }}>{l.icon}</span>
+        <button key={l.key} type="button" onClick={() => { l.go(); if (!l.keepMenu) onDone(); }} style={MENU_ROW_STYLE}>
+          <l.Icon size={16} color={C.amber} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
           <span style={{ flex: 1 }}>{l.label}</span>
         </button>
       ))}

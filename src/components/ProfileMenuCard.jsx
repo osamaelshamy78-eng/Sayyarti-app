@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
-import { useCustomerAuth } from "../useCustomerAuth";
+import React from "react";
 
-// Profile section shown at the top of the ☰ menu: Google account, credits,
-// free tries, recent credit purchase requests, and sign out.
+// Profile section shown at the top of the ☰ menu: Google account, credits and a
+// button to buy more, free tries, recent credit purchase requests, and sign out.
 const C = {
   panel: "#1D2129",
   line: "#2A2F38",
@@ -20,47 +18,9 @@ const STATUS = {
   rejected: { ar: "مرفوض", en: "Rejected", color: C.red },
 };
 
-export default function ProfileMenuCard({ lang }) {
+export default function ProfileMenuCard({ lang, account, onBuyCredits }) {
   const isAr = lang === "ar";
-  const { user, signOut } = useCustomerAuth();
-  const [credits, setCredits] = useState(null);
-  const [requests, setRequests] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!user || !supabase) return undefined;
-    let active = true;
-    (async () => {
-      try {
-        const [creditsRes, requestsRes, adminRes] = await Promise.all([
-          supabase
-            .from("user_credits")
-            .select("credits_remaining, free_diagnosis_used, free_valuation_used")
-            .eq("user_id", user.id)
-            .maybeSingle(),
-          supabase
-            .from("credit_purchase_requests")
-            .select("id, credits_requested, status, created_at")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(3),
-          supabase.rpc("is_car_admin"),
-        ]);
-        if (!active) return;
-        setCredits(creditsRes.data || { credits_remaining: 0, free_diagnosis_used: false, free_valuation_used: false });
-        setRequests(requestsRes.data || []);
-        setIsAdmin(adminRes.data === true);
-      } catch (e) {
-        console.error("profile load failed", e);
-      } finally {
-        if (active) setLoading(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [user]);
+  const { user, signOut, credits, requests, isAdmin, loading } = account;
 
   if (!user) return null;
 
@@ -73,7 +33,7 @@ export default function ProfileMenuCard({ lang }) {
   return (
     <div
       dir={isAr ? "rtl" : "ltr"}
-      style={{ padding: "14px 16px", borderBottom: `1px solid ${C.line}`, textAlign: isAr ? "right" : "left" }}
+      style={{ padding: "14px 16px", textAlign: isAr ? "right" : "left" }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         {avatar ? (
@@ -136,6 +96,24 @@ export default function ProfileMenuCard({ lang }) {
                 {credits?.free_valuation_used ? (isAr ? "مستخدم" : "used") : isAr ? "متاح" : "available"}
               </span>
             </div>
+            <button
+              type="button"
+              onClick={onBuyCredits}
+              style={{
+                marginTop: 10,
+                width: "100%",
+                background: C.amber,
+                color: "#14171C",
+                border: "none",
+                borderRadius: 8,
+                padding: "9px 10px",
+                fontSize: 12.5,
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              {isAr ? "اشترِ كريديت" : "Buy credits"}
+            </button>
           </>
         )}
       </div>

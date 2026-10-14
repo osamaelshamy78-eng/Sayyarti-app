@@ -1,6 +1,8 @@
 import ProfileMenuCard from "./ProfileMenuCard";
-import AppMenuLinks from "./AppMenuLinks";
-import { useRef, useEffect } from "react";
+import AppMenuLinks, { MENU_ROW_STYLE } from "./AppMenuLinks";
+import BuyCreditForm from "./BuyCreditForm";
+import { useRef, useEffect, useState } from "react";
+import { useAccount } from "../useAccount";
 import { Wrench, Menu, ShieldCheck } from "lucide-react";
 import { C } from "../theme";
 
@@ -11,6 +13,8 @@ export function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, on
   const isRTL = lang === "ar";
   const menuRef = useRef(null);
   const toggleRef = useRef(null);
+  const account = useAccount(menuOpen);
+  const [buyOpen, setBuyOpen] = useState(false);
   // a tap anywhere outside the open menu (and its toggle) closes it
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -118,32 +122,25 @@ export function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, on
             maxWidth: "calc(100vw - 40px)",
           }}
         >
-          <ProfileMenuCard lang={lang} />
+          <ProfileMenuCard
+            lang={lang}
+            account={account}
+            onBuyCredits={() => { onCloseMenu(); setBuyOpen(true); }}
+          />
 
-          <button
-            onClick={onOpenAdmin}
-            className="w-full flex items-center gap-2"
-            style={{
-              display: "flex",
-              width: "100%",
-              padding: "12px 16px",
-              background: "none",
-              border: "none",
-              color: C.cream,
-              fontSize: 13,
-              fontWeight: 600,
-              textAlign: isRTL ? "right" : "left",
-              cursor: "pointer",
-              flexDirection: isRTL ? "row-reverse" : "row",
-            }}
-          >
-            <ShieldCheck size={16} color={C.amber} strokeWidth={2} />
-            <span style={{ flex: 1 }}>{t.adminMenuLabel}</span>
-          </button>
+          {account.isAdmin && (
+            <button type="button" onClick={onOpenAdmin} style={MENU_ROW_STYLE}>
+              <ShieldCheck size={16} color={C.amber} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
+              <span style={{ flex: 1 }}>{t.adminMenuLabel}</span>
+            </button>
+          )}
 
           <AppMenuLinks lang={lang} onNavigate={onNavigate} onDone={onCloseMenu} />
         </div>
       )}
+
+      {/* outside the menu, so it stays open after the menu closes */}
+      <BuyCreditForm isOpen={buyOpen} onClose={() => setBuyOpen(false)} lang={lang} userEmail={account.user?.email} />
     </div>
   );
 }
