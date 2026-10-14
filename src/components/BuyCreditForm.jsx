@@ -29,6 +29,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   function t(ar, en) {
     return isAr ? ar : en;
@@ -85,6 +86,22 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     } catch (err) {
       console.error("فشل إرسال إشعار الإيميل:", err);
     }
+  }
+
+  // Card payment: Stripe Checkout opens, and the webhook adds the credits once the payment goes through.
+  async function payByCard() {
+    setPaying(true);
+    setError("");
+    const { data, error: fnError } = await supabase.functions.invoke("sayyarti-checkout", {
+      body: { credits: selectedPkg.credits, returnPath: window.location.pathname },
+    });
+    if (!fnError && data?.url) {
+      window.location.href = data.url;
+      return;
+    }
+    console.error(fnError || data);
+    setPaying(false);
+    setError(t("مقدرناش نفتح صفحة الدفع، حاول مرة أخرى", "Could not open the payment page, please try again"));
   }
 
   function validateStep2() {
@@ -235,6 +252,26 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
               {step === 2 && selectedPkg && (
                 <div className="space-y-5">
+                  <div className="border-2 border-blue-600 rounded-xl p-4 space-y-3">
+                    <p className="text-sm font-semibold text-gray-800">
+                      {t("ادفع بالكارت والرصيد يتضاف على طول", "Pay by card and the credits are added right away")}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={payByCard}
+                      disabled={paying}
+                      className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-40"
+                    >
+                      {paying
+                        ? t("جاري فتح صفحة الدفع...", "Opening payment page...")
+                        : t(`ادفع ${selectedPkg.price} درهم بالكارت`, `Pay ${selectedPkg.price} AED by card`)}
+                    </button>
+                  </div>
+
+                  <p className="text-sm font-semibold text-gray-500 text-center">
+                    {t("أو بتحويل بنكي", "Or by bank transfer")}
+                  </p>
+
                   <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
                     <p className="text-sm font-semibold text-gray-800">
                       {t(

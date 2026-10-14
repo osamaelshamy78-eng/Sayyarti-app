@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
+import { PAID_RETURN } from "./StripeReturnNotice";
 
 // feature: "diagnosis" | "valuation"
 export function useFeatureCredits(feature, userId) {
@@ -38,6 +39,18 @@ export function useFeatureCredits(feature, userId) {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  // Just paid by card: the Stripe webhook usually adds the credits within seconds, so look again a few times.
+  useEffect(() => {
+    if (PAID_RETURN !== "1" || !userId) return;
+    let tries = 0;
+    const timer = setInterval(() => {
+      tries += 1;
+      refresh();
+      if (tries >= 6) clearInterval(timer);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [refresh, userId]);
 
   return { creditsRemaining, freeUsed, isAdmin, loading, refresh };
 }

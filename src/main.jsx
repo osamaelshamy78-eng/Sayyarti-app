@@ -10,6 +10,7 @@ import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startCarCountryEnhancer } from "./CarCountryEnhancer";
 import { startMaintenanceNavFix } from "./MaintenanceNavFix";
+import { startStripeReturnNotice } from "./StripeReturnNotice";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
 
@@ -59,6 +60,7 @@ if (!isFix3DRoute) {
   startMenuLanguageEnhancer();
   startCarCountryEnhancer();
   startMaintenanceNavFix();
+  startStripeReturnNotice();
 }
 
 if ("serviceWorker" in navigator) {
