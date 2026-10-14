@@ -12,7 +12,6 @@ export default function CustomerAuthGate({
   user,
   checking,
   signInWithGoogle,
-  signOut,
   titleAr,
   titleEn,
   descAr,
@@ -65,34 +64,7 @@ export default function CustomerAuthGate({
     );
   }
 
-  return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          maxWidth: 512,
-          margin: "0 auto",
-          padding: "10px 16px 0",
-          color: C.dim,
-          fontSize: 11,
-        }}
-      >
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "70%" }}>
-          {user.email}
-        </span>
-        <button
-          type="button"
-          onClick={signOut}
-          style={{ background: "none", border: "none", color: C.dim, fontSize: 11, cursor: "pointer", textDecoration: "underline", padding: 0 }}
-        >
-          {isAr ? "تسجيل خروج" : "Sign out"}
-        </button>
-      </div>
-      {children}
-    </div>
-  );
+  return children;
 }
 
 function GoogleGlyph() {

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useCloseOnBack } from "../backButton";
+import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
 
 // ===== بيانات الحساب البنكي (نفس حساب الجراجات) =====
@@ -13,7 +15,7 @@ const BANK_DETAILS = {
 };
 
 // ===== باقات الرصيد (رصيد مشترك: تشخيص صور + تقييم سعر) =====
-const PACKAGES = [
+export const PACKAGES = [
   { id: "trial", credits: 3, price: 9, labelAr: "تجربة", labelEn: "Trial" },
   { id: "standard", credits: 10, price: 25, labelAr: "قياسية", labelEn: "Standard" },
   { id: "saver", credits: 25, price: 50, labelAr: "موفرة", labelEn: "Saver" },
@@ -46,19 +48,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     }
     setError("");
     setStep(2);
-  }
-
-  async function uploadReceipt(file) {
-    const ext = file.name.split(".").pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("photo-diagnosis-receipts")
-      .upload(fileName, file);
-    if (uploadError) throw uploadError;
-    const { data } = supabase.storage
-      .from("photo-diagnosis-receipts")
-      .getPublicUrl(fileName);
-    return data.publicUrl;
   }
 
   async function sendNotificationEmail(payload) {
@@ -104,7 +93,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     setError("");
 
     try {
-      const receiptUrl = await uploadReceipt(receiptFile);
+      const receiptUrl = await uploadReceipt("photo-diagnosis-receipts", receiptFile);
 
       const { error: insertError } = await supabase.rpc("submit_credit_purchase", {
         p_credits_requested: selectedPkg.credits,
@@ -117,7 +106,15 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       setSuccess(true);
     } catch (err) {
       console.error(err);
-      setError(t("حصل خطأ أثناء إرسال الطلب، حاول مرة أخرى", "Something went wrong, please try again"));
+      // the database says why it refused; show the cases a customer can act on
+      const msg = String(err?.message || "");
+      if (msg.includes("too many pending requests")) {
+        setError(t("عندك ٣ طلبات لسه بنراجعها. استنى لحد ما نراجعهم وبعدين ابعت طلب جديد.", "You have 3 requests we're still reviewing. Please wait for them before sending another."));
+      } else if (msg.includes("receipt already used")) {
+        setError(t("الإيصال ده اتبعت قبل كده. ارفع صورة إيصال التحويل الجديد.", "This receipt was already sent. Please upload the receipt for this transfer."));
+      } else {
+        setError(t("حصل خطأ أثناء إرسال الطلب، حاول مرة أخرى", "Something went wrong, please try again"));
+      }
     } finally {
       setSubmitting(false);
     }
@@ -133,6 +130,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     onClose();
   }
 
+  useCloseOnBack(isOpen, () => resetAndClose());
+
   if (!isOpen) return null;
 
   return (
@@ -142,16 +141,16 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       style={{ zIndex: 10050 /* above the bottom nav (9990) and the AI button (10001) */ }}
     >
       <div
-        className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl overflow-y-auto shadow-2xl"
+        className="w-full sm:max-w-lg bg-panel rounded-t-2xl sm:rounded-2xl overflow-y-auto shadow-2xl"
         style={{ maxHeight: "92dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <h3 className="font-bold text-gray-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-line">
+          <h3 className="font-bold text-cream">
             {t("اشترِ كريديتس", "Buy Credits")}
           </h3>
           <button
             onClick={resetAndClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+            className="text-dim hover:text-cream text-xl leading-none"
           >
             ×
           </button>
@@ -160,13 +159,13 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
         <div className="p-5">
           {success ? (
             <div className="text-center py-10">
-              <div className="w-14 h-14 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-2xl mx-auto mb-4">
+              <div className="w-14 h-14 rounded-full bg-green-500/15 text-green-400 flex items-center justify-center text-2xl mx-auto mb-4">
                 ✓
               </div>
-              <h3 className="text-lg font-bold text-gray-900 mb-2">
+              <h3 className="text-lg font-bold text-cream mb-2">
                 {t("تم استلام طلبك", "Request received")}
               </h3>
-              <p className="text-gray-500 text-sm mb-6">
+              <p className="text-dim text-sm mb-6">
                 {t(
                   "هنراجع إيصال التحويل ونضيف الرصيد لحسابك تلقائيًا — مفيش كود هتحتاج تكتبه.",
                   "We'll review the receipt and add the credits to your account automatically — no code needed."
@@ -174,7 +173,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
               </p>
               <button
                 onClick={resetAndClose}
-                className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold"
+                className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold"
               >
                 {t("تم", "Done")}
               </button>
@@ -182,14 +181,14 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
           ) : (
             <>
               {error && (
-                <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                <div className="mb-4 text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-xl px-3 py-2">
                   {error}
                 </div>
               )}
 
               {step === 1 && (
                 <div className="space-y-4">
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-dim">
                     {t(
                       "كل كريدت = تشخيص صورة واحد أو تقييم سعر سيارة واحد. اختار الباقة المناسبة لك:",
                       "Each credit = one photo diagnosis or one car valuation. Choose the package that suits you:"
@@ -205,18 +204,18 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                           type="button"
                           onClick={() => selectPackage(pkg)}
                           className={`w-full rounded-xl border-2 px-4 py-3 flex items-center justify-between transition ${
-                            isSelected ? "border-blue-600 bg-blue-50" : "border-gray-200"
+                            isSelected ? "border-amber bg-amber/10" : "border-line"
                           }`}
                         >
                           <div className={isAr ? "text-right" : "text-left"}>
-                            <div className="font-bold text-gray-900 text-sm">
+                            <div className="font-bold text-cream text-sm">
                               {isAr ? pkg.labelAr : pkg.labelEn}
                             </div>
-                            <div className="text-xs text-gray-500 mt-1">
+                            <div className="text-xs text-dim mt-1">
                               {t(`${pkg.credits} كريديت`, `${pkg.credits} credits`)}
                             </div>
                           </div>
-                          <div className="font-bold text-gray-900">
+                          <div className="font-bold text-cream">
                             {pkg.price} {t("درهم", "AED")}
                           </div>
                         </button>
@@ -226,7 +225,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
                   <button
                     onClick={goToStep2}
-                    className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold mt-2"
+                    className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold mt-2"
                   >
                     {t("التالي: الدفع", "Next: Payment")}
                   </button>
@@ -235,14 +234,14 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
               {step === 2 && selectedPkg && (
                 <div className="space-y-5">
-                  <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
-                    <p className="text-sm font-semibold text-gray-800">
+                  <div className="bg-asphalt border border-line rounded-xl p-4 space-y-2">
+                    <p className="text-sm font-semibold text-cream">
                       {t(
                         `المبلغ المطلوب: ${selectedPkg.price} درهم (${selectedPkg.credits} كريديت)`,
                         `Amount due: ${selectedPkg.price} AED (${selectedPkg.credits} credits)`
                       )}
                     </p>
-                    <p className="text-xs text-gray-500 mb-2">
+                    <p className="text-xs text-dim mb-2">
                       {t(
                         "حوّل المبلغ على الحساب التالي، ثم ارفع صورة الإيصال:",
                         "Transfer the amount to the account below, then upload the receipt:"
@@ -258,9 +257,9 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                   </div>
 
                   {userEmail && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-dim">
                       {t("الرصيد هيتضاف لحساب: ", "Credits will be added to: ")}
-                      <span className="font-semibold text-gray-600">{userEmail}</span>
+                      <span className="font-semibold text-dim">{userEmail}</span>
                     </div>
                   )}
 
@@ -273,7 +272,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                     />
                   </Field>
 
-                  <label className="flex items-start gap-2 text-sm text-gray-700">
+                  <label className="flex items-start gap-2 text-sm text-dim">
                     <input
                       type="checkbox"
                       checked={confirmed}
@@ -286,14 +285,14 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                   <div className="flex gap-2 pt-2">
                     <button
                       onClick={() => setStep(1)}
-                      className="flex-1 py-3 rounded-xl border border-gray-200 text-gray-700 font-semibold"
+                      className="flex-1 py-3 rounded-xl border border-line text-dim font-semibold"
                     >
                       {t("رجوع", "Back")}
                     </button>
                     <button
                       onClick={handleSubmit}
                       disabled={submitting || !receiptFile || !confirmed}
-                      className="flex-[2] py-3 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-40"
+                      className="flex-[2] py-3 rounded-xl bg-amber text-asphalt font-semibold disabled:opacity-40"
                     >
                       {submitting ? t("جاري الإرسال...", "Sending...") : t("أرسل الطلب", "Submit request")}
                     </button>
@@ -308,14 +307,34 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       <style>{`
         .input {
           width: 100%;
-          border: 1px solid #e5e7eb;
+          border: 1px solid #2A2F38;
           border-radius: 0.75rem;
           padding: 0.65rem 0.85rem;
           font-size: 0.9rem;
+          background: #14171C;
+          color: #F2ECDD;
+          color-scheme: dark;
+        }
+        .input::placeholder {
+          color: #B9B2A0;
+          opacity: 0.6;
         }
         .input:focus {
           outline: none;
-          border-color: #2563eb;
+          border-color: #F5B942;
+        }
+        input[type="checkbox"] {
+          accent-color: #F5B942;
+        }
+        .input::file-selector-button {
+          margin-inline-end: 0.75rem;
+          padding: 0.35rem 0.8rem;
+          border: 1px solid #2A2F38;
+          border-radius: 0.5rem;
+          background: #1D2129;
+          color: #F2ECDD;
+          font: inherit;
+          cursor: pointer;
         }
       `}</style>
     </div>
@@ -325,7 +344,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 function Field({ label, children }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+      <label className="block text-sm font-semibold text-dim mb-1">{label}</label>
       {children}
     </div>
   );
@@ -334,8 +353,8 @@ function Field({ label, children }) {
 function BankRow({ label, value }) {
   return (
     <div className="flex justify-between text-xs">
-      <span className="text-gray-500">{label}</span>
-      <span className="font-mono font-semibold text-gray-800" dir="ltr">
+      <span className="text-dim">{label}</span>
+      <span className="font-mono font-semibold text-cream" dir="ltr">
         {value}
       </span>
     </div>

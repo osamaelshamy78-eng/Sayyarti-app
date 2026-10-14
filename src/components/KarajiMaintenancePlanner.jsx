@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAppLang } from "../appLanguage";
+import { useCloseOnBack } from "../backButton";
 
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942", red: "#E4432B", green: "#61A56B" };
 const KEY = "karaji-maintenance-planner-v1";
@@ -9,29 +11,6 @@ const DUE_DATES_KEY = "karaji-maintenance-planner-due-dates-v1";
 const UPCOMING_NOTIFIED_KEY = "karaji-maintenance-planner-last-upcoming-notice-v1";
 const REMINDER_WINDOW_DAYS = 3;
 const TOAST_AUTO_DISMISS_MS = 8000;
-
-function detectAppLanguage() {
-  if (typeof document === "undefined") return "en";
-  const buttons = Array.from(document.querySelectorAll("button"));
-  const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
-  const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
-  const isActive = (button) => {
-    if (!button) return false;
-    if (button.getAttribute("aria-pressed") === "true") return true;
-    const inlineBg = (button.style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
-    if (inlineBg === "#f5b942" || inlineBg === "rgb(245,185,66)" || inlineBg === "rgba(245,185,66,1)") return true;
-    const style = window.getComputedStyle(button);
-    const bg = (style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
-    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
-  };
-  if (isActive(arButton)) return "ar";
-  if (isActive(enButton)) return "en";
-  try {
-    const saved = localStorage.getItem("karajy-language");
-    if (saved === "ar" || saved === "en") return saved;
-  } catch (_) {}
-  return "en";
-}
 
 // Ratios preserved from the original fixed plan (5000 / 10000 / 20000 / 40000):
 // tire&brake = 2x oil interval, air filter&fluids = 4x, major check = 8x.
@@ -130,9 +109,13 @@ function formatDaysLeft(days, isAr) {
 }
 
 export default function KarajiMaintenancePlanner({ lang }) {
-  const [appLang, setAppLang] = useState(() => lang || detectAppLanguage());
-  const isAr = appLang === "ar";
+  const appLang = useAppLang();
+  const isAr = (lang || appLang) === "ar";
   const [open, setOpen] = useState(false);
+  useCloseOnBack(open, () => setOpen(false));
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("karaji-planner-change", { detail: { open } }));
+  }, [open]);
   const [mileage, setMileage] = useState("");
   const [lastOilChange, setLastOilChange] = useState("");
   const [oilInterval, setOilInterval] = useState("");
@@ -209,24 +192,6 @@ export default function KarajiMaintenancePlanner({ lang }) {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  useEffect(() => {
-    if (lang) {
-      setAppLang(lang);
-      return undefined;
-    }
-    const syncLanguage = () => setAppLang(detectAppLanguage());
-    syncLanguage();
-    const observer = new MutationObserver(syncLanguage);
-    observer.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "aria-pressed"] });
-    window.addEventListener("storage", syncLanguage);
-    window.addEventListener("karaji-language-change", syncLanguage);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("storage", syncLanguage);
-      window.removeEventListener("karaji-language-change", syncLanguage);
-    };
-  }, [lang]);
-
   // The Maintenance bottom-nav button opens this planner through this event.
   useEffect(() => {
     const openPlanner = () => setOpen(true);
@@ -277,7 +242,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   };
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
       {!open && toast && (
         <button
           onClick={openFromToast}

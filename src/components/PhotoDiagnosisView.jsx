@@ -20,7 +20,7 @@ const C = {
 
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
-  const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
+  const { user, accessToken, checking, signInWithGoogle } = useCustomerAuth();
   const [issueDescription, setIssueDescription] = useState("");
   const [mediaFile, setMediaFile] = useState(null);
   const [mediaPreview, setMediaPreview] = useState(null);
@@ -332,7 +332,6 @@ export default function PhotoDiagnosisView({ lang }) {
       user={user}
       checking={checking}
       signInWithGoogle={signInWithGoogle}
-      signOut={signOut}
       titleAr="سجّل دخولك عشان تجرب مجانًا"
       titleEn="Sign in to try it free"
       descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."

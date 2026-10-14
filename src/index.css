@@ -16,12 +16,25 @@ body,
   box-sizing: border-box;
 }
 
-/* Give the mobile app shell more vertical room so the Fix/issues grid
-   is not cramped or clipped by the device viewport. */
-@media (max-width: 600px) {
-  #root > div > div[style*="width: 380px"] {
-    height: calc(100dvh - 16px) !important;
-    min-height: 760px;
+/* The app fills the phone screen, below the phone's own status bar. On a wider
+   screen it stays a phone-width column. --app-width is shared with the bottom nav. */
+:root {
+  --app-width: 480px;
+  /* space beside the column on a wide screen; 0 on a phone */
+  --app-gutter: max(0px, calc((100vw - var(--app-width)) / 2));
+}
+
+.app-shell {
+  width: 100%;
+  max-width: var(--app-width);
+  height: 100vh;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+}
+
+@media (min-width: 481px) {
+  .app-shell {
+    border-inline: 1px solid #2a2f38;
   }
 }
 

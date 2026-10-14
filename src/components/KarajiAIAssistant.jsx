@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useAppLang } from "../appLanguage";
+import { useCloseOnBack } from "../backButton";
+import { NAV_BUTTON_STYLE, NAV_ACTIVE_STYLE } from "./BottomNav";
 
 const C = {
   asphalt: "#14171C",
@@ -12,34 +15,6 @@ const C = {
 };
 
 const STORAGE_KEY = "karaji-ai-assistant-v1";
-
-function detectAppLanguage() {
-  if (typeof document === "undefined") return "en";
-
-  const buttons = Array.from(document.querySelectorAll("button"));
-  const enButton = buttons.find((b) => b.textContent?.trim() === "EN");
-  const arButton = buttons.find((b) => b.textContent?.trim() === "AR");
-
-  const isActive = (button) => {
-    if (!button) return false;
-    if (button.getAttribute("aria-pressed") === "true") return true;
-    const inlineBg = (button.style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
-    if (inlineBg === "#f5b942" || inlineBg === "rgb(245,185,66)" || inlineBg === "rgba(245,185,66,1)") return true;
-    const style = window.getComputedStyle(button);
-    const bg = (style.backgroundColor || "").replace(/\s/g, "").toLowerCase();
-    return bg === "rgb(245,185,66)" || bg === "rgba(245,185,66,1)" || bg === "#f5b942";
-  };
-
-  if (isActive(arButton)) return "ar";
-  if (isActive(enButton)) return "en";
-
-  try {
-    const saved = localStorage.getItem("karajy-language");
-    if (saved === "ar" || saved === "en") return saved;
-  } catch (_) {}
-
-  return "en";
-}
 
 function getAssessment({ mileage, serviceDate, warning, symptom }) {
   let score = 100;
@@ -84,9 +59,9 @@ function getAssessment({ mileage, serviceDate, warning, symptom }) {
 }
 
 export default function KarajiAIAssistant() {
-  const [appLang, setAppLang] = useState(() => detectAppLanguage());
-  const isAr = appLang === "ar";
+  const isAr = useAppLang() === "ar";
   const [open, setOpen] = useState(false);
+  useCloseOnBack(open, () => setOpen(false));
   const [mileage, setMileage] = useState("");
   const [serviceDate, setServiceDate] = useState("");
   const [warning, setWarning] = useState("none");
@@ -103,26 +78,6 @@ export default function KarajiAIAssistant() {
       setWarning(savedState.warning || "none");
       setSymptom(savedState.symptom || "");
     } catch (_) {}
-  }, []);
-
-  useEffect(() => {
-    const syncLanguage = () => setAppLang(detectAppLanguage());
-    syncLanguage();
-
-    const observer = new MutationObserver(syncLanguage);
-    observer.observe(document.body, {
-      subtree: true,
-      childList: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "aria-pressed"],
-    });
-    window.addEventListener("storage", syncLanguage);
-    window.addEventListener("karaji-language-change", syncLanguage);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("storage", syncLanguage);
-      window.removeEventListener("karaji-language-change", syncLanguage);
-    };
   }, []);
 
   useEffect(() => {
@@ -173,7 +128,7 @@ export default function KarajiAIAssistant() {
     : reason;
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
       {open && (
         <div style={{
           width: "min(390px, calc(100vw - 32px))",
@@ -242,9 +197,25 @@ export default function KarajiAIAssistant() {
         </div>
       )}
 
-      <button type="button" onClick={() => setOpen((value) => !value)} aria-label="Sayyarti AI" style={{ width: 58, height: 58, borderRadius: "50%", border: `2px solid ${C.asphalt}`, background: C.amber, color: C.asphalt, boxShadow: "0 8px 24px rgba(0,0,0,.35)", fontSize: 11, fontWeight: 950, cursor: "pointer" }}>
+      {/* sits on the bottom nav's last slot: right in English, left in Arabic */}
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-label="Sayyarti AI"
+        aria-expanded={open}
+        style={{
+          ...NAV_BUTTON_STYLE,
+          ...(open ? NAV_ACTIVE_STYLE : null),
+          position: "fixed",
+          [isAr ? "left" : "right"]: "calc(var(--app-gutter) + 10px)",
+          bottom: "calc(8px + env(safe-area-inset-bottom))",
+          width: "calc((min(100vw, var(--app-width)) - 32px) / 3)",
+          zIndex: 10001,
+          boxShadow: "0 8px 24px rgba(0,0,0,.25)",
+        }}
+      >
         <div style={{ fontSize: 18, lineHeight: 1 }}>✦</div>
-        AI
+        <div>{isAr ? "مساعد السيارة الذكي" : "AI Assistant"}</div>
       </button>
     </div>
   );

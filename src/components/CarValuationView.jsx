@@ -45,7 +45,7 @@ const inputStyle = {
 
 export default function CarValuationView({ lang }) {
   const isAr = lang === "ar";
-  const { user, accessToken, checking, signInWithGoogle, signOut } = useCustomerAuth();
+  const { user, accessToken, checking, signInWithGoogle } = useCustomerAuth();
   const [form, setForm] = useState({
     country: "",
     make: "",
@@ -108,7 +108,6 @@ export default function CarValuationView({ lang }) {
       user={user}
       checking={checking}
       signInWithGoogle={signInWithGoogle}
-      signOut={signOut}
       titleAr="سجّل دخولك عشان تجرب مجانًا"
       titleEn="Sign in to try it free"
       descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."

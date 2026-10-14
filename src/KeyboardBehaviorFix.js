@@ -1,3 +1,4 @@
+// When the phone keyboard opens, scroll the focused field back into view above it.
 const FOCUSABLE_INPUT = 'input, textarea, select, [contenteditable="true"]';
 
 function getViewport() {
@@ -38,42 +39,21 @@ function keepFocusedFieldVisible() {
   });
 }
 
-function syncKeyboardHeight() {
-  const viewport = getViewport();
-  if (!viewport) return;
-
-  const keyboardHeight = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
-  document.documentElement.style.setProperty("--karaji-keyboard-height", `${keyboardHeight}px`);
-}
-
 export function startKeyboardBehaviorFix() {
   if (window.__karajiKeyboardBehaviorFixStarted) return;
   window.__karajiKeyboardBehaviorFixStarted = true;
 
-  const run = () => {
-    syncKeyboardHeight();
-    keepFocusedFieldVisible();
-  };
-
   const onFocusIn = () => {
-    [60, 160, 300, 500, 800].forEach((delay) => window.setTimeout(run, delay));
+    [60, 160, 300, 500, 800].forEach((delay) => window.setTimeout(keepFocusedFieldVisible, delay));
   };
 
   const onViewportChange = () => {
-    syncKeyboardHeight();
     if (isKeyboardOpen()) {
       [0, 80, 220].forEach((delay) => window.setTimeout(keepFocusedFieldVisible, delay));
     }
   };
 
-  const onFocusOut = () => {
-    window.setTimeout(() => {
-      if (!isKeyboardOpen()) syncKeyboardHeight();
-    }, 120);
-  };
-
   document.addEventListener("focusin", onFocusIn, true);
-  document.addEventListener("focusout", onFocusOut, true);
 
   const viewport = getViewport();
   if (viewport) {
@@ -82,5 +62,4 @@ export function startKeyboardBehaviorFix() {
   }
 
   window.addEventListener("resize", onViewportChange, { passive: true });
-  run();
 }

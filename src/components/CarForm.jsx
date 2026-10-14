@@ -1,4 +1,6 @@
 import React from "react";
+import { CAR_COUNTRIES } from "../countries";
+import CarMedia, { CAR_MEDIA_ACCEPT, MAX_VIDEO_BYTES, isVideoFile } from "./CarMedia";
 import { supabase } from "../supabaseClient";
 import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
 import { useCustomerAuth } from "../useCustomerAuth";
@@ -98,7 +100,7 @@ function Field({ label, children }) {
 }
 
 export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, onSubmitted }) {
-  const { user, checking, signInWithGoogle, signOut } = useCustomerAuth();
+  const { user, checking, signInWithGoogle } = useCustomerAuth();
   const [form, setForm] = React.useState({
     make: "",
     makeOther: "",
@@ -139,6 +141,10 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
   function addPhotos(fileList) {
     const files = Array.from(fileList || []).slice(0, MAX_PHOTOS - photos.length);
     if (!files.length) return;
+    if (files.some((f) => isVideoFile(f) && f.size > MAX_VIDEO_BYTES)) {
+      window.alert(lang === "ar" ? "الفيديو القصير لازم يكون ١٥ ميجا أو أقل." : "Short car videos must be 15 MB or smaller.");
+      return;
+    }
     setUploadError("");
     setPhotos((cur) => [...cur, ...files]);
     setPreviews((cur) => [...cur, ...files.map((f) => URL.createObjectURL(f))]);
@@ -217,7 +223,6 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
       user={user}
       checking={checking}
       signInWithGoogle={signInWithGoogle}
-      signOut={signOut}
       titleAr="سجّل دخولك عشان تضيف إعلان"
       titleEn="Sign in to add a listing"
       descAr="تسجيل الدخول بجوجل مطلوب عشان نربط الإعلان بحسابك ونمنع الإعلانات الوهمية."
@@ -310,7 +315,12 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
             <input style={inputStyle} value={form.city} onChange={set("city")} />
           </Field>
           <Field label={t.carCountry}>
-            <input style={inputStyle} value={form.country} onChange={set("country")} />
+            <select style={inputStyle} value={form.country} onChange={set("country")}>
+              <option value="">—</option>
+              {CAR_COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c[lang === "ar" ? "ar" : "en"]}</option>
+              ))}
+            </select>
           </Field>
         </div>
 
@@ -319,6 +329,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
             <option value="">—</option>
             <option value={t.carSpecsGulf}>{t.carSpecsGulf}</option>
             <option value={t.carSpecsAmerican}>{t.carSpecsAmerican}</option>
+            <option value="Local / Other">{lang === "ar" ? "مواصفات محلية / أخرى" : "Local / Other Specs"}</option>
           </select>
         </Field>
 
@@ -334,7 +345,12 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {previews.map((src, i) => (
               <div key={i} style={{ position: "relative", width: 72, height: 72 }}>
-                <img src={src} alt="" style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.panelLine}` }} />
+                <CarMedia src={src} video={isVideoFile(photos[i])} muted controls={false} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.panelLine}`, display: "block" }} />
+                {isVideoFile(photos[i]) && (
+                  <span style={{ position: "absolute", left: 4, bottom: 4, padding: "2px 5px", borderRadius: 5, background: "rgba(0,0,0,.72)", color: "#fff", fontSize: 8, fontWeight: 800, lineHeight: 1 }}>
+                    {lang === "ar" ? "فيديو" : "VIDEO"}
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={() => removePhoto(i)}
@@ -355,9 +371,13 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
                 }}
               >
                 <Camera size={20} />
+                <span style={{ fontSize: 9, marginLeft: 4, fontWeight: 700, textAlign: "center", lineHeight: 1.1 }}>
+                  {lang === "ar" ? "صور / فيديو" : "Photo / Video"}
+                </span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept={CAR_MEDIA_ACCEPT}
+                  aria-label={lang === "ar" ? "إضافة صور أو فيديو" : "Add photos or videos"}
                   multiple
                   onChange={(e) => addPhotos(e.target.files)}
                   style={{ display: "none" }}

@@ -1,20 +1,13 @@
 import React, { Component, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { startAdminPhotoRequestEnhancer } from "./AdminPhotoRequestEnhancer";
-import { startCarMediaEnhancer } from "./CarMediaEnhancer";
-import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
-import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
-import { startOverlayBackHandler } from "./OverlayBackHandler";
-import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
-import { startCarCountryEnhancer } from "./CarCountryEnhancer";
-import { startMaintenanceNavFix } from "./MaintenanceNavFix";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
 
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
+import BottomNav from "./components/BottomNav";
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
 
 class AppErrorBoundary extends Component {
@@ -41,7 +34,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       ) : (
         <AppLoginGate>
           <App />
-          <KarajiAIAssistant lang="ar" />
+          <BottomNav />
+          <KarajiAIAssistant />
           <KarajiMaintenancePlanner />
         </AppLoginGate>
       )}
@@ -50,15 +44,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 );
 
 if (!isFix3DRoute) {
-  startAdminPhotoRequestEnhancer();
-  startCarMediaEnhancer();
-  startAdminCarDeleteEnhancer();
-  startPendingCarAdminEnhancer();
   startKeyboardBehaviorFix();
-  startOverlayBackHandler();
-  startMenuLanguageEnhancer();
-  startCarCountryEnhancer();
-  startMaintenanceNavFix();
 }
 
 if ("serviceWorker" in navigator) {
