@@ -1,4 +1,5 @@
 import React from "react";
+import { CAR_COUNTRIES } from "../countries";
 import { supabase } from "../supabaseClient";
 import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
 import { useCustomerAuth } from "../useCustomerAuth";
@@ -310,7 +311,12 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
             <input style={inputStyle} value={form.city} onChange={set("city")} />
           </Field>
           <Field label={t.carCountry}>
-            <input style={inputStyle} value={form.country} onChange={set("country")} />
+            <select style={inputStyle} value={form.country} onChange={set("country")}>
+              <option value="">—</option>
+              {CAR_COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c[lang === "ar" ? "ar" : "en"]}</option>
+              ))}
+            </select>
           </Field>
         </div>
 
@@ -319,6 +325,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
             <option value="">—</option>
             <option value={t.carSpecsGulf}>{t.carSpecsGulf}</option>
             <option value={t.carSpecsAmerican}>{t.carSpecsAmerican}</option>
+            <option value="Local / Other">{lang === "ar" ? "مواصفات محلية / أخرى" : "Local / Other Specs"}</option>
           </select>
         </Field>
 

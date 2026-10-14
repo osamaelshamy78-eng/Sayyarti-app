@@ -8,14 +8,13 @@ import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 import { startOverlayBackHandler } from "./OverlayBackHandler";
 import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
-import { startCarCountryEnhancer } from "./CarCountryEnhancer";
-import { startMaintenanceNavFix } from "./MaintenanceNavFix";
 import { startStripeReturnNotice } from "./StripeReturnNotice";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
 
 import KarajiAIAssistant from "./components/KarajiAIAssistant";
 import KarajiMaintenancePlanner from "./components/KarajiMaintenancePlanner";
+import BottomNav from "./components/BottomNav";
 const Fix3DLibrary = React.lazy(() => import("./components/Fix3DLibraryV2.jsx"));
 
 class AppErrorBoundary extends Component {
@@ -42,7 +41,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       ) : (
         <AppLoginGate>
           <App />
-          <KarajiAIAssistant lang="ar" />
+          <BottomNav />
+          <KarajiAIAssistant />
           <KarajiMaintenancePlanner />
         </AppLoginGate>
       )}
@@ -58,8 +58,6 @@ if (!isFix3DRoute) {
   startKeyboardBehaviorFix();
   startOverlayBackHandler();
   startMenuLanguageEnhancer();
-  startCarCountryEnhancer();
-  startMaintenanceNavFix();
   startStripeReturnNotice();
 }
 

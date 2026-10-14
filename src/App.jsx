@@ -27,6 +27,8 @@ import {
 } from "lucide-react";
 import { supabase } from "./supabaseClient";
 import { openReceipt } from "./receipts";
+import { storedLang, announceLang } from "./appLanguage";
+import { CAR_COUNTRIES } from "./countries";
 import GarageListingForm from "./components/GarageListingForm";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
@@ -2831,55 +2833,6 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
           </button>
         </div>
       )}
-    </div>
-  );
-}
-
-function BottomNav({ lang, t, view, setView }) {
-  const items = [
-    { id: "home", label: t.navHome, icon: Gauge },
-    { id: "garages", label: t.navGarages, icon: MapPin },
-    { id: "maintenance", label: t.navMaintenance, icon: Droplet },
-    { id: "cars", label: t.navCars, icon: Car },
-    { id: "parts", label: t.navParts, icon: Settings },
-    { id: "diagnosis", label: t.navDiagnosis, icon: Camera },
-  ];
-  return (
-    <div
-      className="flex"
-      style={{
-        borderTop: `1px solid ${C.panelLine}`,
-        background: C.panel,
-        overflowX: "auto",
-      }}
-    >
-      {items.map((it) => {
-        const active =
-          view === it.id ||
-          (it.id === "home" && (view === "category" || view === "issue" || view === "guide"));
-        const Icon = it.icon;
-        return (
-          <button
-            key={it.id}
-            onClick={() => setView(it.id)}
-            className="flex-1 flex flex-col items-center gap-1 py-3"
-            style={{ border: "none", background: "none", cursor: "pointer", minWidth: 58 }}
-          >
-            <Icon size={20} color={active ? C.amber : C.grey} strokeWidth={2} />
-            <span
-              style={{
-                fontSize: 10.5,
-                fontFamily: lang === "ar" ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif",
-                color: active ? C.amber : C.grey,
-                fontWeight: active ? 600 : 500,
-                textAlign: "center",
-              }}
-            >
-              {it.label}
-            </span>
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -5892,13 +5845,7 @@ function LazyFallback({ lang }) {
 export default function App() {
   const initialRoute = routeFromPath(typeof window !== "undefined" ? window.location.pathname : "/");
   // Start in the language the user picked (login screen or last visit), else the phone's language
-  const [lang, setLang] = useState(() => {
-    try {
-      const saved = localStorage.getItem("karajy-language");
-      if (saved === "ar" || saved === "en") return saved;
-    } catch (e) {}
-    return (navigator.language || "").toLowerCase().startsWith("ar") ? "ar" : "en";
-  });
+  const [lang, setLang] = useState(storedLang);
   useEffect(() => {
     try {
       localStorage.setItem("karajy-language", lang);
@@ -5927,10 +5874,12 @@ export default function App() {
 
   // Keep <html lang>/<html dir> in sync with the in-app language toggle,
   // so external scripts (karaji-safety.js) and browsers/screen readers
-  // can correctly detect which language is actually showing.
+  // can correctly detect which language is actually showing,
+  // and tell the bottom nav / AI assistant / planner about the change.
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    announceLang(lang);
   }, [lang]);
 
   // --- URL routing + browser back-button support -----------------
