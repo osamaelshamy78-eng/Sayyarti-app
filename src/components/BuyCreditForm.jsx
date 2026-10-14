@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCloseOnBack } from "../backButton";
+import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
 
 // ===== بيانات الحساب البنكي (نفس حساب الجراجات) =====
@@ -14,7 +15,7 @@ const BANK_DETAILS = {
 };
 
 // ===== باقات الرصيد (رصيد مشترك: تشخيص صور + تقييم سعر) =====
-const PACKAGES = [
+export const PACKAGES = [
   { id: "trial", credits: 3, price: 9, labelAr: "تجربة", labelEn: "Trial" },
   { id: "standard", credits: 10, price: 25, labelAr: "قياسية", labelEn: "Standard" },
   { id: "saver", credits: 25, price: 50, labelAr: "موفرة", labelEn: "Saver" },
@@ -47,19 +48,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     }
     setError("");
     setStep(2);
-  }
-
-  async function uploadReceipt(file) {
-    const ext = file.name.split(".").pop();
-    const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from("photo-diagnosis-receipts")
-      .upload(fileName, file);
-    if (uploadError) throw uploadError;
-    const { data } = supabase.storage
-      .from("photo-diagnosis-receipts")
-      .getPublicUrl(fileName);
-    return data.publicUrl;
   }
 
   async function sendNotificationEmail(payload) {
@@ -105,7 +93,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     setError("");
 
     try {
-      const receiptUrl = await uploadReceipt(receiptFile);
+      const receiptUrl = await uploadReceipt("photo-diagnosis-receipts", receiptFile);
 
       const { error: insertError } = await supabase.rpc("submit_credit_purchase", {
         p_credits_requested: selectedPkg.credits,
@@ -118,7 +106,15 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       setSuccess(true);
     } catch (err) {
       console.error(err);
-      setError(t("حصل خطأ أثناء إرسال الطلب، حاول مرة أخرى", "Something went wrong, please try again"));
+      // the database says why it refused; show the cases a customer can act on
+      const msg = String(err?.message || "");
+      if (msg.includes("too many pending requests")) {
+        setError(t("عندك ٣ طلبات لسه بنراجعها. استنى لحد ما نراجعهم وبعدين ابعت طلب جديد.", "You have 3 requests we're still reviewing. Please wait for them before sending another."));
+      } else if (msg.includes("receipt already used")) {
+        setError(t("الإيصال ده اتبعت قبل كده. ارفع صورة إيصال التحويل الجديد.", "This receipt was already sent. Please upload the receipt for this transfer."));
+      } else {
+        setError(t("حصل خطأ أثناء إرسال الطلب، حاول مرة أخرى", "Something went wrong, please try again"));
+      }
     } finally {
       setSubmitting(false);
     }

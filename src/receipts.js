@@ -1,5 +1,18 @@
 import { supabase } from "./supabaseClient";
 
+// Transfer receipts are stored under the uploader's own folder (<user id>/<file>): the database only
+// accepts a purchase or listing request whose receipt is the requester's own upload.
+export async function uploadReceipt(bucket, file) {
+  const { data: auth } = await supabase.auth.getUser();
+  const uid = auth?.user?.id;
+  if (!uid) throw new Error("sign in required");
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+  const path = `${uid}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from(bucket).upload(path, file, { contentType: file.type || "image/jpeg" });
+  if (error) throw error;
+  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+}
+
 // Receipt buckets are private. A stored receipt_url still has the old public-URL shape
 // (.../storage/v1/object/public/<bucket>/<file>); admins open it through a link that works for 10 minutes.
 function receiptLocation(url) {

@@ -3,6 +3,7 @@ import { ShieldCheck, LogOut, Trash2, RotateCcw, CheckCircle2 } from "lucide-rea
 import { supabase } from "../supabaseClient";
 import { openReceipt } from "../receipts";
 import PendingCars from "../components/PendingCars";
+import { PACKAGES } from "../components/BuyCreditForm";
 import CarMedia from "../components/CarMedia";
 import { CAR_MAKES, CAR_MODELS } from "../components/CarForm";
 import { ISSUES } from "../data/issues";
@@ -764,6 +765,12 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
               </div>
               <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>
                 {lang === "ar" ? "الكمية" : "Amount"}: {r.credits_requested} {lang === "ar" ? "كريديت" : "credits"}
+              </div>
+              <div style={{ color: C.cream, fontSize: 12, marginTop: 2 }}>
+                {lang === "ar" ? "المفروض الإيصال يكون بـ" : "Receipt should show"}:{" "}
+                <strong style={{ color: C.amber }}>
+                  {PACKAGES.find((p) => p.credits === r.credits_requested)?.price ?? "?"} {lang === "ar" ? "درهم" : "AED"}
+                </strong>
               </div>
               <div style={{ color: r.status === "approved" ? "#7BC67B" : r.status === "rejected" ? "#F06A5F" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
                 {t.adminStatus}: {r.status}

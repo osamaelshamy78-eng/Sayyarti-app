@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
 import { useCustomerAuth } from "../useCustomerAuth";
 
@@ -166,7 +167,7 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
     try {
       // ارفع الصور
       const photoUrl = await uploadFile(photoFile, "garage-photos");
-      const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
+      const receiptUrl = await uploadReceipt("garage-receipts", receiptFile);
 
       // الإرسال يتم من خلال RPC آمن؛ السعر والحالة والرتبة يتم التحقق منها داخل Supabase.
       const { data: requestId, error: submitError } = await supabase.rpc("submit_garage_listing", {

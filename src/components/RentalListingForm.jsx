@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useCloseOnBack } from "../backButton";
+import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
 import { useCustomerAuth } from "../useCustomerAuth";
 
@@ -268,7 +269,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
       for (const file of photoFiles) {
         photoUrls.push(await uploadFile(file, "garage-photos"));
       }
-      const receiptUrl = await uploadFile(receiptFile, "garage-receipts");
+      const receiptUrl = await uploadReceipt("garage-receipts", receiptFile);
 
       const { data: requestId, error: submitError } = await supabase.rpc("submit_rental_listing", {
         p_rental_name: form.rental_name,
