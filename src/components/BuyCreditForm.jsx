@@ -50,32 +50,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     setStep(2);
   }
 
-  async function sendNotificationEmail(payload) {
-    // نستنى لحد ما سكربت EmailJS يتحمل بدل ما نتجاهل الإرسال بصمت
-    let attempts = 0;
-    while (!window.emailjs && attempts < 20) {
-      await new Promise((r) => setTimeout(r, 250));
-      attempts++;
-    }
-    if (!window.emailjs) {
-      console.error("EmailJS لم يتم تحميله، تم تخطي إرسال إشعار الإيميل");
-      return;
-    }
-    try {
-      await window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-        garage_name: "طلب شراء كريديتس (سيارتي)",
-        owner_name: payload.email || "غير معروف",
-        phone: payload.email || "-",
-        address: `الباقة: ${payload.pkg.labelAr} — ${payload.pkg.credits} كريديت`,
-        map_link: "Credit Purchase Request",
-        rank: `Credits: ${payload.pkg.credits}`,
-        price: payload.pkg.price,
-      });
-    } catch (err) {
-      console.error("فشل إرسال إشعار الإيميل:", err);
-    }
-  }
-
   function validateStep2() {
     if (!receiptFile) return t("من فضلك ارفع صورة إيصال التحويل", "Please upload the transfer receipt");
     if (!confirmed) return t("من فضلك أكّد أنك قمت بتحويل المبلغ", "Please confirm you made the transfer");
@@ -102,7 +76,6 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
       if (insertError) throw insertError;
 
-      sendNotificationEmail({ email: userEmail, pkg: selectedPkg });
       setSuccess(true);
     } catch (err) {
       console.error(err);

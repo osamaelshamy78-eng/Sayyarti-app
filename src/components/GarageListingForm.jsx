@@ -134,19 +134,6 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
     return data.publicUrl;
   }
 
-  function sendNotificationEmail(payload) {
-    if (!window.emailjs) return; // لو السكربت لسه مايتحملش، تجاهل بهدوء
-    window.emailjs.send("service_k8e4q6h", "template_rg47ctr", {
-      garage_name: payload.garage_name,
-      owner_name: payload.owner_name,
-      phone: payload.phone,
-      address: payload.address,
-      map_link: payload.map_link || "لم يتم تحديد الموقع بالـ GPS",
-      rank: RANK_LABELS[payload.rank],
-      price: RANK_PRICES[payload.rank],
-    });
-  }
-
   async function handleSubmit() {
     if (form.rank === null) {
       setError("من فضلك اختر الترتيب المطلوب");
@@ -197,7 +184,6 @@ export default function GarageListingForm({ isOpen, onClose, country = "uae" }) 
 
       if (!requestId) throw new Error("لم يتم إنشاء طلب الجراج");
 
-      sendNotificationEmail(form);
       setSuccess(true);
     } catch (err) {
       console.error(err);
