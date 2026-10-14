@@ -4,22 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Sayyarti — Add Your Garage Free</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@800&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root{--asphalt:#14171C;--panel:#1D2129;--line:#2A2F38;--cream:#F2ECDD;--dim:#B9B2A0;--amber:#F5B942;--red:#E4432B;--blue:#4C7EA8}
-    *{box-sizing:border-box} body{margin:0;background:#0A0B0D;color:var(--cream);font-family:Inter,Arial,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:22px 14px}
-    .app{width:min(430px,100%);background:var(--asphalt);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.45)}
+    :root{--asphalt:#FFFFFF;--panel:#F2F5F9;--line:#C8D1DC;--cream:#0E1B2C;--dim:#4B5A6D;--amber:#0B4FA0;--red:#C62828;--blue:#0B4FA0}
+    *{box-sizing:border-box} body{margin:0;background:#F2F5F9;color:var(--cream);font-family:"Readex Pro",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:22px 14px}
+    .app{width:min(430px,100%);background:var(--asphalt);border:1px solid var(--line);border-radius:24px;overflow:hidden;box-shadow:0 24px 70px rgba(14,27,44,.12)}
     header{display:flex;align-items:center;justify-content:space-between;padding:18px;border-bottom:1px solid var(--line)}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.logo{width:34px;height:34px;border-radius:50%;background:var(--amber);color:var(--asphalt);display:grid;place-items:center}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}.logo{width:34px;height:34px;border-radius:8px;background:var(--amber);color:var(--asphalt);display:grid;place-items:center;box-shadow:inset 0 0 0 3px var(--amber),inset 0 0 0 5px #fff;font-family:"Noto Kufi Arabic",sans-serif;font-weight:800;font-size:15px}
     .langs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px}.langs button{border:0;background:transparent;color:var(--dim);padding:6px 10px;border-radius:999px;cursor:pointer;font-weight:700}.langs .active{background:var(--amber);color:var(--asphalt)}
     main{padding:20px 18px 24px} h1{font-size:22px;margin:0 0 7px} p{color:var(--dim);font-size:13px;line-height:1.65;margin:0 0 16px}
-    label{display:block;color:var(--dim);font-size:11.5px;margin:0 0 6px} input,select{width:100%;background:#101319;border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--cream);font-size:13px;margin:0 0 11px;outline:none} input:focus,select:focus{border-color:var(--amber)}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{width:100%;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.primary{background:var(--amber);color:var(--asphalt)}.secondary{background:transparent;color:var(--blue);border:1px solid #4C7EA888}.secondary,.back{margin-bottom:11px}.msg{padding:11px 12px;border-radius:10px;font-size:12px;line-height:1.6;margin-bottom:11px}.error{background:#E4432B18;border:1px solid #E4432B66;color:#F28B7D}.success{background:#F5B94218;border:1px solid #F5B94266;color:var(--cream)}.free{display:inline-block;color:var(--amber);font-weight:800;margin-bottom:14px}.back{display:block;text-align:center;color:var(--dim);font-size:12px;text-decoration:none;padding:8px}
+    label{display:block;color:var(--dim);font-size:11.5px;margin:0 0 6px} input,select{width:100%;background:#FFFFFF;border:1px solid var(--line);border-radius:10px;padding:11px 12px;color:var(--cream);font-size:13px;margin:0 0 11px;outline:none} input:focus,select:focus{border-color:var(--amber)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.btn{width:100%;border:0;border-radius:10px;padding:12px;font-weight:800;cursor:pointer}.primary{background:var(--amber);color:var(--asphalt)}.secondary{background:transparent;color:var(--blue);border:1px solid #0B4FA088}.secondary,.back{margin-bottom:11px}.msg{padding:11px 12px;border-radius:10px;font-size:12px;line-height:1.6;margin-bottom:11px}.error{background:#C6282812;border:1px solid #C6282866;color:#C62828}.success{background:#0B4FA012;border:1px solid #0B4FA066;color:var(--cream)}.free{display:inline-block;color:var(--amber);font-weight:800;margin-bottom:14px}.back{display:block;text-align:center;color:var(--dim);font-size:12px;text-decoration:none;padding:8px}
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <div class="brand"><div class="logo">🔧</div><span>Sayyarti</span></div>
+      <div class="brand"><div class="logo" aria-hidden="true">س</div><span>Sayyarti</span></div>
       <div class="langs"><button id="enBtn" class="active">EN</button><button id="arBtn">AR</button></div>
     </header>
     <main>

@@ -3,8 +3,9 @@ import AppMenuLinks, { MENU_ROW_STYLE } from "./AppMenuLinks";
 import BuyCreditForm from "./BuyCreditForm";
 import { useRef, useEffect, useState } from "react";
 import { useAccount } from "../useAccount";
-import { Wrench, Menu, ShieldCheck } from "lucide-react";
-import { C } from "../theme";
+import { Menu, ShieldCheck } from "lucide-react";
+import SignLogo from "./SignLogo";
+import { C, FONT_BODY, FONT_SIGN } from "../theme";
 
 /* ---------------------------------------------------------------
    Small building blocks
@@ -25,83 +26,42 @@ export function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, on
     document.addEventListener("pointerdown", onPointer, true);
     return () => document.removeEventListener("pointerdown", onPointer, true);
   }, [menuOpen, onCloseMenu]);
+  // The header is the app's road sign: white-bordered panel on sign blue
+  const onSign = { border: `1.5px solid ${C.onAccent}`, background: "transparent", color: C.onAccent, cursor: "pointer" };
   return (
-    <div
-      className="flex items-center justify-between px-5 pt-3 pb-4"
-      style={{ borderBottom: `1px solid ${C.panelLine}`, position: "relative" }}
-    >
-      <button
-        onClick={onLogoTap}
-        className="flex items-center gap-2"
-        style={{ background: "none", border: "none", cursor: "pointer" }}
+    <div style={{ background: C.accent, padding: "10px 14px 12px", position: "relative" }}>
+      <div
+        className="flex items-center justify-between"
+        style={{ border: `2px solid ${C.onAccent}`, borderRadius: 10, padding: "6px 10px" }}
       >
-        <div
-          className="flex items-center justify-center rounded-full"
-          style={{
-            width: 30,
-            height: 30,
-            background: C.amber,
-            boxShadow: `0 0 14px ${C.amber}66`,
-          }}
-        >
-          <Wrench size={16} color={C.asphalt} strokeWidth={2.5} />
-        </div>
-        <span
-          style={{
-            color: C.cream,
-            fontFamily: "'Oswald', sans-serif",
-            fontSize: 19,
-            letterSpacing: isRTL ? 0 : "0.02em",
-            fontWeight: 600,
-          }}
-        >
-          {t.wordmark}
-        </span>
-      </button>
-
-      <div className="flex items-center gap-2">
-        <div
-          className="flex items-center rounded-full p-0.5"
-          style={{ background: C.panel, border: `1px solid ${C.panelLine}` }}
-        >
-          {["en", "ar"].map((code) => (
-            <button
-              key={code}
-              onClick={() => setLang(code)}
-              style={{
-                border: "none",
-                cursor: "pointer",
-                padding: "5px 12px",
-                borderRadius: 999,
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: "0.04em",
-                background: lang === code ? C.amber : "transparent",
-                color: lang === code ? C.asphalt : C.creamDim,
-                fontFamily: "'Inter', sans-serif",
-              }}
-            >
-              {code === "en" ? "EN" : "AR"}
-            </button>
-          ))}
-        </div>
-
         <button
-          ref={toggleRef}
-          onClick={onToggleMenu}
-          aria-label={isRTL ? "القائمة" : "Menu"}
-          aria-expanded={menuOpen}
-          className="flex items-center justify-center rounded-full"
-          style={{
-            width: 32,
-            height: 32,
-            background: C.panel,
-            border: `1px solid ${C.panelLine}`,
-            cursor: "pointer",
-          }}
+          onClick={onLogoTap}
+          aria-label={isRTL ? "الصفحة الرئيسية" : "Home"}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
         >
-          <Menu size={16} color={C.cream} strokeWidth={2} />
+          <SignLogo framed={false} />
         </button>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLang(isRTL ? "en" : "ar")}
+            aria-label={isRTL ? "Switch to English" : "التبديل إلى العربية"}
+            style={{ ...onSign, height: 34, minWidth: 44, padding: "0 10px", borderRadius: 8, fontSize: 13, fontWeight: 600, fontFamily: isRTL ? FONT_BODY : FONT_SIGN }}
+          >
+            {isRTL ? "EN" : "ع"}
+          </button>
+
+          <button
+            ref={toggleRef}
+            onClick={onToggleMenu}
+            aria-label={isRTL ? "القائمة" : "Menu"}
+            aria-expanded={menuOpen}
+            className="flex items-center justify-center"
+            style={{ ...onSign, width: 34, height: 34, borderRadius: 8 }}
+          >
+            <Menu size={18} color={C.onAccent} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
       {menuOpen && (
@@ -109,12 +69,12 @@ export function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, on
           ref={menuRef}
           style={{
             position: "absolute",
-            top: 54,
-            insetInlineEnd: 20,
-            background: C.panel,
-            border: `1px solid ${C.panelLine}`,
+            top: 64,
+            insetInlineEnd: 14,
+            background: C.surface,
+            border: `1px solid ${C.line}`,
             borderRadius: 12,
-            boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+            boxShadow: "0 10px 30px rgba(14,27,44,0.18)",
             overflow: "hidden",
             zIndex: 50,
             minWidth: 190,
@@ -130,7 +90,7 @@ export function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, on
 
           {account.isAdmin && (
             <button type="button" onClick={onOpenAdmin} style={MENU_ROW_STYLE}>
-              <ShieldCheck size={16} color={C.amber} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
+              <ShieldCheck size={16} color={C.accent} strokeWidth={2} aria-hidden="true" style={{ flexShrink: 0 }} />
               <span style={{ flex: 1 }}>{t.adminMenuLabel}</span>
             </button>
           )}

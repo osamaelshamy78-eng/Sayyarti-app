@@ -615,11 +615,11 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
 
   const fieldStyle = {
     width: "100%",
-    background: C.asphalt,
-    border: `1px solid ${C.panelLine}`,
+    background: C.bg,
+    border: `1px solid ${C.line}`,
     borderRadius: 10,
     padding: "11px 12px",
-    color: C.cream,
+    color: C.text,
     fontSize: 13,
     marginBottom: 10,
     fontFamily: "inherit",
@@ -628,17 +628,17 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
   };
 
   if (checking) {
-    return <div className="px-5 pt-8 text-center" style={{ color: C.creamDim }}>{t.adminLoading}</div>;
+    return <div className="px-5 pt-8 text-center" style={{ color: C.textDim }}>{t.adminLoading}</div>;
   }
 
   if (!user) {
     return (
       <div className="px-5 pt-8 pb-6">
         <div className="flex items-center gap-2 mb-2">
-          <ShieldCheck size={24} color={C.amber} />
-          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
+          <ShieldCheck size={24} color={C.accent} />
+          <h1 style={{ color: C.text, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
         </div>
-        <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
+        <p style={{ color: C.textDim, fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
           {t.adminLoginRequired}
         </p>
         <form onSubmit={handleLogin}>
@@ -646,12 +646,12 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
             onChange={(e) => setEmail(e.target.value)} style={fieldStyle} />
           <input type="password" autoComplete="current-password" placeholder={t.adminPassword} value={password}
             onChange={(e) => setPassword(e.target.value)} style={fieldStyle} />
-          <label style={{ display: "flex", alignItems: "center", gap: 8, color: C.creamDim, fontSize: 12, margin: "2px 0 12px", cursor: "pointer" }}>
-            <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: C.amber }} />
+          <label style={{ display: "flex", alignItems: "center", gap: 8, color: C.textDim, fontSize: 12, margin: "2px 0 12px", cursor: "pointer" }}>
+            <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} style={{ accentColor: C.accent }} />
             <span>{t.adminRememberMe}</span>
           </label>
           {loginError && <p style={{ color: C.red, fontSize: 12, lineHeight: 1.5 }}>{loginError}</p>}
-          <button type="submit" style={{ width: "100%", background: C.amber, border: "none", borderRadius: 10, padding: "12px 14px", color: C.asphalt, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}>
+          <button type="submit" style={{ width: "100%", background: C.accent, border: "none", borderRadius: 10, padding: "12px 14px", color: C.onAccent, fontSize: 13.5, fontWeight: 800, cursor: "pointer" }}>
             {t.adminLogin}
           </button>
         </form>
@@ -663,15 +663,15 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
     <div className="px-5 pt-5 pb-6">
       <div className="flex items-center justify-between gap-2 mb-1">
         <div className="flex items-center gap-2">
-          <ShieldCheck size={22} color={C.amber} />
-          <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
+          <ShieldCheck size={22} color={C.accent} />
+          <h1 style={{ color: C.text, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.adminTitle}</h1>
         </div>
-        <button onClick={logout} style={{ background: "transparent", border: `1px solid ${C.panelLine}`, color: C.creamDim, borderRadius: 9, padding: "7px 9px", cursor: "pointer" }}>
+        <button onClick={logout} style={{ background: "transparent", border: `1px solid ${C.line}`, color: C.textDim, borderRadius: 9, padding: "7px 9px", cursor: "pointer" }}>
           <LogOut size={15} />
         </button>
       </div>
 
-      <p style={{ color: C.creamDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>
+      <p style={{ color: C.textDim, fontSize: 12, marginTop: 4, marginBottom: 14 }}>
         {t.adminManageSubtitle}
       </p>
 
@@ -698,25 +698,25 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
           ["media", t.adminMediaTab, issueMedia.length],
         ].map(([id, label, count]) => (
           <button key={id} onClick={() => setTab(id)}
-            style={{ minWidth: 105, background: tab === id ? C.amber : C.panel, color: tab === id ? C.asphalt : C.cream, border: `1px solid ${tab === id ? C.amber : C.panelLine}`, borderRadius: 10, padding: "9px 7px", fontSize: 10.5, fontWeight: 800 }}>
+            style={{ minWidth: 105, background: tab === id ? C.accent : C.surface, color: tab === id ? C.onAccent : C.text, border: `1px solid ${tab === id ? C.accent : C.line}`, borderRadius: 10, padding: "9px 7px", fontSize: 10.5, fontWeight: 800 }}>
             {label}<br /><span style={{ fontSize: 9, opacity: .8 }}>{count}</span>
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center" }}>{t.adminLoadingRequests}</p>
+        <p style={{ color: C.textDim, fontSize: 13, textAlign: "center" }}>{t.adminLoadingRequests}</p>
       ) : tab === "photo" ? (
         <div className="flex flex-col gap-2.5">
-          {photoRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoPhotoRequests}</p>}
+          {photoRequests.length === 0 && <p style={{ color: C.textDim, textAlign: "center", fontSize: 13 }}>{t.adminNoPhotoRequests}</p>}
           {photoRequests.map((p) => {
             const code = generatedCodes[p.id] || p.generated_code;
             return (
-              <div key={p.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12 }}>
-                <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>{t.adminPhotoRequest}</div>
-                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>WhatsApp: {p.whatsapp_number}</div>
-                <div style={{ color: C.creamDim, fontSize: 12 }}>{t.adminPackage}: {p.package_credits} {t.adminDiagnosis} — {p.package_price} AED</div>
-                <div style={{ color: p.status === "approved" ? "#7BC67B" : p.status === "rejected" ? "#F06A5F" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
+              <div key={p.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12 }}>
+                <div style={{ color: C.text, fontWeight: 800, fontSize: 14 }}>{t.adminPhotoRequest}</div>
+                <div style={{ color: C.textDim, fontSize: 12, marginTop: 5 }}>WhatsApp: {p.whatsapp_number}</div>
+                <div style={{ color: C.textDim, fontSize: 12 }}>{t.adminPackage}: {p.package_credits} {t.adminDiagnosis} — {p.package_price} AED</div>
+                <div style={{ color: p.status === "approved" ? C.green : p.status === "rejected" ? C.red : C.accent, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
                   {t.adminStatus}: {p.status}
                 </div>
                 {p.receipt_url && (
@@ -726,11 +726,11 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
                   </button>
                 )}
                 {code && (
-                  <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: C.asphalt, border: `1px solid ${C.amber}55` }}>
-                    <div style={{ color: C.creamDim, fontSize: 11 }}>{t.adminCreditCode}</div>
-                    <div dir="ltr" style={{ color: C.amber, fontSize: 18, fontWeight: 900, letterSpacing: 1.2 }}>{code}</div>
+                  <div style={{ marginTop: 10, padding: 10, borderRadius: 10, background: C.bg, border: `1px solid ${C.accent}55` }}>
+                    <div style={{ color: C.textDim, fontSize: 11 }}>{t.adminCreditCode}</div>
+                    <div dir="ltr" style={{ color: C.accent, fontSize: 18, fontWeight: 900, letterSpacing: 1.2 }}>{code}</div>
                     <button onClick={() => openWhatsApp(p.whatsapp_number, code, p.package_credits)}
-                      style={{ width: "100%", marginTop: 8, background: C.amber, color: C.asphalt, border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      style={{ width: "100%", marginTop: 8, background: C.accent, color: C.onAccent, border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
                       {t.adminSendCode}
                     </button>
                   </div>
@@ -738,11 +738,11 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
                 {!code && p.status === "pending" && (
                   <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                     <button disabled={busyId === p.id} onClick={() => approvePhoto(p)}
-                      style={{ flex: 1, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                      style={{ flex: 1, background: C.accent, color: C.onAccent, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
                       {busyId === p.id ? t.adminApproving : t.adminApproveGenerate}
                     </button>
                     <button disabled={busyId === p.id} onClick={() => rejectPhoto(p)}
-                      style={{ flex: 1, background: "transparent", color: "#F06A5F", border: "1px solid #F06A5F66", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                      style={{ flex: 1, background: "transparent", color: C.red, border: `1px solid ${C.red}66`, borderRadius: 9, padding: 10, fontWeight: 900 }}>
                       {t.adminReject}
                     </button>
                   </div>
@@ -754,25 +754,25 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
       ) : tab === "creditRequests" ? (
         <div className="flex flex-col gap-2.5">
           {creditRequests.length === 0 && (
-            <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>
+            <p style={{ color: C.textDim, textAlign: "center", fontSize: 13 }}>
               {lang === "ar" ? "مفيش طلبات شراء كريديتس" : "No credit purchase requests"}
             </p>
           )}
           {creditRequests.map((r) => (
-            <div key={r.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12 }}>
-              <div style={{ color: C.cream, fontWeight: 800, fontSize: 14 }}>
+            <div key={r.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12 }}>
+              <div style={{ color: C.text, fontWeight: 800, fontSize: 14 }}>
                 {lang === "ar" ? "طلب شراء كريديتس" : "Credit purchase request"}
               </div>
-              <div style={{ color: C.creamDim, fontSize: 12, marginTop: 5 }}>
+              <div style={{ color: C.textDim, fontSize: 12, marginTop: 5 }}>
                 {lang === "ar" ? "الكمية" : "Amount"}: {r.credits_requested} {lang === "ar" ? "كريديت" : "credits"}
               </div>
-              <div style={{ color: C.cream, fontSize: 12, marginTop: 2 }}>
+              <div style={{ color: C.text, fontSize: 12, marginTop: 2 }}>
                 {lang === "ar" ? "المفروض الإيصال يكون بـ" : "Receipt should show"}:{" "}
-                <strong style={{ color: C.amber }}>
+                <strong style={{ color: C.accent }}>
                   {PACKAGES.find((p) => p.credits === r.credits_requested)?.price ?? "?"} {lang === "ar" ? "درهم" : "AED"}
                 </strong>
               </div>
-              <div style={{ color: r.status === "approved" ? "#7BC67B" : r.status === "rejected" ? "#F06A5F" : C.amber, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
+              <div style={{ color: r.status === "approved" ? C.green : r.status === "rejected" ? C.red : C.accent, fontSize: 11, fontWeight: 800, marginTop: 4 }}>
                 {t.adminStatus}: {r.status}
               </div>
               {r.receipt_url && (
@@ -784,11 +784,11 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
               {r.status === "pending" && (
                 <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
                   <button disabled={busyId === r.id} onClick={() => approveCreditPurchase(r)}
-                    style={{ flex: 1, background: C.amber, color: C.asphalt, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                    style={{ flex: 1, background: C.accent, color: C.onAccent, border: "none", borderRadius: 9, padding: 10, fontWeight: 900 }}>
                     {busyId === r.id ? t.adminApproving : (lang === "ar" ? "وافق وزوّد الرصيد" : "Approve & add credits")}
                   </button>
                   <button disabled={busyId === r.id} onClick={() => rejectCreditPurchase(r)}
-                    style={{ flex: 1, background: "transparent", color: "#F06A5F", border: "1px solid #F06A5F66", borderRadius: 9, padding: 10, fontWeight: 900 }}>
+                    style={{ flex: 1, background: "transparent", color: C.red, border: `1px solid ${C.red}66`, borderRadius: 9, padding: 10, fontWeight: 900 }}>
                     {t.adminReject}
                   </button>
                 </div>
@@ -798,21 +798,21 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "garage" ? (
         <div className="flex flex-col gap-2.5">
-          {garageRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoGarageRequests}</p>}
+          {garageRequests.length === 0 && <p style={{ color: C.textDim, textAlign: "center", fontSize: 13 }}>{t.adminNoGarageRequests}</p>}
           {garageRequests.map((g) => (
-            <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+            <div key={g.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, overflow: "hidden" }}>
               {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{ width: "100%", height: 130, objectFit: "cover" }} />}
               <div style={{ padding: 12 }}>
-                <div style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.garage_name}</div>
-                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
-                <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
-                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
-                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
+                <div style={{ color: C.text, fontSize: 14, fontWeight: 800 }}>{g.garage_name}</div>
+                <div style={{ color: C.textDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
+                <div style={{ color: C.textDim, fontSize: 12 }}>{g.address}</div>
+                <div style={{ color: C.accent, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
+                <div style={{ color: C.textDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
                 {g.receipt_url && <button type="button" onClick={() => openReceipt(g.receipt_url)} style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>{t.adminViewReceipt}</button>}
                 {g.status === "pending" && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "approved")}
-                      style={{ background: "#2F7D32", color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      style={{ background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
                       {t.adminApprove}
                     </button>
                     <button disabled={busyId === g.id} onClick={() => updateGarageStatus(g, "rejected")}
@@ -827,21 +827,21 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "rentalRequests" ? (
         <div className="flex flex-col gap-2.5">
-          {rentalRequests.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoRentalRequests}</p>}
+          {rentalRequests.length === 0 && <p style={{ color: C.textDim, textAlign: "center", fontSize: 13 }}>{t.adminNoRentalRequests}</p>}
           {rentalRequests.map((g) => (
-            <div key={g.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+            <div key={g.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, overflow: "hidden" }}>
               {g.photo_url && <img src={g.photo_url} alt={g.rental_name} style={{ width: "100%", height: 130, objectFit: "cover" }} />}
               <div style={{ padding: 12 }}>
-                <div style={{ color: C.cream, fontSize: 14, fontWeight: 800 }}>{g.rental_name}</div>
-                <div style={{ color: C.creamDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
-                <div style={{ color: C.creamDim, fontSize: 12 }}>{g.address}</div>
-                <div style={{ color: C.amber, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
-                <div style={{ color: C.creamDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
+                <div style={{ color: C.text, fontSize: 14, fontWeight: 800 }}>{g.rental_name}</div>
+                <div style={{ color: C.textDim, fontSize: 12, marginTop: 4 }}>{g.owner_name} · {g.phone}</div>
+                <div style={{ color: C.textDim, fontSize: 12 }}>{g.address}</div>
+                <div style={{ color: C.accent, fontSize: 12, marginTop: 5 }}>{t.adminRank}: {g.rank} · {Number(g.price).toLocaleString()} {t.adminYear}</div>
+                <div style={{ color: C.textDim, fontSize: 11, marginTop: 4 }}>{t.adminStatus}: {g.status}</div>
                 {g.receipt_url && <button type="button" onClick={() => openReceipt(g.receipt_url)} style={{ display: "block", color: C.blue, fontSize: 12, marginTop: 8, background: "none", border: 0, padding: 0, cursor: "pointer" }}>{t.adminViewReceipt}</button>}
                 {g.status === "pending" && (
                   <div className="grid grid-cols-2 gap-2 mt-3">
                     <button disabled={busyId === g.id} onClick={() => updateRentalRequestStatus(g, "approved")}
-                      style={{ background: "#2F7D32", color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
+                      style={{ background: C.green, color: "#fff", border: "none", borderRadius: 8, padding: 9, fontWeight: 800 }}>
                       {t.adminApprove}
                     </button>
                     <button disabled={busyId === g.id} onClick={() => updateRentalRequestStatus(g, "rejected")}
@@ -856,26 +856,26 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "manageGarages" ? (
         <div>
-          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
-            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddGarage}</div>
+          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.text, fontWeight: 800, marginBottom: 10 }}>{t.adminAddGarage}</div>
             {[["garage_name", lang === "ar" ? "اسم الجراج" : "Garage name"],["owner_name", lang === "ar" ? "اسم المالك" : "Owner name"],["phone", lang === "ar" ? "الهاتف" : "Phone"],["address", lang === "ar" ? "العنوان" : "Address"]].map(([k,ph]) => <input key={k} placeholder={ph} value={garageForm[k]} onChange={e=>setGarageForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
             <div style={{ marginBottom: 10 }}>
-              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة الجراج" : "Garage photo"}</label>
+              <label style={{ display:"block", color:C.textDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة الجراج" : "Garage photo"}</label>
               <input type="file" accept="image/*" onChange={e=>setGaragePhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
-              {garagePhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{garagePhotoFile.name}</div>}
+              {garagePhotoFile && <div style={{ color:C.accent, fontSize:11, marginTop:-5, marginBottom:8 }}>{garagePhotoFile.name}</div>}
               {garagePhotoFile && <img src={URL.createObjectURL(garagePhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
             </div>
             <div className="grid grid-cols-2 gap-2">
               <select value={garageForm.country} onChange={e=>setGarageForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
               <select value={garageForm.rank} onChange={e=>setGarageForm(v=>({...v,rank:e.target.value}))} style={fieldStyle}><option value="0">Normal</option><option value="1">Rank 1</option><option value="2">Rank 2</option><option value="3">Rank 3</option></select>
             </div>
-            <button disabled={busyId === "new-garage"} onClick={addAdminGarage} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-garage" ? "..." : t.adminAddGarage}</button>
+            <button disabled={busyId === "new-garage"} onClick={addAdminGarage} style={{ width:"100%", background:C.accent,color:C.bg,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-garage" ? "..." : t.adminAddGarage}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {adminGarages.map(g => <div key={g.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+            {adminGarages.map(g => <div key={g.id} style={{background:C.surface,border:`1px solid ${C.line}`,borderRadius:14,overflow:"hidden"}}>
               {g.photo_url && <img src={g.photo_url} alt={g.garage_name} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
               <div style={{padding:12}}>
-                <div style={{color:C.cream,fontWeight:800}}>{g.garage_name}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{g.address} · {g.country}</div>
+                <div style={{color:C.text,fontWeight:800}}>{g.garage_name}</div><div style={{color:C.textDim,fontSize:12,marginTop:4}}>{g.address} · {g.country}</div>
                 <button disabled={busyId===g.id} onClick={()=>deleteAdminGarage(g.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
@@ -883,23 +883,23 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "maintenance" ? (
         <div>
-          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
-            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMaintenance}</div>
+          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.text, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMaintenance}</div>
             <select value={maintenanceForm.country} onChange={e=>setMaintenanceForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
             {[["name_en","Name (EN)"],["name_ar","الاسم (AR)"],["area_en","Area (EN)"],["area_ar","المنطقة (AR)"],["note_en","Description (EN)"],["note_ar","الوصف (AR)"],["map_link","Maps link"]].map(([k,ph]) => <input key={k} placeholder={ph} value={maintenanceForm[k]} onChange={e=>setMaintenanceForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
             <div style={{ marginBottom: 10 }}>
-              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة مركز الصيانة" : "Maintenance center photo"}</label>
+              <label style={{ display:"block", color:C.textDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة مركز الصيانة" : "Maintenance center photo"}</label>
               <input type="file" accept="image/*" onChange={e=>setMaintenancePhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
-              {maintenancePhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{maintenancePhotoFile.name}</div>}
+              {maintenancePhotoFile && <div style={{ color:C.accent, fontSize:11, marginTop:-5, marginBottom:8 }}>{maintenancePhotoFile.name}</div>}
               {maintenancePhotoFile && <img src={URL.createObjectURL(maintenancePhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
             </div>
-            <button disabled={busyId === "new-maintenance"} onClick={addMaintenanceCenter} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-maintenance" ? "..." : t.adminAddMaintenance}</button>
+            <button disabled={busyId === "new-maintenance"} onClick={addMaintenanceCenter} style={{ width:"100%", background:C.accent,color:C.bg,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-maintenance" ? "..." : t.adminAddMaintenance}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {maintenanceCenters.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+            {maintenanceCenters.map(m => <div key={m.id} style={{background:C.surface,border:`1px solid ${C.line}`,borderRadius:14,overflow:"hidden"}}>
               {m.photo_url && <img src={m.photo_url} alt={lang === "ar" ? m.name_ar : m.name_en} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
               <div style={{padding:12}}>
-                <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
+                <div style={{color:C.text,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.textDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
                 <button disabled={busyId===m.id} onClick={()=>deleteMaintenanceCenter(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
@@ -907,23 +907,23 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "rentals" ? (
         <div>
-          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
-            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddRental}</div>
+          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.text, fontWeight: 800, marginBottom: 10 }}>{t.adminAddRental}</div>
             <select value={rentalForm.country} onChange={e=>setRentalForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
             {[["name_en","Name (EN)"],["name_ar","الاسم (AR)"],["area_en","Area (EN)"],["area_ar","المنطقة (AR)"],["note_en","Description (EN)"],["note_ar","الوصف (AR)"],["map_link","Maps link"]].map(([k,ph]) => <input key={k} placeholder={ph} value={rentalForm[k]} onChange={e=>setRentalForm(v=>({...v,[k]:e.target.value}))} style={fieldStyle} />)}
             <div style={{ marginBottom: 10 }}>
-              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة شركة التأجير" : "Rental company photo"}</label>
+              <label style={{ display:"block", color:C.textDim, fontSize:11.5, marginBottom:6 }}>{lang === "ar" ? "صورة شركة التأجير" : "Rental company photo"}</label>
               <input type="file" accept="image/*" onChange={e=>setRentalPhotoFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
-              {rentalPhotoFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{rentalPhotoFile.name}</div>}
+              {rentalPhotoFile && <div style={{ color:C.accent, fontSize:11, marginTop:-5, marginBottom:8 }}>{rentalPhotoFile.name}</div>}
               {rentalPhotoFile && <img src={URL.createObjectURL(rentalPhotoFile)} alt="" style={{ width:"100%", height:110, objectFit:"cover", borderRadius:10, marginBottom:10 }} />}
             </div>
-            <button disabled={busyId === "new-rental"} onClick={addRental} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-rental" ? "..." : t.adminAddRental}</button>
+            <button disabled={busyId === "new-rental"} onClick={addRental} style={{ width:"100%", background:C.accent,color:C.bg,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-rental" ? "..." : t.adminAddRental}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {rentals.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+            {rentals.map(m => <div key={m.id} style={{background:C.surface,border:`1px solid ${C.line}`,borderRadius:14,overflow:"hidden"}}>
               {m.photo_url && <img src={m.photo_url} alt={lang === "ar" ? m.name_ar : m.name_en} style={{width:"100%",height:120,objectFit:"cover",display:"block"}} onError={(e)=>e.currentTarget.style.display="none"} />}
               <div style={{padding:12}}>
-                <div style={{color:C.cream,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.creamDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
+                <div style={{color:C.text,fontWeight:800}}>{lang === "ar" ? m.name_ar : m.name_en}</div><div style={{color:C.textDim,fontSize:12,marginTop:4}}>{m.country} · {lang === "ar" ? m.area_ar : m.area_en}</div>
                 <button disabled={busyId===m.id} onClick={()=>deleteRental(m.id)} style={{width:"100%",marginTop:9,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:9,fontWeight:800}}><Trash2 size={14} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
@@ -931,9 +931,9 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : tab === "valuation" ? (
         <div>
-          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
-            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 4 }}>{t.adminValuationTitle}</div>
-            <div style={{ color: C.creamDim, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>{t.adminValuationHint}</div>
+          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.text, fontWeight: 800, marginBottom: 4 }}>{t.adminValuationTitle}</div>
+            <div style={{ color: C.textDim, fontSize: 11, lineHeight: 1.5, marginBottom: 10 }}>{t.adminValuationHint}</div>
             <select value={valuationForm.country} onChange={e=>setValuationForm(v=>({...v,country:e.target.value}))} style={fieldStyle}><option value="uae">UAE</option><option value="ksa">KSA</option><option value="egypt">Egypt</option></select>
             <select value={valuationForm.make} onChange={e=>setValuationForm(v=>({...v,make:e.target.value,model:""}))} style={fieldStyle}>
               <option value="">{lang==="ar"?"الماركة":"Make"}</option>
@@ -964,7 +964,7 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
             </select>
             <textarea rows={2} placeholder={lang==="ar"?"عيوب (اختياري)":"Defects (optional)"} value={valuationForm.defects} onChange={e=>setValuationForm(v=>({...v,defects:e.target.value}))} style={{...fieldStyle, resize:"vertical"}} />
             <div style={{ marginBottom: 10 }}>
-              <label style={{ display:"block", color:C.creamDim, fontSize:11.5, marginBottom:6 }}>{t.adminValuationPhotos}</label>
+              <label style={{ display:"block", color:C.textDim, fontSize:11.5, marginBottom:6 }}>{t.adminValuationPhotos}</label>
               <input type="file" accept="image/*" multiple onChange={e=>setValuationPhotos(Array.from(e.target.files||[]).slice(0,6))} style={{ ...fieldStyle, padding:9 }} />
               {valuationPhotos.length > 0 && (
                 <div className="flex gap-2 flex-wrap" style={{ marginTop: 8 }}>
@@ -972,21 +972,21 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
                 </div>
               )}
             </div>
-            <button disabled={valuationLoading || !valuationForm.make || !valuationForm.model || !valuationForm.year || !valuationForm.mileage} onClick={runAdminValuation} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:11,fontWeight:900 }}>
+            <button disabled={valuationLoading || !valuationForm.make || !valuationForm.model || !valuationForm.year || !valuationForm.mileage} onClick={runAdminValuation} style={{ width:"100%", background:C.accent,color:C.bg,border:"none",borderRadius:9,padding:11,fontWeight:900 }}>
               {valuationLoading ? t.adminValuationRunning : t.adminValuationBtn}
             </button>
           </div>
           {valuationError && <div style={{ color: C.red, fontSize:12.5, background:`${C.red}14`, border:`1px solid ${C.red}55`, borderRadius:10, padding:"10px 12px", marginBottom:12 }}>{valuationError}</div>}
           {valuationResult && (
-            <div style={{ background: C.panel, border: `1px solid ${C.amberDim}`, borderRadius: 14, padding: 14, whiteSpace:"pre-wrap", color:C.cream, fontSize:13, lineHeight:1.7 }}>
+            <div style={{ background: C.surface, border: `1px solid ${C.accentDim}`, borderRadius: 14, padding: 14, whiteSpace:"pre-wrap", color:C.text, fontSize:13, lineHeight:1.7 }}>
               {valuationResult}
             </div>
           )}
         </div>
       ) : tab === "media" ? (
         <div>
-          <div style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
-            <div style={{ color: C.cream, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMedia}</div>
+          <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, padding: 12, marginBottom: 12 }}>
+            <div style={{ color: C.text, fontWeight: 800, marginBottom: 10 }}>{t.adminAddMedia}</div>
             <select value={mediaIssueId} onChange={e=>setMediaIssueId(e.target.value)} style={fieldStyle}>
               {Object.keys(ISSUES).map(id => <option key={id} value={id}>{ISSUES[id]?.en?.title || id}</option>)}
             </select>
@@ -994,17 +994,17 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
               <option value="en">English</option><option value="ar">العربية</option>
             </select>
             <input type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={e=>setMediaFile(e.target.files?.[0] || null)} style={{ ...fieldStyle, padding:9 }} />
-            {mediaFile && <div style={{ color:C.amber, fontSize:11, marginTop:-5, marginBottom:8 }}>{mediaFile.name} · {(mediaFile.size/1024/1024).toFixed(2)} MB</div>}
-            <div style={{ color:C.creamDim, fontSize:10.5, lineHeight:1.5, marginBottom:10 }}>{t.adminMediaLimit}</div>
-            <button disabled={!mediaFile || busyId === "new-media"} onClick={addIssueMedia} style={{ width:"100%", background:C.amber,color:C.asphalt,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-media" ? "..." : t.adminMediaUpload}</button>
+            {mediaFile && <div style={{ color:C.accent, fontSize:11, marginTop:-5, marginBottom:8 }}>{mediaFile.name} · {(mediaFile.size/1024/1024).toFixed(2)} MB</div>}
+            <div style={{ color:C.textDim, fontSize:10.5, lineHeight:1.5, marginBottom:10 }}>{t.adminMediaLimit}</div>
+            <button disabled={!mediaFile || busyId === "new-media"} onClick={addIssueMedia} style={{ width:"100%", background:C.accent,color:C.bg,border:"none",borderRadius:9,padding:10,fontWeight:900 }}>{busyId === "new-media" ? "..." : t.adminMediaUpload}</button>
           </div>
           <div className="flex flex-col gap-2.5">
-            {issueMedia.length === 0 && <p style={{ color:C.creamDim, textAlign:"center", fontSize:13 }}>{t.adminMediaEmpty}</p>}
-            {issueMedia.map(m => <div key={m.id} style={{background:C.panel,border:`1px solid ${C.panelLine}`,borderRadius:14,overflow:"hidden"}}>
+            {issueMedia.length === 0 && <p style={{ color:C.textDim, textAlign:"center", fontSize:13 }}>{t.adminMediaEmpty}</p>}
+            {issueMedia.map(m => <div key={m.id} style={{background:C.surface,border:`1px solid ${C.line}`,borderRadius:14,overflow:"hidden"}}>
               {m.media_type === "video" ? <video src={m.url} controls preload="metadata" style={{width:"100%",maxHeight:180,background:"#000"}} /> : <img src={m.url} alt={m.title || m.issue_id} style={{width:"100%",height:140,objectFit:"cover",display:"block"}} />}
               <div style={{padding:10}}>
-                <div style={{color:C.cream,fontWeight:800,fontSize:12}}>{ISSUES[m.issue_id]?.[m.lang]?.title || m.issue_id}</div>
-                <div style={{color:C.creamDim,fontSize:10.5,marginTop:3}}>{m.lang.toUpperCase()} · {m.media_type} · {m.file_size_bytes ? `${(m.file_size_bytes/1024/1024).toFixed(2)} MB` : ""}</div>
+                <div style={{color:C.text,fontWeight:800,fontSize:12}}>{ISSUES[m.issue_id]?.[m.lang]?.title || m.issue_id}</div>
+                <div style={{color:C.textDim,fontSize:10.5,marginTop:3}}>{m.lang.toUpperCase()} · {m.media_type} · {m.file_size_bytes ? `${(m.file_size_bytes/1024/1024).toFixed(2)} MB` : ""}</div>
                 <button disabled={busyId===m.id} onClick={()=>deleteIssueMedia(m)} style={{width:"100%",marginTop:8,background:"transparent",color:C.red,border:`1px solid ${C.red}88`,borderRadius:8,padding:8,fontWeight:800}}><Trash2 size={13} style={{verticalAlign:"middle",marginRight:5}} />{t.adminDelete}</button>
               </div>
             </div>)}
@@ -1012,9 +1012,9 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
         </div>
       ) : (
         <div className="flex flex-col gap-2.5">
-          {cars.length === 0 && <p style={{ color: C.creamDim, textAlign: "center", fontSize: 13 }}>{t.adminNoCars}</p>}
+          {cars.length === 0 && <p style={{ color: C.textDim, textAlign: "center", fontSize: 13 }}>{t.adminNoCars}</p>}
           {cars.map((c) => (
-            <div key={c.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 14, overflow: "hidden" }}>
+            <div key={c.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 14, overflow: "hidden" }}>
               {(c.photo_url || c.photo_urls?.[0]) && (
                 <div style={{ position: "relative" }}>
                   <CarMedia src={c.photo_url || c.photo_urls[0]} alt={c.make_model} style={{ width: "100%", height: 120, objectFit: "cover", display: "block" }} />
@@ -1039,14 +1039,14 @@ export function AdminCarsView({ lang, t, isRTL, onBack }) {
               <div style={{ padding: "11px 12px" }}>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{c.make_model}{c.year ? ` · ${c.year}` : ""}</div>
-                    <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>{c.price}{c.city ? ` · ${c.city}` : ""}</div>
+                    <div style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>{c.make_model}{c.year ? ` · ${c.year}` : ""}</div>
+                    <div style={{ color: C.textDim, fontSize: 11.5, marginTop: 3 }}>{c.price}{c.city ? ` · ${c.city}` : ""}</div>
                   </div>
-                  <span style={{ color: c.status === "sold" ? C.red : C.amber, fontSize: 11, fontWeight: 800 }}>{c.status === "sold" ? t.adminSold : t.adminAvailable}</span>
+                  <span style={{ color: c.status === "sold" ? C.red : C.accent, fontSize: 11, fontWeight: 800 }}>{c.status === "sold" ? t.adminSold : t.adminAvailable}</span>
                 </div>
                 <button disabled={busyId === c.id} onClick={() => updateCarStatus(c, c.status === "sold" ? "approved" : "sold")}
                   className="flex items-center justify-center gap-2 mt-3"
-                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.amberDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.amber : C.red, fontSize: 12.5, fontWeight: 700 }}>
+                  style={{ width: "100%", background: "transparent", border: `1px solid ${c.status === "sold" ? C.accentDim : C.red}88`, borderRadius: 10, padding: "9px 12px", cursor: busyId === c.id ? "wait" : "pointer", color: c.status === "sold" ? C.accent : C.red, fontSize: 12.5, fontWeight: 700 }}>
                   {c.status === "sold" ? <RotateCcw size={14} /> : <CheckCircle2 size={14} />}
                   {c.status === "sold" ? t.adminMarkAvailable : t.adminMarkSold}
                 </button>

@@ -1,4 +1,5 @@
 import React from "react";
+import { C } from "../theme";
 
 // Car listings take short videos as well as photos; both live in the same photo fields.
 const VIDEO_TYPES = new Set(["video/mp4", "video/webm", "video/quicktime", "video/x-m4v"]);
@@ -24,7 +25,7 @@ export default function CarMedia({ src, video, alt, style, onClick, onError, mut
         onClick={onClick}
         // show the first frame instead of a blank box
         onLoadedData={(e) => { try { e.currentTarget.currentTime = 0.01; } catch (_) {} }}
-        style={{ background: "#0F1115", ...style }}
+        style={{ background: C.text, ...style }}
       />
     );
   }

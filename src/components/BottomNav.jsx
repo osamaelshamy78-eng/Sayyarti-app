@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useAppLang } from "../appLanguage";
+import { Home, Wrench } from "lucide-react";
+import { C } from "../theme";
 
 // Fixed bar at the bottom of every screen: Home, Maintenance, and a slot the AI assistant's
 // button sits on (KarajiAIAssistant draws that button itself, over the empty third slot).
 // The button for what's on screen is highlighted: App announces its view, the planner its state.
 export const NAV_BUTTON_STYLE = {
   height: 58,
-  border: "1px solid #2A2F38",
+  border: `1px solid ${C.line}`,
   borderRadius: 12,
-  background: "#14171C",
-  color: "#F2ECDD",
+  background: C.surface,
+  color: C.textDim,
   padding: "8px 5px",
   fontSize: 11,
   fontWeight: 800,
@@ -27,7 +29,7 @@ export const NAV_BUTTON_STYLE = {
 };
 
 // added on top of NAV_BUTTON_STYLE for the screen that's showing
-export const NAV_ACTIVE_STYLE = { color: "#F5B942", border: "1px solid #F5B94266", background: "#F5B94214" };
+export const NAV_ACTIVE_STYLE = { color: C.accent, border: `1px solid ${C.accent}66`, background: `${C.accent}14` };
 
 function useWindowEvent(name, initial, read) {
   const [value, setValue] = useState(initial);
@@ -54,8 +56,8 @@ export default function BottomNav() {
   const view = useWindowEvent("karaji-view-change", window.location.pathname === "/" ? "home" : "", (e) => e.detail.view);
   const plannerOpen = useWindowEvent("karaji-planner-change", false, (e) => e.detail.open);
   const items = [
-    { label: isAr ? "الرئيسية" : "Home", icon: "⌂", onClick: goHome, active: view === "home" && !plannerOpen },
-    { label: isAr ? "الصيانة" : "Maintenance", icon: "🔧", onClick: openMaintenance, active: plannerOpen },
+    { id: "home", label: isAr ? "الرئيسية" : "Home", Icon: Home, onClick: goHome, active: view === "home" && !plannerOpen },
+    { id: "maintenance", label: isAr ? "الصيانة" : "Maintenance", Icon: Wrench, onClick: openMaintenance, active: plannerOpen },
   ];
   return (
     <nav
@@ -71,21 +73,21 @@ export default function BottomNav() {
         justifyContent: "space-around",
         gap: 6,
         padding: "8px 10px calc(8px + env(safe-area-inset-bottom))",
-        background: "#1D2129",
-        borderTop: "1px solid #2A2F38",
+        background: C.surface,
+        borderTop: `1px solid ${C.line}`,
         boxSizing: "border-box",
-        boxShadow: "0 -8px 24px rgba(0,0,0,.25)",
+        boxShadow: "0 -6px 18px rgba(14,27,44,.08)",
       }}
     >
       {items.map((it) => (
         <button
-          key={it.icon}
+          key={it.id}
           type="button"
           onClick={it.onClick}
           aria-current={it.active ? "page" : undefined}
           style={{ ...NAV_BUTTON_STYLE, ...(it.active ? NAV_ACTIVE_STYLE : null), flex: 1, minWidth: 0 }}
         >
-          <span style={{ fontSize: 18, lineHeight: 1 }}>{it.icon}</span>
+          <it.Icon size={20} strokeWidth={2} aria-hidden="true" />
           <span>{it.label}</span>
         </button>
       ))}

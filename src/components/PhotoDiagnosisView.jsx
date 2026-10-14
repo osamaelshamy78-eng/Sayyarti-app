@@ -2,21 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { useCustomerAuth } from "../useCustomerAuth";
 import CustomerAuthGate from "./CustomerAuthGate";
 import BuyCreditForm from "./BuyCreditForm";
+import { C } from "../theme";
 
 const EDGE_FUNCTION_URL =
   "https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/smart-endpoint";
 
-const C = {
-  asphalt: "#14171C",
-  panel: "#1D2129",
-  line: "#2A2F38",
-  cream: "#F2ECDD",
-  dim: "#B9B2A0",
-  amber: "#F5B942",
-  blue: "#4C7EA8",
-  red: "#E4432B",
-  green: "#61A56B",
-};
 
 export default function PhotoDiagnosisView({ lang }) {
   const isAr = lang === "ar";
@@ -337,78 +327,78 @@ export default function PhotoDiagnosisView({ lang }) {
       descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."
       descEn="One free try per account. After that, you can buy credits to keep going."
     >
-    <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
+    <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.text }}>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
+        <div style={{ color: C.accent, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
         <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
           {isAr ? "شخّص مشكلة سيارتك بالصورة" : "Understand your car problem from a photo"}
         </h1>
-        <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
+        <p style={{ color: C.textDim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
           {isAr ? "ارفع صورة أو فيديو، واحكي لسيارتي إيه اللي حصل. بدون كود عطل وبدون شراء باقة." : "Upload a photo or video and tell Sayyarti what happened. No fault code and no package required."}
         </p>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 7, marginBottom: 12 }}>
         {[["01", isAr ? "صوّر" : "Capture"], ["02", isAr ? "حلّل" : "Analyze"], ["03", isAr ? "حل المشكلة" : "Solve it"]].map(([n, label]) => (
-          <div key={n} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 9px" }}>
-            <div style={{ color: C.amber, fontSize: 10, fontWeight: 900 }}>{n}</div>
-            <div style={{ color: C.dim, fontSize: 10.5, marginTop: 2 }}>{label}</div>
+          <div key={n} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 10, padding: "8px 9px" }}>
+            <div style={{ color: C.accent, fontSize: 10, fontWeight: 900 }}>{n}</div>
+            <div style={{ color: C.textDim, fontSize: 10.5, marginTop: 2 }}>{label}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "1. ارفع أو صوّر المشكلة" : "1. Upload or capture the problem"}</div>
+      <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.text, fontSize: 13.5, fontWeight: 800, marginBottom: 9 }}>{isAr ? "1. ارفع أو صوّر المشكلة" : "1. Upload or capture the problem"}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-          <button type="button" onClick={() => galleryInputRef.current?.click()} style={{ border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream, borderRadius: 12, padding: "12px 8px", cursor: "pointer" }}>
+          <button type="button" onClick={() => galleryInputRef.current?.click()} style={{ border: `1px solid ${C.line}`, background: C.bg, color: C.text, borderRadius: 12, padding: "12px 8px", cursor: "pointer" }}>
             <div style={{ fontSize: 21 }}>↥</div>
             <div style={{ fontSize: 12, fontWeight: 800, marginTop: 3 }}>{isAr ? "من الجهاز" : "From device"}</div>
-            <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "صورة أو فيديو" : "Photo or video"}</div>
+            <div style={{ color: C.textDim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "صورة أو فيديو" : "Photo or video"}</div>
           </button>
-          <button type="button" onPointerDown={startCapturePress} onPointerUp={endCapturePress} onPointerCancel={cancelCapturePress} onPointerLeave={cancelCapturePress} onContextMenu={(e) => e.preventDefault()} style={{ border: `1px solid ${C.amber}66`, background: `${C.amber}0D`, color: C.cream, borderRadius: 12, padding: "12px 8px", cursor: "pointer", userSelect: "none", touchAction: "none" }}>
+          <button type="button" onPointerDown={startCapturePress} onPointerUp={endCapturePress} onPointerCancel={cancelCapturePress} onPointerLeave={cancelCapturePress} onContextMenu={(e) => e.preventDefault()} style={{ border: `1px solid ${C.accent}66`, background: `${C.accent}0D`, color: C.text, borderRadius: 12, padding: "12px 8px", cursor: "pointer", userSelect: "none", touchAction: "none" }}>
             <div style={{ fontSize: 21 }}>●</div>
             <div style={{ fontSize: 12, fontWeight: 800, marginTop: 3 }}>{isAr ? "التقاط" : "Capture"}</div>
-            <div style={{ color: C.dim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "ضغطة صورة • مطول فيديو" : "Tap photo • hold video"}</div>
+            <div style={{ color: C.textDim, fontSize: 9.5, marginTop: 2 }}>{isAr ? "ضغطة صورة • مطول فيديو" : "Tap photo • hold video"}</div>
           </button>
         </div>
         <input ref={galleryInputRef} type="file" accept="image/*,video/mp4,video/webm,video/quicktime" onChange={handleMediaChange} hidden />
         <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleMediaChange} hidden />
         <input ref={videoInputRef} type="file" accept="video/mp4,video/webm,video/quicktime" capture="environment" onChange={handleMediaChange} hidden />
-        {mediaFile && <div style={{ marginTop: 10, borderRadius: 11, background: C.asphalt, border: `1px solid ${C.line}`, padding: 10 }}><div style={{ color: C.cream, fontSize: 11.5, fontWeight: 700, overflowWrap: "anywhere" }}>{mediaFile.name}</div><div style={{ color: C.dim, fontSize: 10.5, marginTop: 3 }}>{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div></div>}
+        {mediaFile && <div style={{ marginTop: 10, borderRadius: 11, background: C.bg, border: `1px solid ${C.line}`, padding: 10 }}><div style={{ color: C.text, fontSize: 11.5, fontWeight: 700, overflowWrap: "anywhere" }}>{mediaFile.name}</div><div style={{ color: C.textDim, fontSize: 10.5, marginTop: 3 }}>{(mediaFile.size / 1024 / 1024).toFixed(2)} MB</div></div>}
         {mediaFile?.type.startsWith("video/") && mediaPreview && <video src={mediaPreview} controls playsInline style={{ marginTop: 10, width: "100%", maxHeight: 245, objectFit: "contain", borderRadius: 12, background: "#000", display: "block" }} />}
-        {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" style={{ marginTop: 10, width: "100%", maxHeight: 245, objectFit: "contain", borderRadius: 12, background: "#0B0D10", display: "block" }} />}
+        {mediaFile?.type.startsWith("image/") && mediaPreview && <img src={mediaPreview} alt="preview" style={{ marginTop: 10, width: "100%", maxHeight: 245, objectFit: "contain", borderRadius: 12, background: C.text, display: "block" }} />}
       </div>
 
-      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 2 }}>{isAr ? "2. بيانات سيارتك" : "2. Your car's details"}</div>
-        <div style={{ color: C.dim, fontSize: 11, marginBottom: 9 }}>{isAr ? "مطلوبة بس لو عايز تعرف تكلفة الإصلاح التقريبية" : "Only needed if you want the estimated repair cost"}</div>
+      <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.text, fontSize: 13.5, fontWeight: 800, marginBottom: 2 }}>{isAr ? "2. بيانات سيارتك" : "2. Your car's details"}</div>
+        <div style={{ color: C.textDim, fontSize: 11, marginBottom: 9 }}>{isAr ? "مطلوبة بس لو عايز تعرف تكلفة الإصلاح التقريبية" : "Only needed if you want the estimated repair cost"}</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 8 }}>
           <div>
-            <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة والموديل" : "Make & model"}</label>
+            <label style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة والموديل" : "Make & model"}</label>
             <input
               value={carMakeModel}
               onChange={(e) => setCarMakeModel(e.target.value)}
               placeholder={isAr ? "مثال: تويوتا كامري" : "e.g. Toyota Camry"}
-              style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+              style={{ width: "100%", boxSizing: "border-box", background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, color: C.text, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
             />
           </div>
           <div>
-            <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "سنة الصنع" : "Year"}</label>
+            <label style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "سنة الصنع" : "Year"}</label>
             <input
               type="number"
               value={carYear}
               onChange={(e) => setCarYear(e.target.value)}
               placeholder={isAr ? "مثال: 2019" : "e.g. 2019"}
-              style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+              style={{ width: "100%", boxSizing: "border-box", background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, color: C.text, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
             />
           </div>
         </div>
         <div>
-          <label style={{ color: C.dim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
+          <label style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
           <select
             value={carCountry}
             onChange={(e) => setCarCountry(e.target.value)}
-            style={{ width: "100%", boxSizing: "border-box", background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 10, color: C.cream, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
+            style={{ width: "100%", boxSizing: "border-box", background: C.bg, border: `1px solid ${C.line}`, borderRadius: 10, color: C.text, padding: "10px 11px", fontSize: 12.5, outline: "none" }}
           >
             <option value="uae">{isAr ? "الإمارات" : "UAE"}</option>
             <option value="ksa">{isAr ? "السعودية" : "Saudi Arabia"}</option>
@@ -417,17 +407,17 @@ export default function PhotoDiagnosisView({ lang }) {
         </div>
       </div>
 
-      <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "3. احكي لسيارتي إيه اللي حصل" : "3. Tell Sayyarti what happened"}</div>
-        <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "مثال: العربية بدأت تخرج دخان أبيض من الكبوت..." : "Example: the car started making a strange noise when I brake..."} rows={4} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", minHeight: 95, background: C.asphalt, border: `1px solid ${C.line}`, borderRadius: 12, color: C.cream, padding: "11px 12px", outline: "none", fontFamily: "inherit", fontSize: 13, lineHeight: 1.55 }} />
+      <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12 }}>
+        <div style={{ color: C.text, fontSize: 13.5, fontWeight: 800, marginBottom: 8 }}>{isAr ? "3. احكي لسيارتي إيه اللي حصل" : "3. Tell Sayyarti what happened"}</div>
+        <textarea value={issueDescription} onChange={(e) => setIssueDescription(e.target.value)} placeholder={isAr ? "مثال: العربية بدأت تخرج دخان أبيض من الكبوت..." : "Example: the car started making a strange noise when I brake..."} rows={4} style={{ width: "100%", boxSizing: "border-box", resize: "vertical", minHeight: 95, background: C.bg, border: `1px solid ${C.line}`, borderRadius: 12, color: C.text, padding: "11px 12px", outline: "none", fontFamily: "inherit", fontSize: 13, lineHeight: 1.55 }} />
       </div>
 
       <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}55`, borderRadius: 13, padding: "11px 12px", marginBottom: 12 }}>
-        <div style={{ color: C.cream, fontSize: 12.5, fontWeight: 800, marginBottom: 4 }}>{isAr ? "مهم" : "Important"}</div>
-        <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>{isAr ? "التشخيص إرشادي وليس بديلًا عن فحص فني مؤهل، خصوصًا في الفرامل والوقود وارتفاع الحرارة والإيرباج." : "This is guidance, not a substitute for a qualified inspection, especially for brakes, fuel, overheating or airbag issues."}</div>
+        <div style={{ color: C.text, fontSize: 12.5, fontWeight: 800, marginBottom: 4 }}>{isAr ? "مهم" : "Important"}</div>
+        <div style={{ color: C.textDim, fontSize: 11.5, lineHeight: 1.55 }}>{isAr ? "التشخيص إرشادي وليس بديلًا عن فحص فني مؤهل، خصوصًا في الفرامل والوقود وارتفاع الحرارة والإيرباج." : "This is guidance, not a substitute for a qualified inspection, especially for brakes, fuel, overheating or airbag issues."}</div>
       </div>
 
-      <button type="button" onClick={handleDiagnose} disabled={loadingDiagnose} style={{ width: "100%", background: loadingDiagnose ? `${C.amber}88` : C.amber, color: C.asphalt, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loadingDiagnose ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900, marginBottom: 9 }}>
+      <button type="button" onClick={handleDiagnose} disabled={loadingDiagnose} style={{ width: "100%", background: loadingDiagnose ? `${C.accent}88` : C.accent, color: C.onAccent, border: "none", borderRadius: 13, padding: "14px 16px", cursor: loadingDiagnose ? "wait" : "pointer", fontSize: 14.5, fontWeight: 900, marginBottom: 9 }}>
         {loadingDiagnose
           ? diagnoseStage === "prepare"
             ? (isAr ? "بنجهز الصورة..." : "Preparing photo...")
@@ -437,26 +427,26 @@ export default function PhotoDiagnosisView({ lang }) {
           : (isAr ? "شخّص المشكلة" : "Diagnose the problem")}
       </button>
       {sentSizeKb != null && (
-        <div style={{ color: C.dim, fontSize: 10.5, textAlign: "center", marginTop: -5, marginBottom: 9 }}>
+        <div style={{ color: C.textDim, fontSize: 10.5, textAlign: "center", marginTop: -5, marginBottom: 9 }}>
           {isAr ? `حجم الملف المرسل: ${sentSizeKb} كيلوبايت` : `File size sent: ${sentSizeKb} KB`}
         </div>
       )}
 
-      <button type="button" onClick={handleGetCost} disabled={loadingCost} style={{ width: "100%", background: "transparent", color: C.cream, border: `1px solid ${C.amber}`, borderRadius: 13, padding: "13px 16px", cursor: loadingCost ? "wait" : "pointer", fontSize: 14, fontWeight: 800 }}>
+      <button type="button" onClick={handleGetCost} disabled={loadingCost} style={{ width: "100%", background: "transparent", color: C.text, border: `1px solid ${C.accent}`, borderRadius: 13, padding: "13px 16px", cursor: loadingCost ? "wait" : "pointer", fontSize: 14, fontWeight: 800 }}>
         {loadingCost ? (isAr ? "بندور على الأسعار... (ممكن ياخد لحد 30 ثانية)" : "Searching prices... (up to 30 seconds)") : (isAr ? "اعرف تكلفة الإصلاح التقريبية" : "Get estimated repair cost")}
       </button>
 
-      {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>{error}</div>}
+      {error && <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.text, fontSize: 12.5 }}>{error}</div>}
 
       {needsCreditsMsg && (
-        <div style={{ marginTop: 10, background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 12, padding: "12px 14px" }}>
-          <div style={{ color: C.cream, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+        <div style={{ marginTop: 10, background: `${C.accent}14`, border: `1px solid ${C.accent}55`, borderRadius: 12, padding: "12px 14px" }}>
+          <div style={{ color: C.text, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
             {isAr ? "خلصت محاولتك المجانية. اشترِ كريديتس عشان تكمل." : "You've used your free try. Buy credits to continue."}
           </div>
           <button
             type="button"
             onClick={() => setShowBuyCredit(true)}
-            style={{ width: "100%", background: C.amber, color: C.asphalt, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
+            style={{ width: "100%", background: C.accent, color: C.onAccent, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
           >
             {isAr ? "اشترِ كريديتس" : "Buy credits"}
           </button>
@@ -465,23 +455,23 @@ export default function PhotoDiagnosisView({ lang }) {
 
       {result && (
         <div style={{ marginTop: 14 }}>
-          <div style={{ background: C.panel, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
+          <div style={{ background: C.surface, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
             <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "نتيجة التحليل" : "ANALYSIS RESULT"}</div>
-            <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result}</div>
+            <div style={{ color: C.text, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result}</div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 10 }}>
-            <button type="button" onClick={openGarages} style={{ background: C.amber, color: C.asphalt, border: "none", borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 900, cursor: "pointer" }}>{isAr ? "جراجات قريبة" : "Nearby garages"}</button>
-            <button type="button" onClick={openYouTube} style={{ background: "transparent", color: C.cream, border: `1px solid ${C.line}`, borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>{isAr ? "فيديوهات الإصلاح" : "Repair videos"}</button>
+            <button type="button" onClick={openGarages} style={{ background: C.accent, color: C.onAccent, border: "none", borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 900, cursor: "pointer" }}>{isAr ? "جراجات قريبة" : "Nearby garages"}</button>
+            <button type="button" onClick={openYouTube} style={{ background: "transparent", color: C.text, border: `1px solid ${C.line}`, borderRadius: 11, padding: "11px 8px", fontSize: 12, fontWeight: 800, cursor: "pointer" }}>{isAr ? "فيديوهات الإصلاح" : "Repair videos"}</button>
           </div>
-          <div style={{ marginTop: 9, color: C.dim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>{isAr ? "لو النتيجة غير واضحة، جرّب صورة أقرب للجزء المتأثر أو أضف تفاصيل أكثر في الوصف." : "If the result is unclear, try a closer photo of the affected part or add more detail to the description."}</div>
+          <div style={{ marginTop: 9, color: C.textDim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>{isAr ? "لو النتيجة غير واضحة، جرّب صورة أقرب للجزء المتأثر أو أضف تفاصيل أكثر في الوصف." : "If the result is unclear, try a closer photo of the affected part or add more detail to the description."}</div>
         </div>
       )}
 
       {estimatedCost && (
-        <div style={{ background: C.panel, border: `1px solid ${C.amber}55`, borderRadius: 16, padding: 14, marginTop: 10 }}>
-          <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "تكلفة الإصلاح التقريبية" : "ESTIMATED REPAIR COST"}</div>
-          <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{estimatedCost}</div>
-          <div style={{ color: C.dim, fontSize: 10, marginTop: 8, lineHeight: 1.5 }}>{isAr ? "تقدير تقريبي بناءً على أسعار السوق، السعر الفعلي بيختلف حسب نوع السيارة وحالة الجراج." : "An approximate market-based estimate. Actual price varies by garage and car condition."}</div>
+        <div style={{ background: C.surface, border: `1px solid ${C.accent}55`, borderRadius: 16, padding: 14, marginTop: 10 }}>
+          <div style={{ color: C.accent, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>{isAr ? "تكلفة الإصلاح التقريبية" : "ESTIMATED REPAIR COST"}</div>
+          <div style={{ color: C.text, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{estimatedCost}</div>
+          <div style={{ color: C.textDim, fontSize: 10, marginTop: 8, lineHeight: 1.5 }}>{isAr ? "تقدير تقريبي بناءً على أسعار السوق، السعر الفعلي بيختلف حسب نوع السيارة وحالة الجراج." : "An approximate market-based estimate. Actual price varies by garage and car condition."}</div>
         </div>
       )}
     </div>

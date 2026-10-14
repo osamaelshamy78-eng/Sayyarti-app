@@ -1,7 +1,7 @@
 import { lazy, useState, useEffect, Suspense } from "react";
 import { storedLang, announceLang } from "./appLanguage";
 import { closeTopDialogOnBack } from "./backButton";
-import { C } from "./theme";
+import { C, FONT_BODY } from "./theme";
 import { routeFromPath, routePathForIssue, routePathForCategory, applySeoMeta } from "./routes";
 import { T } from "./i18n/strings";
 import { TopBar } from "./components/TopBar";
@@ -24,7 +24,7 @@ const CarValuationView = lazy(() => import("./components/CarValuationView"));
 --------------------------------------------------------------- */
 function LazyFallback({ lang }) {
   return (
-    <div style={{ padding: 32, textAlign: "center", color: C.creamDim, fontSize: 13 }}>
+    <div style={{ padding: 32, textAlign: "center", color: C.textDim, fontSize: 13 }}>
       {lang === "ar" ? "جارٍ التحميل..." : "Loading..."}
     </div>
   );
@@ -106,7 +106,7 @@ export default function App() {
 
   const isRTL = lang === "ar";
   const t = T[lang];
-  const bodyFont = isRTL ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif";
+  const bodyFont = FONT_BODY;
 
   function goHome() {
     navPush("/");
@@ -154,13 +154,13 @@ export default function App() {
   }
 
   return (
-    <div className="w-full flex justify-center" style={{ background: "#0A0B0D" }}>
+    <div className="w-full flex justify-center" style={{ background: C.bg }}>
       {/* the whole screen on a phone; a centred column on a wider screen (see .app-shell) */}
       <div
         dir={isRTL ? "rtl" : "ltr"}
         className="app-shell"
         style={{
-          background: C.asphalt,
+          background: C.bg,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",

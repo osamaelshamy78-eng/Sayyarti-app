@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppLang } from "../appLanguage";
 import { useCloseOnBack } from "../backButton";
+import { C } from "../theme";
 
-const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942", red: "#E4432B", green: "#61A56B" };
 const KEY = "karaji-maintenance-planner-v1";
 const LAST_OIL_KEY = "karaji-maintenance-planner-last-oil-v1";
 const INTERVAL_KEY = "karaji-maintenance-planner-oil-interval-v1";
@@ -242,47 +242,47 @@ export default function KarajiMaintenancePlanner({ lang }) {
   };
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "inherit" }}>
       {!open && toast && (
         <button
           onClick={openFromToast}
           style={{
             display: "flex", alignItems: "center", gap: 8, textAlign: isAr ? "right" : "left",
             width: "min(300px, calc(100vw - 32px))", marginBottom: 9, padding: "10px 12px",
-            borderRadius: 12, border: `1px solid ${toast.kind === "overdue" ? C.red : C.amber}66`,
-            background: C.panel, boxShadow: "0 12px 30px rgba(0,0,0,.4)", cursor: "pointer",
+            borderRadius: 12, border: `1px solid ${toast.kind === "overdue" ? C.red : C.accent}66`,
+            background: C.surface, boxShadow: "0 12px 30px rgba(14,27,44,.16)", cursor: "pointer",
           }}
         >
           <span style={{ fontSize: 16, lineHeight: 1 }}>{toast.kind === "overdue" ? "⚠️" : "⏰"}</span>
           <span style={{ flex: 1 }}>
-            <span style={{ display: "block", color: toast.kind === "overdue" ? C.red : C.amber, fontWeight: 900, fontSize: 11 }}>
+            <span style={{ display: "block", color: toast.kind === "overdue" ? C.red : C.accent, fontWeight: 900, fontSize: 11 }}>
               {toast.kind === "overdue" ? (isAr ? "صيانة متأخرة" : "Overdue maintenance") : (isAr ? "صيانة قريبة" : "Maintenance coming up")}
             </span>
-            <span style={{ display: "block", color: C.cream, fontSize: 11, marginTop: 1 }}>
+            <span style={{ display: "block", color: C.text, fontSize: 11, marginTop: 1 }}>
               {isAr ? toast.ar : toast.title} — {toast.detail}
             </span>
           </span>
           <span
             onClick={(e) => { e.stopPropagation(); setToast(null); }}
-            style={{ color: C.dim, fontSize: 14, padding: "0 2px" }}
+            style={{ color: C.textDim, fontSize: 14, padding: "0 2px" }}
           >
             ×
           </span>
         </button>
       )}
 
-      {open && <div style={{ width: "min(330px, calc(100vw - 32px))", maxHeight: "min(560px, calc(100dvh - 150px))", overflowY: "auto", background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: "0 18px 50px rgba(0,0,0,.45)", padding: 14, marginBottom: 9 }}>
+      {open && <div style={{ width: "min(330px, calc(100vw - 32px))", maxHeight: "min(560px, calc(100dvh - 150px))", overflowY: "auto", background: C.surface, border: `1px solid ${C.line}`, borderRadius: 16, boxShadow: "0 18px 50px rgba(14,27,44,.16)", padding: 14, marginBottom: 9 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div><div style={{ color: C.amber, fontSize: 10, fontWeight: 900 }}>SAYYARTI</div><div style={{ color: C.cream, fontSize: 16, fontWeight: 900 }}>{isAr ? "خطة الصيانة" : "Maintenance plan"}</div></div>
-          <button onClick={() => setOpen(false)} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.line}`, background: "transparent", color: C.dim }}>×</button>
+          <div><div style={{ color: C.accent, fontSize: 10, fontWeight: 900 }}>SAYYARTI</div><div style={{ color: C.text, fontSize: 16, fontWeight: 900 }}>{isAr ? "خطة الصيانة" : "Maintenance plan"}</div></div>
+          <button onClick={() => setOpen(false)} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${C.line}`, background: "transparent", color: C.textDim }}>×</button>
         </div>
 
         {showReminderBanner && (
-          <div style={{ marginBottom: 10, padding: 10, borderRadius: 10, border: `1px solid ${C.amber}`, background: `${C.amber}1A`, display: "flex", gap: 8, alignItems: "flex-start" }}>
+          <div style={{ marginBottom: 10, padding: 10, borderRadius: 10, border: `1px solid ${C.accent}`, background: `${C.accent}1A`, display: "flex", gap: 8, alignItems: "flex-start" }}>
             <span style={{ fontSize: 16, lineHeight: 1 }}>⏰</span>
             <div>
-              <div style={{ color: C.amber, fontWeight: 900, fontSize: 12 }}>{isAr ? "تذكير صيانة" : "Maintenance reminder"}</div>
-              <div style={{ color: C.cream, fontSize: 11.5, marginTop: 2 }}>
+              <div style={{ color: C.accent, fontWeight: 900, fontSize: 12 }}>{isAr ? "تذكير صيانة" : "Maintenance reminder"}</div>
+              <div style={{ color: C.text, fontSize: 11.5, marginTop: 2 }}>
                 {isAr
                   ? `${next.ar} متوقع خلال ${formatDaysLeft(next.daysRemaining, true)}`
                   : `${next.title} is expected due ${formatDaysLeft(next.daysRemaining, false)}`}
@@ -291,22 +291,22 @@ export default function KarajiMaintenancePlanner({ lang }) {
           </div>
         )}
 
-        <label style={{ display: "block", color: C.dim, fontSize: 11 }}>
+        <label style={{ display: "block", color: C.textDim, fontSize: 11 }}>
           {isAr ? "عداد الكيلومترات الحالي" : "Current mileage"}
-          <input value={mileage} onChange={(e) => setMileage(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="120000" style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream }} />
+          <input value={mileage} onChange={(e) => setMileage(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="120000" style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.bg, color: C.text }} />
         </label>
-        <label style={{ display: "block", color: C.dim, fontSize: 11, marginTop: 10 }}>
+        <label style={{ display: "block", color: C.textDim, fontSize: 11, marginTop: 10 }}>
           {isAr ? "عداد آخر تغيير زيت" : "Last oil change mileage"}
-          <input value={lastOilChange} onChange={(e) => setLastOilChange(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="115000" style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream }} />
+          <input value={lastOilChange} onChange={(e) => setLastOilChange(e.target.value.replace(/\D/g, ""))} inputMode="numeric" placeholder="115000" style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.bg, color: C.text }} />
         </label>
-        <label style={{ display: "block", color: C.dim, fontSize: 11, marginTop: 10 }}>
+        <label style={{ display: "block", color: C.textDim, fontSize: 11, marginTop: 10 }}>
           {isAr ? "تاريخ آخر تغيير زيت" : "Date of last oil change"}
-          <input type="date" value={lastOilDate} onChange={(e) => setLastOilDate(e.target.value)} max={new Date().toISOString().slice(0, 10)} style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream, colorScheme: "dark" }} />
-          <span style={{ display: "block", color: C.dim, fontSize: 9.5, marginTop: 4 }}>{isAr ? "اختياري — يُستخدم لتقدير الأيام/الأشهر المتبقية والتذكير" : "Optional — used to estimate days/months left and to trigger the reminder"}</span>
+          <input type="date" value={lastOilDate} onChange={(e) => setLastOilDate(e.target.value)} max={new Date().toISOString().slice(0, 10)} style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.bg, color: C.text, colorScheme: "dark" }} />
+          <span style={{ display: "block", color: C.textDim, fontSize: 9.5, marginTop: 4 }}>{isAr ? "اختياري — يُستخدم لتقدير الأيام/الأشهر المتبقية والتذكير" : "Optional — used to estimate days/months left and to trigger the reminder"}</span>
         </label>
-        <label style={{ display: "block", color: C.dim, fontSize: 11, marginTop: 10 }}>
+        <label style={{ display: "block", color: C.textDim, fontSize: 11, marginTop: 10 }}>
           {isAr ? "الفترة بين تغييرات الزيت" : "Oil change interval"}
-          <select value={oilInterval} onChange={(e) => setOilInterval(e.target.value)} style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.asphalt, color: C.cream }}>
+          <select value={oilInterval} onChange={(e) => setOilInterval(e.target.value)} style={{ width: "100%", boxSizing: "border-box", marginTop: 5, padding: 10, borderRadius: 9, border: `1px solid ${C.line}`, background: C.bg, color: C.text }}>
             <option value="">{isAr ? "اختر الفترة" : "Select interval"}</option>
             <option value="5000">5,000 km</option>
             <option value="10000">10,000 km</option>
@@ -316,21 +316,21 @@ export default function KarajiMaintenancePlanner({ lang }) {
         {next && next.due !== null && (
           next.due < 0 ? (
             <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.red}55`, background: `${C.red}0D` }}>
-              <div style={{ color: C.dim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
-              <div style={{ color: C.cream, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
+              <div style={{ color: C.textDim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
+              <div style={{ color: C.text, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
               <div style={{ color: C.red, fontSize: 11, marginTop: 3 }}>{Math.abs(next.due).toLocaleString()} km {isAr ? "متأخرة عن الموعد" : "overdue"}</div>
               {next.daysRemaining !== null && <div style={{ color: C.red, fontSize: 10, marginTop: 2, opacity: 0.85 }}>{formatDaysLeft(next.daysRemaining, isAr)}</div>}
             </div>
           ) : (
-            <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.amber}55`, background: `${C.amber}0D` }}>
-              <div style={{ color: C.dim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
-              <div style={{ color: C.cream, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
-              <div style={{ color: C.amber, fontSize: 11, marginTop: 3 }}>{next.due.toLocaleString()} km {isAr ? "متبقية تقريبًا" : "approximately remaining"}</div>
-              {next.daysRemaining !== null && <div style={{ color: C.amber, fontSize: 10, marginTop: 2, opacity: 0.85 }}>{formatDaysLeft(next.daysRemaining, isAr)}</div>}
+            <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.accent}55`, background: `${C.accent}0D` }}>
+              <div style={{ color: C.textDim, fontSize: 10 }}>{isAr ? "الأولوية القادمة" : "Next priority"}</div>
+              <div style={{ color: C.text, fontWeight: 900, marginTop: 3 }}>{isAr ? next.ar : next.title}</div>
+              <div style={{ color: C.accent, fontSize: 11, marginTop: 3 }}>{next.due.toLocaleString()} km {isAr ? "متبقية تقريبًا" : "approximately remaining"}</div>
+              {next.daysRemaining !== null && <div style={{ color: C.accent, fontSize: 10, marginTop: 2, opacity: 0.85 }}>{formatDaysLeft(next.daysRemaining, isAr)}</div>}
             </div>
           )
         )}
-        {(!next || next.due === null) && <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.line}`, color: C.dim, fontSize: 10.5, textAlign: "center" }}>{isAr ? "أدخل عداد آخر تغيير زيت واختر الفترة لعرض الخطة" : "Enter last oil change mileage and select an interval to see the plan"}</div>}
+        {(!next || next.due === null) && <div style={{ marginTop: 10, padding: 11, borderRadius: 11, border: `1px solid ${C.line}`, color: C.textDim, fontSize: 10.5, textAlign: "center" }}>{isAr ? "أدخل عداد آخر تغيير زيت واختر الفترة لعرض الخطة" : "Enter last oil change mileage and select an interval to see the plan"}</div>}
 
         <div style={{ marginTop: 10 }}>{planWithDays.map((item, i) => {
           const overdue = item.due !== null && item.due < 0;
@@ -338,16 +338,16 @@ export default function KarajiMaintenancePlanner({ lang }) {
           const timeLabel = formatDaysLeft(item.daysRemaining, isAr);
           return (
             <div key={i} style={{ padding: "8px 0", borderBottom: `1px solid ${C.line}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, color: C.dim, fontSize: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, color: C.textDim, fontSize: 10 }}>
                 <span>{isAr ? item.ar : item.title}</span>
-                <strong style={{ color: overdue ? C.red : C.cream }}>{kmLabel}</strong>
+                <strong style={{ color: overdue ? C.red : C.text }}>{kmLabel}</strong>
               </div>
-              <div style={{ textAlign: isAr ? "left" : "right", color: overdue ? C.red : C.dim, fontSize: 9.5, marginTop: 2, opacity: 0.85 }}>{timeLabel}</div>
+              <div style={{ textAlign: isAr ? "left" : "right", color: overdue ? C.red : C.textDim, fontSize: 9.5, marginTop: 2, opacity: 0.85 }}>{timeLabel}</div>
             </div>
           );
         })}</div>
 
-        <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.amber, color: C.asphalt, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
+        <button onClick={save} style={{ width: "100%", marginTop: 11, padding: 10, border: 0, borderRadius: 10, background: C.accent, color: C.onAccent, fontWeight: 900 }}>{saved ? (isAr ? "تم الحفظ ✓" : "Saved ✓") : (isAr ? "حفظ العداد" : "Save mileage")}</button>
 
         {(() => {
           const canBookNow = next && next.daysRemaining !== null && next.daysRemaining <= 2;
@@ -365,21 +365,21 @@ export default function KarajiMaintenancePlanner({ lang }) {
                   width: "100%", marginTop: 8, padding: 10, borderRadius: 10, fontWeight: 900,
                   border: `1px solid ${canBookNow ? C.red : C.line}`,
                   background: canBookNow ? `${C.red}1A` : "transparent",
-                  color: canBookNow ? C.red : C.dim,
+                  color: canBookNow ? C.red : C.textDim,
                   cursor: canBookNow ? "pointer" : "not-allowed",
                 }}
               >
                 {isAr ? "افتح مراكز الصيانة" : "Open maintenance centers"}
               </button>
               {!canBookNow && (
-                <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 5, textAlign: "center" }}>
+                <div style={{ color: C.textDim, fontSize: 9, lineHeight: 1.4, marginTop: 5, textAlign: "center" }}>
                   {isAr ? "هيتفعل الزر قبل الموعد بيوم أو يومين، أو لو الموعد فات." : "This unlocks a day or two before the due date, or once it's overdue."}
                 </div>
               )}
             </>
           );
         })()}
-        <div style={{ color: C.dim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام. الأيام تُحسب من تاريخ استحقاق ثابت يتحدّث فقط عند حفظ عداد جديد." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions. Days are counted from a fixed due date that only updates when you save a new mileage reading."}</div>
+        <div style={{ color: C.textDim, fontSize: 9, lineHeight: 1.4, marginTop: 8, textAlign: "center" }}>{isAr ? "الخطة إرشادية وقد تختلف حسب الشركة وطراز السيارة وظروف الاستخدام. الأيام تُحسب من تاريخ استحقاق ثابت يتحدّث فقط عند حفظ عداد جديد." : "Planning guidance only; intervals vary by vehicle, manufacturer and driving conditions. Days are counted from a fixed due date that only updates when you save a new mileage reading."}</div>
       </div>}
     </div>
   );

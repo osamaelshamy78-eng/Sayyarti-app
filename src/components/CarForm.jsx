@@ -5,18 +5,8 @@ import { supabase } from "../supabaseClient";
 import { ChevronLeft, ChevronRight, Camera, X } from "lucide-react";
 import { useCustomerAuth } from "../useCustomerAuth";
 import CustomerAuthGate from "./CustomerAuthGate";
+import { C } from "../theme";
 
-const C = {
-  asphalt: "#14171C",
-  panel: "#1D2129",
-  panelLine: "#2A2F38",
-  cream: "#F2ECDD",
-  creamDim: "#B9B2A0",
-  amber: "#F5B942",
-  amberDim: "#8A6A2A",
-  red: "#E4432B",
-  blue: "#4C7EA8",
-};
 
 const MAX_PHOTOS = 6;
 const OTHER = "Other";
@@ -83,12 +73,12 @@ const inputStyle = {
   boxSizing: "border-box",
   padding: "12px 14px",
   borderRadius: 12,
-  border: `1px solid ${C.panelLine}`,
-  background: C.panel,
-  color: C.cream,
+  border: `1px solid ${C.line}`,
+  background: C.surface,
+  color: C.text,
   fontSize: 14,
 };
-const labelStyle = { color: C.creamDim, fontSize: 12.5, fontWeight: 700, marginBottom: 6, display: "block" };
+const labelStyle = { color: C.textDim, fontSize: 12.5, fontWeight: 700, marginBottom: 6, display: "block" };
 
 function Field({ label, children }) {
   return (
@@ -234,11 +224,11 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
         className="flex items-center gap-1 px-5 pt-4 pb-2"
         style={{ border: "none", background: "none", cursor: "pointer" }}
       >
-        <BackIcon size={18} color={C.amber} />
-        <span style={{ color: C.amber, fontSize: 13, fontWeight: 600 }}>{t.navCars}</span>
+        <BackIcon size={18} color={C.accent} />
+        <span style={{ color: C.accent, fontSize: 13, fontWeight: 600 }}>{t.navCars}</span>
       </button>
 
-      <h2 style={{ color: C.cream, fontSize: 18, fontWeight: 800, margin: "6px 20px 14px" }}>{t.addCarBtn}</h2>
+      <h2 style={{ color: C.text, fontSize: 18, fontWeight: 800, margin: "6px 20px 14px" }}>{t.addCarBtn}</h2>
 
       <form onSubmit={handleSubmit} dir={isRTL ? "rtl" : "ltr"} className="px-5">
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -345,7 +335,7 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             {previews.map((src, i) => (
               <div key={i} style={{ position: "relative", width: 72, height: 72 }}>
-                <CarMedia src={src} video={isVideoFile(photos[i])} muted controls={false} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.panelLine}`, display: "block" }} />
+                <CarMedia src={src} video={isVideoFile(photos[i])} muted controls={false} style={{ width: 72, height: 72, borderRadius: 10, objectFit: "cover", border: `1px solid ${C.line}`, display: "block" }} />
                 {isVideoFile(photos[i]) && (
                   <span style={{ position: "absolute", left: 4, bottom: 4, padding: "2px 5px", borderRadius: 5, background: "rgba(0,0,0,.72)", color: "#fff", fontSize: 8, fontWeight: 800, lineHeight: 1 }}>
                     {lang === "ar" ? "فيديو" : "VIDEO"}
@@ -366,8 +356,8 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
             {photos.length < MAX_PHOTOS && (
               <label
                 style={{
-                  width: 72, height: 72, borderRadius: 10, border: `1px dashed ${C.panelLine}`,
-                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: C.creamDim,
+                  width: 72, height: 72, borderRadius: 10, border: `1px dashed ${C.line}`,
+                  display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: C.textDim,
                 }}
               >
                 <Camera size={20} />
@@ -394,14 +384,14 @@ export default function CarForm({ lang = "en", t = {}, isRTL = false, onClose, o
           <button
             type="submit"
             disabled={submitting}
-            style={{ flex: 1, padding: "13px 16px", border: "none", borderRadius: 12, background: C.amber, color: C.asphalt, fontWeight: 800, opacity: submitting ? 0.6 : 1 }}
+            style={{ flex: 1, padding: "13px 16px", border: "none", borderRadius: 12, background: C.accent, color: C.onAccent, fontWeight: 800, opacity: submitting ? 0.6 : 1 }}
           >
             {submitting ? t.carUploading : t.carSubmit}
           </button>
           <button
             type="button"
             onClick={onClose}
-            style={{ padding: "13px 16px", borderRadius: 12, border: `1px solid ${C.panelLine}`, background: C.panel, color: C.cream, fontWeight: 700 }}
+            style={{ padding: "13px 16px", borderRadius: 12, border: `1px solid ${C.line}`, background: C.surface, color: C.text, fontWeight: 700 }}
           >
             {t.carCancel}
           </button>
