@@ -48,16 +48,6 @@ export default function App() {
   const [carMode, setCarMode] = useState(initialRoute.carMode || "browse"); // browse | add | submitted
   const [selectedCar, setSelectedCar] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [clock, setClock] = useState(() =>
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  );
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }));
-    }, 1000 * 30);
-    return () => clearInterval(id);
-  }, []);
 
   // Keep <html lang>/<html dir> in sync with the in-app language toggle,
   // so external scripts (karaji-safety.js) and browsers/screen readers
@@ -104,6 +94,11 @@ export default function App() {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
+
+  // the bottom nav highlights Home while the home screen shows
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("karaji-view-change", { detail: { view } }));
+  }, [view]);
 
   useEffect(() => {
     applySeoMeta({ lang, view, activeIssueId, activeCategory, activeObdCode });
@@ -159,19 +154,13 @@ export default function App() {
   }
 
   return (
-    <div
-      className="w-full min-h-screen flex items-center justify-center py-8"
-      style={{ background: "#0A0B0D" }}
-    >
+    <div className="w-full flex justify-center" style={{ background: "#0A0B0D" }}>
+      {/* the whole screen on a phone; a centred column on a wider screen (see .app-shell) */}
       <div
         dir={isRTL ? "rtl" : "ltr"}
+        className="app-shell"
         style={{
-          width: 380,
-          height: 760,
           background: C.asphalt,
-          borderRadius: 40,
-          border: `8px solid #05060700`,
-          boxShadow: "0 30px 60px rgba(0,0,0,0.5)",
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -179,14 +168,6 @@ export default function App() {
           position: "relative",
         }}
       >
-        {/* status bar */}
-        <div
-          className="flex items-center justify-between px-6"
-          style={{ height: 30, color: C.creamDim, fontSize: 12, fontWeight: 600 }}
-        >
-          <span>{clock}</span>
-          <span style={{ letterSpacing: 1 }}>●●●●</span>
-        </div>
 
         <TopBar
           lang={lang}
@@ -200,7 +181,8 @@ export default function App() {
           onOpenAdmin={handleOpenAdmin}
         />
 
-        <div role="main" className="flex-1 overflow-y-auto">
+        {/* bottom padding keeps the end of every screen clear of the fixed bottom nav */}
+        <div role="main" className="flex-1 overflow-y-auto" style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom))" }}>
           {view === "home" && (
             <HomeView
               lang={lang}

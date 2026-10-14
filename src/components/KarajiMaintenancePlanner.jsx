@@ -113,6 +113,9 @@ export default function KarajiMaintenancePlanner({ lang }) {
   const isAr = (lang || appLang) === "ar";
   const [open, setOpen] = useState(false);
   useCloseOnBack(open, () => setOpen(false));
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("karaji-planner-change", { detail: { open } }));
+  }, [open]);
   const [mileage, setMileage] = useState("");
   const [lastOilChange, setLastOilChange] = useState("");
   const [oilInterval, setOilInterval] = useState("");
@@ -239,7 +242,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   };
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", left: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9997, fontFamily: "system-ui,sans-serif" }}>
       {!open && toast && (
         <button
           onClick={openFromToast}

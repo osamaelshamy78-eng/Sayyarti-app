@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppLang } from "../appLanguage";
 import { useCloseOnBack } from "../backButton";
-import { NAV_BUTTON_STYLE } from "./BottomNav";
+import { NAV_BUTTON_STYLE, NAV_ACTIVE_STYLE } from "./BottomNav";
 
 const C = {
   asphalt: "#14171C",
@@ -128,7 +128,7 @@ export default function KarajiAIAssistant() {
     : reason;
 
   return (
-    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: 10, bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
+    <div ref={rootRef} dir={isAr ? "rtl" : "ltr"} style={{ position: "fixed", right: "calc(var(--app-gutter) + 10px)", bottom: "calc(70px + env(safe-area-inset-bottom))", zIndex: 9998, fontFamily: "system-ui, sans-serif", maxWidth: "calc(100vw - 20px)" }}>
       {open && (
         <div style={{
           width: "min(390px, calc(100vw - 32px))",
@@ -202,12 +202,14 @@ export default function KarajiAIAssistant() {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-label="Sayyarti AI"
+        aria-expanded={open}
         style={{
           ...NAV_BUTTON_STYLE,
+          ...(open ? NAV_ACTIVE_STYLE : null),
           position: "fixed",
-          [isAr ? "left" : "right"]: 10,
+          [isAr ? "left" : "right"]: "calc(var(--app-gutter) + 10px)",
           bottom: "calc(8px + env(safe-area-inset-bottom))",
-          width: "calc((100vw - 32px) / 3)",
+          width: "calc((min(100vw, var(--app-width)) - 32px) / 3)",
           zIndex: 10001,
           boxShadow: "0 8px 24px rgba(0,0,0,.25)",
         }}
