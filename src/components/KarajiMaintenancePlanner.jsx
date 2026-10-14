@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppLang } from "../appLanguage";
+import { useCloseOnBack } from "../backButton";
 
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942", red: "#E4432B", green: "#61A56B" };
 const KEY = "karaji-maintenance-planner-v1";
@@ -111,6 +112,7 @@ export default function KarajiMaintenancePlanner({ lang }) {
   const appLang = useAppLang();
   const isAr = (lang || appLang) === "ar";
   const [open, setOpen] = useState(false);
+  useCloseOnBack(open, () => setOpen(false));
   const [mileage, setMileage] = useState("");
   const [lastOilChange, setLastOilChange] = useState("");
   const [oilInterval, setOilInterval] = useState("");

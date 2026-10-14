@@ -2,7 +2,6 @@ import React, { Component, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
-import { startOverlayBackHandler } from "./OverlayBackHandler";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
 
@@ -46,7 +45,6 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 if (!isFix3DRoute) {
   startKeyboardBehaviorFix();
-  startOverlayBackHandler();
 }
 
 if ("serviceWorker" in navigator) {

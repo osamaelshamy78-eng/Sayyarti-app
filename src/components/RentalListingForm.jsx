@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useCloseOnBack } from "../backButton";
 import { supabase } from "../supabaseClient";
 import { useCustomerAuth } from "../useCustomerAuth";
 
@@ -325,6 +326,8 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
     setSuccess(false);
     onClose();
   }
+
+  useCloseOnBack(isOpen, () => resetAndClose());
 
   if (!isOpen) return null;
 

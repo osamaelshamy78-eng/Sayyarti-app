@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useAppLang } from "../appLanguage";
+import { useCloseOnBack } from "../backButton";
 import { NAV_BUTTON_STYLE } from "./BottomNav";
 
 const C = {
@@ -60,6 +61,7 @@ function getAssessment({ mileage, serviceDate, warning, symptom }) {
 export default function KarajiAIAssistant() {
   const isAr = useAppLang() === "ar";
   const [open, setOpen] = useState(false);
+  useCloseOnBack(open, () => setOpen(false));
   const [mileage, setMileage] = useState("");
   const [serviceDate, setServiceDate] = useState("");
   const [warning, setWarning] = useState("none");

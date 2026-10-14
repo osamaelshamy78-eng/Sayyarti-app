@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useCloseOnBack } from "../backButton";
 
 const C = { asphalt: "#14171C", panel: "#1D2129", line: "#2A2F38", cream: "#F2ECDD", dim: "#B9B2A0", amber: "#F5B942" };
 const PHONE = "971558875606";
@@ -39,6 +40,7 @@ export default function AppMenuLinks({ lang, onNavigate, onDone }) {
 }
 
 function AboutDialog({ ar, onClose }) {
+  useCloseOnBack(true, onClose);
   return (
     <div
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}

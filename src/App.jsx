@@ -28,6 +28,7 @@ import {
 import { supabase } from "./supabaseClient";
 import { openReceipt } from "./receipts";
 import { storedLang, announceLang } from "./appLanguage";
+import { useCloseOnBack, closeTopDialogOnBack } from "./backButton";
 import { CAR_COUNTRIES } from "./countries";
 import AppMenuLinks from "./components/AppMenuLinks";
 import GarageNetworkCta from "./components/GarageNetworkCta";
@@ -4120,12 +4121,6 @@ function FullscreenGallery({ photos, startIndex, onClose, lang }) {
     const el = scrollerRef.current;
     if (el) el.scrollLeft = el.clientWidth * startIndex * (lang === "ar" ? -1 : 1);
 
-    // Phone Back button closes the viewer instead of leaving the page
-    try {
-      window.history.pushState(window.history.state, "", window.location.href);
-    } catch (e) {}
-    window.__karajiViewerClose = onClose;
-
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e) => e.key === "Escape" && closeViewer();
@@ -4134,17 +4129,14 @@ function FullscreenGallery({ photos, startIndex, onClose, lang }) {
     return () => {
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
-      if (window.__karajiViewerClose === onClose) window.__karajiViewerClose = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Phone Back button closes the viewer instead of leaving the page
+  useCloseOnBack(true, onClose);
   function closeViewer() {
-    try {
-      window.history.back(); // popstate handler in App calls onClose
-    } catch (e) {
-      onClose();
-    }
+    onClose();
   }
 
   function handleScroll() {
@@ -5900,14 +5892,9 @@ export default function App() {
   };
 
   useEffect(() => {
-    function handlePopState() {
-      // If the full-screen photo viewer is open, Back only closes it
-      if (window.__karajiViewerClose) {
-        const closeViewer = window.__karajiViewerClose;
-        window.__karajiViewerClose = null;
-        closeViewer();
-        return;
-      }
+    function handlePopState(event) {
+      // If a dialog or the photo viewer is open, Back only closes it
+      if (closeTopDialogOnBack(event)) return;
       const route = routeFromPath(window.location.pathname);
       setView(route.view);
       setActiveCategory(route.activeCategory || null);

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useCloseOnBack } from "../backButton";
 import { supabase } from "../supabaseClient";
 
 // ===== بيانات الحساب البنكي (نفس حساب الجراجات) =====
@@ -132,6 +133,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
     setSuccess(false);
     onClose();
   }
+
+  useCloseOnBack(isOpen, () => resetAndClose());
 
   if (!isOpen) return null;
 
