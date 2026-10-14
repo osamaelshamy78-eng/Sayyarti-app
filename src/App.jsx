@@ -3655,10 +3655,13 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
     return 0;
   });
 
-  // opened from an issue page: only garages whose text mentions that kind of work
-  const shownGarages = issueKey
+  // opened from an issue page: only garages whose text mentions that kind of work,
+  // or all of them when none does (rather than an empty list)
+  const issueMatches = issueKey
     ? combinedGarages.filter((g) => garageMatchesIssue([g.name, g.area, g.note].join(" "), issueKey))
-    : combinedGarages;
+    : [];
+  const noIssueMatch = !!issueKey && issueMatches.length === 0;
+  const shownGarages = issueKey && !noIssueMatch ? issueMatches : combinedGarages;
 
   return (
     <div className="px-5 pt-5 pb-6">
@@ -3707,7 +3710,7 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {issueKey && <IssueGarageBanner lang={lang} issueKey={issueKey} />}
+        {issueKey && <IssueGarageBanner lang={lang} issueKey={issueKey} noMatch={noIssueMatch} />}
         {shownGarages.map((g) => (
           <button
             key={g.key}

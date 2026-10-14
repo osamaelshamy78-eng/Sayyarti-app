@@ -51,9 +51,10 @@ export function issueFilterFromUrl() {
   }
 }
 
+// whole words only, so "ac" doesn't match inside "replace"
 export function garageMatchesIssue(text, key) {
   const lower = (text || "").toLowerCase();
-  return WORDS[key].some((w) => lower.includes(w));
+  return WORDS[key].some((w) => new RegExp(`\\b${w}\\b`).test(lower));
 }
 
 export function FindGarageButton({ lang, issuePath }) {
@@ -79,13 +80,16 @@ function searchNearby(key) {
   );
 }
 
-export function IssueGarageBanner({ lang, issueKey }) {
+// noMatch: no listed garage does this kind of work, so the whole directory is shown instead
+export function IssueGarageBanner({ lang, issueKey, noMatch }) {
   const ar = lang === "ar";
   return (
     <div style={{ background: "#4C7EA814", border: "1px solid #4C7EA844", borderRadius: 12, padding: "11px 12px", marginBottom: 10, color: "#F2ECDD", fontSize: 12, lineHeight: 1.5 }}>
       <strong>{LABELS[issueKey][ar ? "ar" : "en"]}</strong>
       <br />
-      {ar ? "تم تصفية القائمة حسب العطل الذي اخترته." : "The list is filtered for the issue you selected."}
+      {noMatch
+        ? (ar ? "مفيش جراج متخصص في القائمة لسه، فدي كل الجراجات. أو دوّر على متخصص قريب منك:" : "No specialist is listed for this yet, so here are all garages. Or look for one near you:")
+        : (ar ? "تم تصفية القائمة حسب العطل الذي اخترته." : "The list is filtered for the issue you selected.")}
       <button
         type="button"
         onClick={() => searchNearby(issueKey)}
