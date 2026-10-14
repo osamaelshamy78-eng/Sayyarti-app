@@ -1,16 +1,10 @@
 import React, { useState } from "react";
 import { useCustomerAuth } from "../useCustomerAuth";
+import { C, FONT_BODY } from "../theme";
+import SignLogo from "./SignLogo";
 
 // Full-screen Google sign-in shown before the app. Nothing else (app, bottom nav,
 // AI button) is usable until the user signs in. Session is remembered by Supabase.
-const C = {
-  asphalt: "#14171C",
-  panel: "#1D2129",
-  line: "#2A2F38",
-  cream: "#F2ECDD",
-  dim: "#B9B2A0",
-  amber: "#F5B942",
-};
 
 function initialLang() {
   try {
@@ -24,13 +18,13 @@ const overlayStyle = {
   position: "fixed",
   inset: 0,
   zIndex: 10100, // above the bottom nav (9990) and the AI button (10001)
-  background: C.asphalt,
-  color: C.cream,
+  background: C.bg,
+  color: C.text,
   display: "flex",
   flexDirection: "column",
   padding: "calc(env(safe-area-inset-top, 0px) + 16px) 20px calc(env(safe-area-inset-bottom, 0px) + 24px)",
   overflowY: "auto",
-  fontFamily: "'IBM Plex Sans Arabic', 'Inter', system-ui, sans-serif",
+  fontFamily: FONT_BODY,
 };
 
 export default function AppLoginGate({ children }) {
@@ -44,7 +38,7 @@ export default function AppLoginGate({ children }) {
   if (checking) {
     return (
       <div style={overlayStyle}>
-        <div style={{ color: C.dim, fontSize: 13 }}>{isAr ? "جاري التحميل..." : "Loading..."}</div>
+        <div style={{ color: C.textDim, fontSize: 13 }}>{isAr ? "جاري التحميل..." : "Loading..."}</div>
       </div>
     );
   }
@@ -79,7 +73,7 @@ export default function AppLoginGate({ children }) {
           gap: 2,
           padding: 3,
           borderRadius: 999,
-          background: C.panel,
+          background: C.surface,
           border: `1px solid ${C.line}`,
         }}
       >
@@ -96,9 +90,9 @@ export default function AppLoginGate({ children }) {
               fontSize: 12.5,
               fontWeight: 700,
               cursor: "pointer",
-              background: lang === code ? C.amber : "transparent",
-              color: lang === code ? C.asphalt : C.dim,
-              fontFamily: code === "ar" ? "'IBM Plex Sans Arabic', sans-serif" : "'Inter', sans-serif",
+              background: lang === code ? C.accent : "transparent",
+              color: lang === code ? C.onAccent : C.textDim,
+              fontFamily: FONT_BODY,
             }}
           >
             {code === "ar" ? "العربية" : "English"}
@@ -111,26 +105,10 @@ export default function AppLoginGate({ children }) {
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", width: "100%", padding: "24px 4px" }}>
       <div style={{ width: "100%", maxWidth: 380, textAlign: "center" }}>
 
-        <div
-          aria-hidden="true"
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: 999,
-            background: C.amber,
-            boxShadow: `0 0 30px ${C.amber}66`,
-            margin: "0 auto 18px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: 34,
-          }}
-        >
-          🔧
-        </div>
-
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800 }}>{isAr ? "سيارتي" : "Sayyarti"}</h1>
-        <p style={{ color: C.dim, fontSize: 14, lineHeight: 1.7, margin: "12px 0 28px" }}>
+        <h1 aria-label={isAr ? "سيارتي" : "Sayyarti"} style={{ margin: 0, display: "flex", justifyContent: "center" }}>
+          <SignLogo size={1.9} />
+        </h1>
+        <p style={{ color: C.textDim, fontSize: 14, lineHeight: 1.7, margin: "12px 0 28px" }}>
           {isAr
             ? "تشخيص أعطال سيارتك، الورش، الصيانة، وبيع وشراء السيارات في مكان واحد."
             : "Car diagnostics, garages, maintenance, and buying & selling cars in one place."}
@@ -142,9 +120,9 @@ export default function AppLoginGate({ children }) {
           disabled={busy}
           style={{
             width: "100%",
-            background: C.cream,
-            color: C.asphalt,
-            border: "none",
+            background: C.surface,
+            color: C.text,
+            border: `1.5px solid ${C.line}`,
             borderRadius: 14,
             padding: "15px 16px",
             fontSize: 15,
@@ -161,7 +139,7 @@ export default function AppLoginGate({ children }) {
           {busy ? (isAr ? "جاري الفتح..." : "Opening...") : isAr ? "الدخول بحساب جوجل" : "Continue with Google"}
         </button>
 
-        <p style={{ color: C.dim, fontSize: 11, lineHeight: 1.6, marginTop: 16, opacity: 0.8 }}>
+        <p style={{ color: C.textDim, fontSize: 11, lineHeight: 1.6, marginTop: 16, opacity: 0.8 }}>
           {isAr
             ? "بنستخدم حساب جوجل بتاعك لتسجيل الدخول بس، ومش بننشر أي حاجة باسمك."
             : "We only use your Google account to sign you in. We never post anything on your behalf."}

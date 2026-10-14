@@ -3,6 +3,7 @@ import { useCloseOnBack } from "../backButton";
 import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
 import { useCustomerAuth } from "../useCustomerAuth";
+import { C } from "../theme";
 
 // ===== Bank account details =====
 const BANK_DETAILS = {
@@ -324,9 +325,9 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
       className="fixed inset-0 flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
       style={{ zIndex: 10050 /* above the bottom nav (9990) and the AI button (10001) */ }}
     >
-      <div className="w-full sm:max-w-lg bg-panel rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
-        <div className="sticky top-0 bg-panel border-b border-line px-5 py-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-cream">{t.title}</h2>
+      <div className="w-full sm:max-w-lg bg-surface rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto shadow-2xl">
+        <div className="sticky top-0 bg-surface border-b border-line px-5 py-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-ink">{t.title}</h2>
           <button onClick={resetAndClose} className="text-dim text-xl leading-none">×</button>
         </div>
 
@@ -336,7 +337,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
           ) : !user ? (
             <div className="text-center py-8">
               <div className="text-3xl mb-3">🔐</div>
-              <h3 className="text-lg font-bold text-cream mb-2">
+              <h3 className="text-lg font-bold text-ink mb-2">
                 {isAr ? "سجّل دخولك عشان تضيف إعلانك" : "Sign in to add your listing"}
               </h3>
               <p className="text-dim text-sm mb-6">
@@ -346,7 +347,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
               </p>
               <button
                 onClick={signInWithGoogle}
-                className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold"
+                className="w-full py-3 rounded-xl bg-accent text-on-accent font-semibold"
               >
                 {isAr ? "تسجيل الدخول بجوجل" : "Sign in with Google"}
               </button>
@@ -356,11 +357,11 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
               <div className="w-16 h-16 rounded-full bg-green-500/10 text-green-400 flex items-center justify-center text-3xl mx-auto mb-4">
                 ✓
               </div>
-              <h3 className="text-lg font-bold text-cream mb-2">{t.successTitle}</h3>
+              <h3 className="text-lg font-bold text-ink mb-2">{t.successTitle}</h3>
               <p className="text-dim text-sm mb-6">{t.successMsg}</p>
               <button
                 onClick={resetAndClose}
-                className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold"
+                className="w-full py-3 rounded-xl bg-accent text-on-accent font-semibold"
               >
                 {t.doneBtn}
               </button>
@@ -413,7 +414,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
                       type="button"
                       onClick={handleUseMyLocation}
                       disabled={gpsLoading}
-                      className="mt-2 text-sm text-amber font-medium flex items-center gap-1"
+                      className="mt-2 text-sm text-accent font-medium flex items-center gap-1"
                     >
                       📍 {gpsLoading ? t.useLocationLoading : t.useLocation}
                     </button>
@@ -450,7 +451,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
 
                   <button
                     onClick={goToStep2}
-                    className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold mt-2"
+                    className="w-full py-3 rounded-xl bg-accent text-on-accent font-semibold mt-2"
                   >
                     {t.nextBtn}
                   </button>
@@ -473,13 +474,13 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
                             onClick={() => selectRank(rankKey)}
                             className={`rounded-xl border-2 px-3 py-3 text-${isAr ? "right" : "left"} transition ${
                               isSelected
-                                ? "border-amber bg-amber/10"
+                                ? "border-accent bg-accent/10"
                                 : isTaken
-                                ? "border-line bg-asphalt opacity-50 cursor-not-allowed"
+                                ? "border-line bg-page opacity-50 cursor-not-allowed"
                                 : "border-line"
                             }`}
                           >
-                            <div className="font-bold text-cream text-sm">
+                            <div className="font-bold text-ink text-sm">
                               {t.rankLabels[rankKey]}
                             </div>
                             <div className="text-xs text-dim mt-1">
@@ -495,8 +496,8 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
                   </div>
 
                   {form.rank !== null && (
-                    <div className="bg-asphalt border border-line rounded-xl p-4 space-y-2">
-                      <p className="text-sm font-semibold text-cream">
+                    <div className="bg-page border border-line rounded-xl p-4 space-y-2">
+                      <p className="text-sm font-semibold text-ink">
                         {t.amountRequired(RANK_PRICES[form.rank])}
                       </p>
                       <p className="text-xs text-dim mb-2">{t.transferInstructions}</p>
@@ -548,7 +549,7 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
                         !receiptFile ||
                         !confirmed
                       }
-                      className="flex-[2] py-3 rounded-xl bg-amber text-asphalt font-semibold disabled:opacity-40"
+                      className="flex-[2] py-3 rounded-xl bg-accent text-on-accent font-semibold disabled:opacity-40"
                     >
                       {submitting ? t.submittingBtn : t.submitBtn}
                     </button>
@@ -563,32 +564,32 @@ export default function RentalListingForm({ isOpen, onClose, country = "uae", la
       <style>{`
         .input {
           width: 100%;
-          border: 1px solid #2A2F38;
+          border: 1px solid ${C.line};
           border-radius: 0.75rem;
           padding: 0.65rem 0.85rem;
           font-size: 0.9rem;
-          background: #14171C;
-          color: #F2ECDD;
+          background: ${C.bg};
+          color: ${C.text};
           color-scheme: dark;
         }
         .input::placeholder {
-          color: #B9B2A0;
+          color: ${C.textDim};
           opacity: 0.6;
         }
         .input:focus {
           outline: none;
-          border-color: #F5B942;
+          border-color: ${C.accent};
         }
         input[type="checkbox"] {
-          accent-color: #F5B942;
+          accent-color: ${C.accent};
         }
         .input::file-selector-button {
           margin-inline-end: 0.75rem;
           padding: 0.35rem 0.8rem;
-          border: 1px solid #2A2F38;
+          border: 1px solid ${C.line};
           border-radius: 0.5rem;
-          background: #1D2129;
-          color: #F2ECDD;
+          background: ${C.surface};
+          color: ${C.text};
           font: inherit;
           cursor: pointer;
         }
@@ -610,7 +611,7 @@ function BankRow({ label, value }) {
   return (
     <div className="flex justify-between text-xs">
       <span className="text-dim">{label}</span>
-      <span className="font-mono font-semibold text-cream" dir="ltr">
+      <span className="font-mono font-semibold text-ink" dir="ltr">
         {value}
       </span>
     </div>

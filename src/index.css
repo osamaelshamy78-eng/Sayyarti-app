@@ -9,7 +9,7 @@ body,
 #root {
   height: 100%;
   margin: 0;
-  background: #0a0b0d;
+  background: #F2F5F9;
 }
 
 * {
@@ -34,7 +34,7 @@ body,
 
 @media (min-width: 481px) {
   .app-shell {
-    border-inline: 1px solid #2a2f38;
+    border-inline: 1px solid #C8D1DC;
   }
 }
 

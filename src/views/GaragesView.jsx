@@ -99,10 +99,10 @@ export function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest,
   return (
     <div className="px-5 pt-5 pb-6">
       <GarageNetworkCta lang={lang} />
-      <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
+      <h1 style={{ color: C.text, fontSize: 21, fontWeight: 700, margin: 0 }}>
         {t.garagesHeading}
       </h1>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.garagesSub}</p>
+      <p style={{ color: C.textDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.garagesSub}</p>
 
       <div className="flex gap-2 mb-4">
         {Object.keys(GARAGES).map((code) => {
@@ -113,9 +113,9 @@ export function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest,
               onClick={() => setCountry(code)}
               style={{
                 flex: 1,
-                border: `1px solid ${active ? C.amber : C.panelLine}`,
-                background: active ? `${C.amber}18` : C.panel,
-                color: active ? C.amber : C.creamDim,
+                border: `1px solid ${active ? C.accent : C.line}`,
+                background: active ? `${C.accent}18` : C.surface,
+                color: active ? C.accent : C.textDim,
                 borderRadius: 10,
                 padding: "9px 6px",
                 fontSize: 11.5,
@@ -139,7 +139,7 @@ export function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest,
         }}
       >
         <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
-        <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.garagesNote}</span>
+        <span style={{ color: C.textDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.garagesNote}</span>
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -150,8 +150,8 @@ export function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest,
             onClick={() => window.open(g.mapLink, "_blank")}
             className="w-full"
             style={{
-              background: C.panel,
-              border: `1px solid ${C.panelLine}`,
+              background: C.surface,
+              border: `1px solid ${C.line}`,
               borderRadius: 14,
               overflow: "hidden",
               padding: 0,
@@ -165,15 +165,15 @@ export function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest,
             )}
             <div style={{ padding: "14px 16px" }}>
               <div className="flex items-start justify-between gap-2">
-                <span style={{ color: C.cream, fontSize: 14, fontWeight: 700 }}>{g.name}</span>
-                <MapPin size={15} color={C.amber} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span style={{ color: C.text, fontSize: 14, fontWeight: 700 }}>{g.name}</span>
+                <MapPin size={15} color={C.accent} style={{ flexShrink: 0, marginTop: 1 }} />
               </div>
-              <div style={{ color: C.amberDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
+              <div style={{ color: C.accentDim, fontSize: 11.5, marginTop: 3, fontWeight: 600 }}>
                 {g.area}
                 {g.distanceKm != null && ` · ${g.distanceKm.toFixed(1)} ${lang === "ar" ? "كم" : "km"}`}
               </div>
               {g.note && (
-                <div style={{ color: C.creamDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
+                <div style={{ color: C.textDim, fontSize: 12.5, marginTop: 5, lineHeight: 1.5 }}>
                   {g.note}
                 </div>
               )}

@@ -5,12 +5,13 @@ export default {
     extend: {
       // Sayyarti's palette (same values as src/theme.js), for the forms styled with Tailwind
       colors: {
-        asphalt: "#14171C",
-        panel: "#1D2129",
-        line: "#2A2F38",
-        cream: "#F2ECDD",
-        dim: "#B9B2A0",
-        amber: "#F5B942",
+        page: "#F2F5F9",
+        surface: "#FFFFFF",
+        line: "#C8D1DC",
+        ink: "#0E1B2C",
+        dim: "#4B5A6D",
+        accent: "#0B4FA0",
+        "on-accent": "#FFFFFF",
       },
     },
   },

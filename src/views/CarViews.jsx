@@ -166,15 +166,15 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
 
       <div className="px-5">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h2 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: 0 }}>
+          <h2 style={{ color: C.text, fontSize: 19, fontWeight: 700, margin: 0 }}>
             {car.make_model} {car.year ? `· ${car.year}` : ""}
           </h2>
-          <span style={{ color: C.amber, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
+          <span style={{ color: C.accent, fontSize: 18, fontWeight: 700, flexShrink: 0 }}>
             {formatPrice(car.price, car.country, lang)}
           </span>
         </div>
 
-        <div style={{ color: C.creamDim, fontSize: 12.5, marginBottom: 14 }}>
+        <div style={{ color: C.textDim, fontSize: 12.5, marginBottom: 14 }}>
           {[car.city, countryLabel].filter(Boolean).join(" · ")}
           {formatMileage(car.mileage, lang) ? ` · ${formatMileage(car.mileage, lang)}` : ""}
           {car.specs === "gulf" ? ` · ${t.carSpecsGulf}` : ""}
@@ -184,14 +184,14 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
         {car.description && (
           <div
             style={{
-              background: C.panel,
-              border: `1px solid ${C.panelLine}`,
+              background: C.surface,
+              border: `1px solid ${C.line}`,
               borderRadius: 12,
               padding: "12px 14px",
               marginBottom: 16,
             }}
           >
-            <p style={{ color: C.creamDim, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+            <p style={{ color: C.textDim, fontSize: 13, lineHeight: 1.6, margin: 0 }}>
               {car.description}
             </p>
           </div>
@@ -218,15 +218,15 @@ function CarDetailView({ lang, t, isRTL, car, onBack }) {
             }
             className="w-full flex items-center justify-center gap-2"
             style={{
-              background: C.amber,
+              background: C.accent,
               border: "none",
               borderRadius: 12,
               padding: "13px 16px",
               cursor: "pointer",
             }}
           >
-            <MessageCircle size={18} color={C.asphalt} />
-            <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.carContact}</span>
+            <MessageCircle size={18} color={C.onAccent} />
+            <span style={{ color: C.onAccent, fontSize: 14, fontWeight: 700 }}>{t.carContact}</span>
           </button>
         )}
       </div>
@@ -243,24 +243,24 @@ export function CarsView({ lang, t, isRTL, mode, onSubmitted, onBack }) {
           style={{
             width: 60,
             height: 60,
-            background: `${C.amber}18`,
-            border: `1px solid ${C.amberDim}`,
+            background: `${C.accent}18`,
+            border: `1px solid ${C.accentDim}`,
             margin: "0 auto 16px",
           }}
         >
-          <Car size={26} color={C.amber} />
+          <Car size={26} color={C.accent} />
         </div>
-        <p style={{ color: C.cream, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
+        <p style={{ color: C.text, fontSize: 14, lineHeight: 1.6, marginBottom: 18 }}>
           {t.carSubmitted}
         </p>
         <button
           onClick={onBack}
           style={{
-            background: C.amber,
+            background: C.accent,
             border: "none",
             borderRadius: 12,
             padding: "12px 20px",
-            color: C.asphalt,
+            color: C.onAccent,
             fontSize: 13,
             fontWeight: 700,
             cursor: "pointer",
@@ -390,11 +390,11 @@ export function BuyCarView({ lang, t, isRTL }) {
   const hasActiveFilters = Object.values(filters).some(Boolean);
 
   const selectStyle = {
-    background: C.panel,
-    border: `1px solid ${C.panelLine}`,
+    background: C.surface,
+    border: `1px solid ${C.line}`,
     borderRadius: 10,
     padding: "9px 10px",
-    color: C.cream,
+    color: C.text,
     fontSize: 12.5,
     width: "100%",
   };
@@ -402,13 +402,13 @@ export function BuyCarView({ lang, t, isRTL }) {
   return (
     <div className="px-5 pt-5 pb-6">
       <div className="flex items-center justify-between mb-1">
-        <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.buyCarHeading}</h1>
+        <h1 style={{ color: C.text, fontSize: 21, fontWeight: 700, margin: 0 }}>{t.buyCarHeading}</h1>
       </div>
-      <p style={{ color: C.creamDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.buyCarSub}</p>
+      <p style={{ color: C.textDim, fontSize: 13, marginTop: 4, marginBottom: 14 }}>{t.buyCarSub}</p>
 
       <div className="grid grid-cols-2 gap-2 mb-2">
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterCountry}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterCountry}</span>
           <select
             style={selectStyle}
             value={filters.country}
@@ -421,7 +421,7 @@ export function BuyCarView({ lang, t, isRTL }) {
           </select>
         </div>
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMake}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMake}</span>
           <select
             style={selectStyle}
             value={filters.make}
@@ -434,7 +434,7 @@ export function BuyCarView({ lang, t, isRTL }) {
           </select>
         </div>
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterModel}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterModel}</span>
           <select
             style={selectStyle}
             value={filters.model}
@@ -448,7 +448,7 @@ export function BuyCarView({ lang, t, isRTL }) {
           </select>
         </div>
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterPrice}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterPrice}</span>
           <select
             style={selectStyle}
             value={filters.price}
@@ -461,7 +461,7 @@ export function BuyCarView({ lang, t, isRTL }) {
           </select>
         </div>
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterYear}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterYear}</span>
           <select
             style={selectStyle}
             value={filters.year}
@@ -474,7 +474,7 @@ export function BuyCarView({ lang, t, isRTL }) {
           </select>
         </div>
         <div>
-          <span style={{ color: C.creamDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMileage}</span>
+          <span style={{ color: C.textDim, fontSize: 10.5, fontWeight: 700, display: "block", marginBottom: 3 }}>{t.filterMileage}</span>
           <select
             style={selectStyle}
             value={filters.mileage}
@@ -503,10 +503,10 @@ export function BuyCarView({ lang, t, isRTL }) {
           style={{ background: `${C.blue}14`, border: `1px solid ${C.blue}44`, borderRadius: 10, padding: "10px 12px", marginTop: 8 }}
         >
           <Info size={14} color={C.blue} style={{ marginTop: 2, flexShrink: 0 }} />
-          <span style={{ color: C.creamDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.carNoDb}</span>
+          <span style={{ color: C.textDim, fontSize: 11.5, lineHeight: 1.5 }}>{t.carNoDb}</span>
         </div>
       ) : loading ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>{t.carLoading}</p>
+        <p style={{ color: C.textDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>{t.carLoading}</p>
       ) : loadError ? (
         <div style={{ marginTop: 20, textAlign: "center" }}>
           <p style={{ color: C.red, fontSize: 13, marginBottom: 10 }}>
@@ -514,13 +514,13 @@ export function BuyCarView({ lang, t, isRTL }) {
           </p>
           <button
             onClick={() => window.location.reload()}
-            style={{ background: C.amber, border: "none", borderRadius: 10, padding: "9px 14px", color: C.asphalt, fontWeight: 700, cursor: "pointer" }}
+            style={{ background: C.accent, border: "none", borderRadius: 10, padding: "9px 14px", color: C.onAccent, fontWeight: 700, cursor: "pointer" }}
           >
             {lang === "ar" ? "إعادة المحاولة" : "Retry"}
           </button>
         </div>
       ) : filtered.length === 0 ? (
-        <p style={{ color: C.creamDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
+        <p style={{ color: C.textDim, fontSize: 13, textAlign: "center", marginTop: 20 }}>
           {listings.length === 0 ? t.carEmpty : t.filterNoResults}
         </p>
       ) : (
@@ -530,8 +530,8 @@ export function BuyCarView({ lang, t, isRTL }) {
               key={c.id}
               onClick={() => setSelected(c)}
               style={{
-                background: C.panel,
-                border: `1px solid ${C.panelLine}`,
+                background: C.surface,
+                border: `1px solid ${C.line}`,
                 borderRadius: 14,
                 overflow: "hidden",
                 cursor: "pointer",
@@ -568,7 +568,7 @@ export function BuyCarView({ lang, t, isRTL }) {
                         bottom: 8,
                         insetInlineEnd: 8,
                         background: "rgba(0,0,0,0.6)",
-                        color: C.cream,
+                        color: C.text,
                         fontSize: 11,
                         fontWeight: 600,
                         padding: "2px 8px",
@@ -602,14 +602,14 @@ export function BuyCarView({ lang, t, isRTL }) {
                   </div>
                 )}
                 <div className="flex items-start justify-between gap-2">
-                  <span style={{ color: C.cream, fontSize: 14.5, fontWeight: 700 }}>
+                  <span style={{ color: C.text, fontSize: 14.5, fontWeight: 700 }}>
                     {c.make_model} {c.year ? `· ${c.year}` : ""}
                   </span>
-                  <span style={{ color: C.amber, fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+                  <span style={{ color: C.accent, fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
                     {formatPrice(c.price, c.country, lang)}
                   </span>
                 </div>
-                <div style={{ color: C.creamDim, fontSize: 11.5, marginTop: 3 }}>
+                <div style={{ color: C.textDim, fontSize: 11.5, marginTop: 3 }}>
                   {[c.city, CAR_COUNTRIES.find((x) => x.code === c.country)?.[lang]]
                     .filter(Boolean)
                     .join(" · ")}
@@ -618,7 +618,7 @@ export function BuyCarView({ lang, t, isRTL }) {
                   {c.specs === "american" ? ` · ${t.carSpecsAmerican}` : ""}
                 </div>
                 {c.description && (
-                  <p style={{ color: C.creamDim, fontSize: 12.5, marginTop: 6, lineHeight: 1.5 }}>
+                  <p style={{ color: C.textDim, fontSize: 12.5, marginTop: 6, lineHeight: 1.5 }}>
                     {c.description}
                   </p>
                 )}
@@ -648,14 +648,14 @@ export function BuyCarView({ lang, t, isRTL }) {
                     style={{
                       width: "100%",
                       background: "transparent",
-                      border: `1px solid ${C.amberDim}`,
+                      border: `1px solid ${C.accentDim}`,
                       borderRadius: 10,
                       padding: "8px 12px",
                       cursor: "pointer",
                     }}
                   >
-                    <MessageCircle size={14} color={C.amber} />
-                    <span style={{ color: C.amber, fontSize: 12.5, fontWeight: 600 }}>
+                    <MessageCircle size={14} color={C.accent} />
+                    <span style={{ color: C.accent, fontSize: 12.5, fontWeight: 600 }}>
                       {t.carContact}
                     </span>
                   </button>

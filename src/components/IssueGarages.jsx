@@ -1,4 +1,5 @@
 import React from "react";
+import { C } from "../theme";
 
 // From an issue page, "Find a garage for this issue" opens the garage directory filtered to
 // garages whose name / area / note mention the issue's specialty.
@@ -64,7 +65,7 @@ export function FindGarageButton({ lang, issuePath }) {
     <button
       type="button"
       onClick={() => { window.location.href = `/garages?issue=${encodeURIComponent(key)}`; }}
-      style={{ width: "100%", marginTop: 12, marginBottom: 16, padding: "12px 14px", borderRadius: 12, border: 0, background: "#F5B942", color: "#14171C", fontWeight: 800, cursor: "pointer", display: "block" }}
+      style={{ width: "100%", marginTop: 12, marginBottom: 16, padding: "12px 14px", borderRadius: 12, border: 0, background: C.accent, color: C.onAccent, fontWeight: 800, cursor: "pointer", display: "block" }}
     >
       {lang === "ar" ? "ابحث عن جراج مناسب للعطل" : "Find a garage for this issue"}
     </button>
@@ -84,7 +85,7 @@ function searchNearby(key) {
 export function IssueGarageBanner({ lang, issueKey, noMatch }) {
   const ar = lang === "ar";
   return (
-    <div style={{ background: "#4C7EA814", border: "1px solid #4C7EA844", borderRadius: 12, padding: "11px 12px", marginBottom: 10, color: "#F2ECDD", fontSize: 12, lineHeight: 1.5 }}>
+    <div style={{ background: `${C.blue}14`, border: `1px solid ${C.blue}44`, borderRadius: 12, padding: "11px 12px", marginBottom: 10, color: C.text, fontSize: 12, lineHeight: 1.5 }}>
       <strong>{LABELS[issueKey][ar ? "ar" : "en"]}</strong>
       <br />
       {noMatch
@@ -93,7 +94,7 @@ export function IssueGarageBanner({ lang, issueKey, noMatch }) {
       <button
         type="button"
         onClick={() => searchNearby(issueKey)}
-        style={{ marginTop: 8, width: "100%", padding: 9, borderRadius: 9, border: "1px solid #F5B942", background: "#F5B942", color: "#14171C", fontWeight: 800, cursor: "pointer" }}
+        style={{ marginTop: 8, width: "100%", padding: 9, borderRadius: 9, border: `1px solid ${C.accent}`, background: C.accent, color: C.onAccent, fontWeight: 800, cursor: "pointer" }}
       >
         {ar ? "ابحث عن متخصص قريب مني" : "Find a nearby specialist"}
       </button>

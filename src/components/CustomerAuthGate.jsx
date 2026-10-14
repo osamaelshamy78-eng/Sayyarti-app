@@ -1,11 +1,4 @@
-const C = {
-  asphalt: "#14171C",
-  panel: "#1D2129",
-  line: "#2A2F38",
-  cream: "#F2ECDD",
-  dim: "#B9B2A0",
-  amber: "#F5B942",
-};
+import { C } from "../theme";
 
 export default function CustomerAuthGate({
   lang,
@@ -22,7 +15,7 @@ export default function CustomerAuthGate({
 
   if (checking) {
     return (
-      <div className="max-w-lg mx-auto px-4 pt-10 pb-24 text-center" dir={isAr ? "rtl" : "ltr"} style={{ color: C.dim, fontSize: 13 }}>
+      <div className="max-w-lg mx-auto px-4 pt-10 pb-24 text-center" dir={isAr ? "rtl" : "ltr"} style={{ color: C.textDim, fontSize: 13 }}>
         {isAr ? "جاري التحقق..." : "Checking..."}
       </div>
     );
@@ -30,11 +23,11 @@ export default function CustomerAuthGate({
 
   if (!user) {
     return (
-      <div className="max-w-lg mx-auto px-4 pt-8 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
-        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22, textAlign: "center" }}>
+      <div className="max-w-lg mx-auto px-4 pt-8 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.text }}>
+        <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 18, padding: 22, textAlign: "center" }}>
           <div style={{ fontSize: 30, marginBottom: 10 }}>🔐</div>
           <h2 style={{ margin: 0, fontSize: 18, fontWeight: 900 }}>{isAr ? titleAr : titleEn}</h2>
-          <p style={{ color: C.dim, fontSize: 12.5, lineHeight: 1.65, margin: "10px 0 18px" }}>
+          <p style={{ color: C.textDim, fontSize: 12.5, lineHeight: 1.65, margin: "10px 0 18px" }}>
             {isAr ? descAr : descEn}
           </p>
           <button
@@ -42,8 +35,8 @@ export default function CustomerAuthGate({
             onClick={signInWithGoogle}
             style={{
               width: "100%",
-              background: C.cream,
-              color: C.asphalt,
+              background: C.text,
+              color: C.onAccent,
               border: "none",
               borderRadius: 13,
               padding: "13px 16px",

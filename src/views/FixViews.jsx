@@ -34,7 +34,7 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
       <div className="mb-2">
         <label
           style={{
-            color: C.creamDim,
+            color: C.textDim,
             fontSize: 12,
             fontWeight: 600,
             display: "block",
@@ -46,13 +46,13 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
         <div
           className="flex items-center gap-2"
           style={{
-            background: "#ffffff0d",
-            border: `1px solid #ffffff1f`,
+            background: C.surface,
+            border: `1px solid ${C.line}`,
             borderRadius: 12,
             padding: "10px 12px",
           }}
         >
-          <Search size={16} color={C.creamDim} strokeWidth={2} style={{ flexShrink: 0 }} />
+          <Search size={16} color={C.textDim} strokeWidth={2} style={{ flexShrink: 0 }} />
           <input
             type="text"
             value={query}
@@ -66,14 +66,14 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
               background: "transparent",
               border: "none",
               outline: "none",
-              color: C.cream,
+              color: C.text,
               fontSize: 13.5,
               width: "100%",
               fontFamily: "inherit",
             }}
           />
         </div>
-        <p style={{ color: C.creamDim, fontSize: 10.5, marginTop: 5, opacity: 0.75 }}>
+        <p style={{ color: C.textDim, fontSize: 10.5, marginTop: 5, opacity: 0.75 }}>
           {t.faultCodeSearchHint}
         </p>
       </div>
@@ -81,7 +81,7 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
       {norm.length >= 2 && (
         <div className="mb-6">
           {matches.length === 0 ? (
-            <p style={{ color: C.creamDim, fontSize: 12, padding: "10px 2px" }}>
+            <p style={{ color: C.textDim, fontSize: 12, padding: "10px 2px" }}>
               {t.faultCodeNoResults}
             </p>
           ) : (
@@ -94,8 +94,8 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
                   <div
                     key={code}
                     style={{
-                      background: "#ffffff0a",
-                      border: `1px solid #ffffff1a`,
+                      background: C.surface,
+                      border: `1px solid ${C.line}`,
                       borderRadius: 12,
                       overflow: "hidden",
                     }}
@@ -111,7 +111,7 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
                     >
                       <span
                         style={{
-                          color: C.amber,
+                          color: C.accent,
                           fontSize: 12.5,
                           fontWeight: 700,
                           flexShrink: 0,
@@ -120,26 +120,26 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
                       >
                         {code}
                       </span>
-                      <span style={{ color: C.cream, fontSize: 12.5, fontWeight: 600, flex: 1 }}>
+                      <span style={{ color: C.text, fontSize: 12.5, fontWeight: 600, flex: 1 }}>
                         {info.title}
                       </span>
                       {lang === "ar" ? (
-                        <ChevronLeft size={14} color={C.creamDim} />
+                        <ChevronLeft size={14} color={C.textDim} />
                       ) : (
-                        <ChevronRight size={14} color={C.creamDim} />
+                        <ChevronRight size={14} color={C.textDim} />
                       )}
                     </button>
                     {isOpen && (
                       <div style={{ padding: "0 13px 13px" }}>
                         <p
                           style={{
-                            color: C.creamDim,
+                            color: C.textDim,
                             fontSize: 11.5,
                             lineHeight: 1.6,
                             marginBottom: entry.relatedIssue ? 10 : 0,
                           }}
                         >
-                          <span style={{ fontWeight: 700, color: C.cream }}>
+                          <span style={{ fontWeight: 700, color: C.text }}>
                             {t.faultCodeMeaning}:{" "}
                           </span>
                           {info.meaning}
@@ -185,7 +185,7 @@ export function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onO
         >
           <EngineLightIcon size={19} color={C.blue} strokeWidth={1.6} />
         </div>
-        <span style={{ color: C.cream, fontSize: 13.5, fontWeight: 600, flex: 1 }}>
+        <span style={{ color: C.text, fontSize: 13.5, fontWeight: 600, flex: 1 }}>
           {t.lightsGuideTile}
         </span>
         {lang === "ar" ? (
@@ -221,25 +221,25 @@ export function ObdCodeView({ lang, t, code, onOpenIssue, onBack, isRTL }) {
     <div className="pb-6">
       <BackHeader label={t.navIssues} onBack={onBack} isRTL={isRTL} />
       <div className="px-5">
-        <div style={{ color: C.amber, fontFamily: "monospace", fontWeight: 800, fontSize: 22, marginBottom: 5 }}>
+        <div style={{ color: C.accent, fontFamily: "monospace", fontWeight: 800, fontSize: 22, marginBottom: 5 }}>
           {code}
         </div>
-        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 8px" }}>
+        <h1 style={{ color: C.text, fontSize: 19, fontWeight: 700, margin: "0 0 8px" }}>
           {info.title}
         </h1>
         <div
           style={{
-            background: C.panel,
-            border: `1px solid ${C.panelLine}`,
+            background: C.surface,
+            border: `1px solid ${C.line}`,
             borderRadius: 14,
             padding: "14px 15px",
             marginBottom: 14,
           }}
         >
-          <div style={{ color: C.creamDim, fontSize: 11.5, fontWeight: 700, marginBottom: 5 }}>
+          <div style={{ color: C.textDim, fontSize: 11.5, fontWeight: 700, marginBottom: 5 }}>
             {t.faultCodeMeaning}
           </div>
-          <p style={{ color: C.cream, fontSize: 13, lineHeight: 1.65, margin: 0 }}>{info.meaning}</p>
+          <p style={{ color: C.text, fontSize: 13, lineHeight: 1.65, margin: 0 }}>{info.meaning}</p>
         </div>
 
         {related && (
@@ -271,10 +271,10 @@ export function LightsGuideView({ lang, t, onOpenCategory, onBack, isRTL }) {
     <div className="pb-6">
       <BackHeader label={t.navIssues} onBack={onBack} isRTL={isRTL} />
       <div className="px-5">
-        <h1 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 4px 0" }}>
+        <h1 style={{ color: C.text, fontSize: 19, fontWeight: 700, margin: "0 0 4px 0" }}>
           {t.lightsGuideHeading}
         </h1>
-        <p style={{ color: C.creamDim, fontSize: 13, marginBottom: 18 }}>{t.lightsGuideSub}</p>
+        <p style={{ color: C.textDim, fontSize: 13, marginBottom: 18 }}>{t.lightsGuideSub}</p>
 
         <div className="grid grid-cols-2 gap-3">
           {CATEGORIES.map((cat) => {
@@ -285,8 +285,8 @@ export function LightsGuideView({ lang, t, onOpenCategory, onBack, isRTL }) {
                 onClick={() => onOpenCategory(cat)}
                 className="flex flex-col items-center gap-2"
                 style={{
-                  background: C.panel,
-                  border: `1px solid ${C.panelLine}`,
+                  background: C.surface,
+                  border: `1px solid ${C.line}`,
                   borderRadius: 14,
                   padding: "16px 10px",
                   cursor: "pointer",
@@ -297,15 +297,15 @@ export function LightsGuideView({ lang, t, onOpenCategory, onBack, isRTL }) {
                   style={{
                     width: 56,
                     height: 56,
-                    background: `radial-gradient(circle, ${C.amber}22, ${C.amber}08 70%)`,
-                    border: `1px solid ${C.amber}`,
+                    background: `radial-gradient(circle, ${C.accent}22, ${C.accent}08 70%)`,
+                    border: `1px solid ${C.accent}`,
                   }}
                 >
-                  <Icon size={26} color={C.amber} strokeWidth={1.5} />
+                  <Icon size={26} color={C.accent} strokeWidth={1.5} />
                 </div>
                 <span
                   style={{
-                    color: C.cream,
+                    color: C.text,
                     fontSize: 12.5,
                     fontWeight: 600,
                     textAlign: "center",
@@ -331,11 +331,11 @@ export function CategoryView({ lang, t, category, onOpenIssue, onBack, isRTL }) 
       <div className="px-5 flex items-center gap-3 mb-4">
         <div
           className="flex items-center justify-center rounded-full"
-          style={{ width: 42, height: 42, background: `${C.amber}18`, border: `1px solid ${C.amberDim}` }}
+          style={{ width: 42, height: 42, background: `${C.accent}18`, border: `1px solid ${C.accentDim}` }}
         >
-          <Icon size={20} color={C.amber} />
+          <Icon size={20} color={C.accent} />
         </div>
-        <h2 style={{ color: C.cream, fontSize: 18, fontWeight: 700, margin: 0 }}>
+        <h2 style={{ color: C.text, fontSize: 18, fontWeight: 700, margin: 0 }}>
           {category[lang]}
         </h2>
       </div>
@@ -348,8 +348,8 @@ export function CategoryView({ lang, t, category, onOpenIssue, onBack, isRTL }) 
               onClick={() => onOpenIssue(issueId)}
               className="text-start"
               style={{
-                background: C.panel,
-                border: `1px solid ${C.panelLine}`,
+                background: C.surface,
+                border: `1px solid ${C.line}`,
                 borderRadius: 14,
                 padding: "14px 16px",
                 cursor: "pointer",
@@ -358,7 +358,7 @@ export function CategoryView({ lang, t, category, onOpenIssue, onBack, isRTL }) 
                 justifyContent: "space-between",
               }}
             >
-              <span style={{ color: C.cream, fontSize: 14, fontWeight: 600, textAlign: isRTL ? "right" : "left" }}>
+              <span style={{ color: C.text, fontSize: 14, fontWeight: 600, textAlign: isRTL ? "right" : "left" }}>
                 {issue.title}
               </span>
               {isRTL ? (
@@ -426,16 +426,16 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
               style={{
                 width: 84,
                 height: 84,
-                background: `radial-gradient(circle, ${C.amber}33, ${C.amber}08 70%)`,
-                border: `1.5px solid ${C.amber}`,
-                boxShadow: `0 0 22px ${C.amber}55, inset 0 0 12px ${C.amber}22`,
+                background: `radial-gradient(circle, ${C.accent}33, ${C.accent}08 70%)`,
+                border: `1.5px solid ${C.accent}`,
+                boxShadow: `0 0 22px ${C.accent}55, inset 0 0 12px ${C.accent}22`,
               }}
             >
-              <CategoryIcon size={38} color={C.amber} strokeWidth={1.5} />
+              <CategoryIcon size={38} color={C.accent} strokeWidth={1.5} />
             </div>
           </div>
         )}
-        <h2 style={{ color: C.cream, fontSize: 19, fontWeight: 700, margin: "0 0 16px 0", lineHeight: 1.3, textAlign: "center" }}>
+        <h2 style={{ color: C.text, fontSize: 19, fontWeight: 700, margin: "0 0 16px 0", lineHeight: 1.3, textAlign: "center" }}>
           {issue.title}
         </h2>
         <FindGarageButton lang={lang} issuePath={routePathForIssue(issueId)} />
@@ -446,7 +446,7 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
               <li
                 key={i}
                 style={{
-                  color: C.creamDim,
+                  color: C.textDim,
                   fontSize: 13.5,
                   lineHeight: 1.6,
                   display: "flex",
@@ -461,13 +461,13 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
           </ul>
         </Section>
 
-        <Section label={t.causes} color={C.amber}>
+        <Section label={t.causes} color={C.accent}>
           <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
             {issue.causes.map((s, i) => (
               <li
                 key={i}
                 style={{
-                  color: C.creamDim,
+                  color: C.textDim,
                   fontSize: 13.5,
                   lineHeight: 1.6,
                   display: "flex",
@@ -475,7 +475,7 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
                   marginBottom: 4,
                 }}
               >
-                <span style={{ color: C.amber, flexShrink: 0 }}>●</span>
+                <span style={{ color: C.accent, flexShrink: 0 }}>●</span>
                 <span>{s}</span>
               </li>
             ))}
@@ -488,7 +488,7 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
               <li
                 key={i}
                 style={{
-                  color: C.cream,
+                  color: C.text,
                   fontSize: 13.5,
                   lineHeight: 1.6,
                   display: "flex",
@@ -523,7 +523,7 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
           <Section label={lang === "ar" ? "فيديو وصور الإصلاح" : "Repair photos & videos"} color={C.blue}>
             <div className="flex flex-col gap-3">
               {media.map((m) => (
-                <div key={m.id} style={{ background: C.panel, border: `1px solid ${C.panelLine}`, borderRadius: 12, overflow: "hidden" }}>
+                <div key={m.id} style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 12, overflow: "hidden" }}>
                   {m.media_type === "video" ? (
                     <video src={m.url} controls playsInline preload="metadata" style={{ width: "100%", maxHeight: 230, background: "#000", display: "block" }} />
                   ) : (
@@ -544,7 +544,7 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
           }
           className="w-full flex items-center justify-center gap-2"
           style={{
-            background: C.amber,
+            background: C.accent,
             border: "none",
             borderRadius: 12,
             padding: "13px 16px",
@@ -552,8 +552,8 @@ export function IssueView({ lang, t, issueId, onBack, categoryLabel, CategoryIco
             marginTop: 4,
           }}
         >
-          <PlayCircle size={18} color={C.asphalt} />
-          <span style={{ color: C.asphalt, fontSize: 14, fontWeight: 700 }}>{t.watchVideo}</span>
+          <PlayCircle size={18} color={C.onAccent} />
+          <span style={{ color: C.onAccent, fontSize: 14, fontWeight: 700 }}>{t.watchVideo}</span>
         </button>
 
         {onRequestQuote && (

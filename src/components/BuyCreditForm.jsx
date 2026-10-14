@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useCloseOnBack } from "../backButton";
 import { uploadReceipt } from "../receipts";
 import { supabase } from "../supabaseClient";
+import { C } from "../theme";
 
 // ===== بيانات الحساب البنكي (نفس حساب الجراجات) =====
 const BANK_DETAILS = {
@@ -114,16 +115,16 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       style={{ zIndex: 10050 /* above the bottom nav (9990) and the AI button (10001) */ }}
     >
       <div
-        className="w-full sm:max-w-lg bg-panel rounded-t-2xl sm:rounded-2xl overflow-y-auto shadow-2xl"
+        className="w-full sm:max-w-lg bg-surface rounded-t-2xl sm:rounded-2xl overflow-y-auto shadow-2xl"
         style={{ maxHeight: "92dvh", paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="flex items-center justify-between px-5 py-4 border-b border-line">
-          <h3 className="font-bold text-cream">
+          <h3 className="font-bold text-ink">
             {t("اشترِ كريديتس", "Buy Credits")}
           </h3>
           <button
             onClick={resetAndClose}
-            className="text-dim hover:text-cream text-xl leading-none"
+            className="text-dim hover:text-ink text-xl leading-none"
           >
             ×
           </button>
@@ -135,7 +136,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
               <div className="w-14 h-14 rounded-full bg-green-500/15 text-green-400 flex items-center justify-center text-2xl mx-auto mb-4">
                 ✓
               </div>
-              <h3 className="text-lg font-bold text-cream mb-2">
+              <h3 className="text-lg font-bold text-ink mb-2">
                 {t("تم استلام طلبك", "Request received")}
               </h3>
               <p className="text-dim text-sm mb-6">
@@ -146,7 +147,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
               </p>
               <button
                 onClick={resetAndClose}
-                className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold"
+                className="w-full py-3 rounded-xl bg-accent text-on-accent font-semibold"
               >
                 {t("تم", "Done")}
               </button>
@@ -177,18 +178,18 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                           type="button"
                           onClick={() => selectPackage(pkg)}
                           className={`w-full rounded-xl border-2 px-4 py-3 flex items-center justify-between transition ${
-                            isSelected ? "border-amber bg-amber/10" : "border-line"
+                            isSelected ? "border-accent bg-accent/10" : "border-line"
                           }`}
                         >
                           <div className={isAr ? "text-right" : "text-left"}>
-                            <div className="font-bold text-cream text-sm">
+                            <div className="font-bold text-ink text-sm">
                               {isAr ? pkg.labelAr : pkg.labelEn}
                             </div>
                             <div className="text-xs text-dim mt-1">
                               {t(`${pkg.credits} كريديت`, `${pkg.credits} credits`)}
                             </div>
                           </div>
-                          <div className="font-bold text-cream">
+                          <div className="font-bold text-ink">
                             {pkg.price} {t("درهم", "AED")}
                           </div>
                         </button>
@@ -198,7 +199,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
                   <button
                     onClick={goToStep2}
-                    className="w-full py-3 rounded-xl bg-amber text-asphalt font-semibold mt-2"
+                    className="w-full py-3 rounded-xl bg-accent text-on-accent font-semibold mt-2"
                   >
                     {t("التالي: الدفع", "Next: Payment")}
                   </button>
@@ -207,8 +208,8 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
 
               {step === 2 && selectedPkg && (
                 <div className="space-y-5">
-                  <div className="bg-asphalt border border-line rounded-xl p-4 space-y-2">
-                    <p className="text-sm font-semibold text-cream">
+                  <div className="bg-page border border-line rounded-xl p-4 space-y-2">
+                    <p className="text-sm font-semibold text-ink">
                       {t(
                         `المبلغ المطلوب: ${selectedPkg.price} درهم (${selectedPkg.credits} كريديت)`,
                         `Amount due: ${selectedPkg.price} AED (${selectedPkg.credits} credits)`
@@ -265,7 +266,7 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
                     <button
                       onClick={handleSubmit}
                       disabled={submitting || !receiptFile || !confirmed}
-                      className="flex-[2] py-3 rounded-xl bg-amber text-asphalt font-semibold disabled:opacity-40"
+                      className="flex-[2] py-3 rounded-xl bg-accent text-on-accent font-semibold disabled:opacity-40"
                     >
                       {submitting ? t("جاري الإرسال...", "Sending...") : t("أرسل الطلب", "Submit request")}
                     </button>
@@ -280,32 +281,32 @@ export default function BuyCreditForm({ isOpen, onClose, lang, userEmail }) {
       <style>{`
         .input {
           width: 100%;
-          border: 1px solid #2A2F38;
+          border: 1px solid ${C.line};
           border-radius: 0.75rem;
           padding: 0.65rem 0.85rem;
           font-size: 0.9rem;
-          background: #14171C;
-          color: #F2ECDD;
+          background: ${C.bg};
+          color: ${C.text};
           color-scheme: dark;
         }
         .input::placeholder {
-          color: #B9B2A0;
+          color: ${C.textDim};
           opacity: 0.6;
         }
         .input:focus {
           outline: none;
-          border-color: #F5B942;
+          border-color: ${C.accent};
         }
         input[type="checkbox"] {
-          accent-color: #F5B942;
+          accent-color: ${C.accent};
         }
         .input::file-selector-button {
           margin-inline-end: 0.75rem;
           padding: 0.35rem 0.8rem;
-          border: 1px solid #2A2F38;
+          border: 1px solid ${C.line};
           border-radius: 0.5rem;
-          background: #1D2129;
-          color: #F2ECDD;
+          background: ${C.surface};
+          color: ${C.text};
           font: inherit;
           cursor: pointer;
         }
@@ -327,7 +328,7 @@ function BankRow({ label, value }) {
   return (
     <div className="flex justify-between text-xs">
       <span className="text-dim">{label}</span>
-      <span className="font-mono font-semibold text-cream" dir="ltr">
+      <span className="font-mono font-semibold text-ink" dir="ltr">
         {value}
       </span>
     </div>

@@ -3,21 +3,11 @@ import { CAR_MAKES, CAR_MODELS } from "./CarForm.jsx";
 import { useCustomerAuth } from "../useCustomerAuth";
 import CustomerAuthGate from "./CustomerAuthGate";
 import BuyCreditForm from "./BuyCreditForm";
+import { C } from "../theme";
 
 const EDGE_FUNCTION_URL =
   "https://fgexzguyjgbwvvqoakly.supabase.co/functions/v1/car-valuation";
 
-const C = {
-  asphalt: "#14171C",
-  panel: "#1D2129",
-  line: "#2A2F38",
-  cream: "#F2ECDD",
-  dim: "#B9B2A0",
-  amber: "#F5B942",
-  blue: "#4C7EA8",
-  red: "#E4432B",
-  green: "#61A56B",
-};
 
 const COUNTRIES = [
   { code: "uae", en: "United Arab Emirates", ar: "الإمارات" },
@@ -34,10 +24,10 @@ const CONDITIONS = [
 const inputStyle = {
   width: "100%",
   boxSizing: "border-box",
-  background: C.asphalt,
+  background: C.bg,
   border: `1px solid ${C.line}`,
   borderRadius: 12,
-  color: C.cream,
+  color: C.text,
   padding: "11px 12px",
   fontSize: 13,
   outline: "none",
@@ -113,22 +103,22 @@ export default function CarValuationView({ lang }) {
       descAr="محاولة واحدة مجانية لكل حساب، وبعدها تقدر تشتري كريديتس لو حبيت تكمل."
       descEn="One free try per account. After that, you can buy credits to keep going."
     >
-      <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.cream }}>
+      <div className="max-w-lg mx-auto px-4 pt-4 pb-24" dir={isAr ? "rtl" : "ltr"} style={{ color: C.text }}>
         <div style={{ marginBottom: 16 }}>
-          <div style={{ color: C.amber, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
+          <div style={{ color: C.accent, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.08em", marginBottom: 5 }}>SAYYARTI AI</div>
           <h1 style={{ margin: 0, fontSize: 23, lineHeight: 1.25, fontWeight: 900 }}>
             {isAr ? "قيّم سعر سيارتك" : "Estimate your car's price"}
           </h1>
-          <p style={{ color: C.dim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
+          <p style={{ color: C.textDim, fontSize: 12.5, margin: "7px 0 0", lineHeight: 1.55 }}>
             {isAr
               ? "دخّل بيانات سيارتك وهيدور الذكاء الاصطناعي على إعلانات حقيقية مشابهة في سوقك ويديك نطاق سعر تقريبي."
               : "Enter your car's details and the AI will search real comparable listings in your market for an estimated price range."}
           </p>
         </div>
 
-        <div style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12, display: "grid", gap: 10 }}>
+        <div style={{ background: C.surface, border: `1px solid ${C.line}`, borderRadius: 16, padding: 14, marginBottom: 12, display: "grid", gap: 10 }}>
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الدولة" : "Country"}</label>
             <select style={inputStyle} value={form.country} onChange={set("country")}>
               <option value="">{isAr ? "اختر الدولة" : "Select country"}</option>
               {COUNTRIES.map((c) => (
@@ -139,7 +129,7 @@ export default function CarValuationView({ lang }) {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة" : "Make"}</label>
+              <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الماركة" : "Make"}</label>
               <select style={inputStyle} value={form.make} onChange={set("make")}>
                 <option value="">{isAr ? "اختر" : "Select"}</option>
                 {CAR_MAKES.map((m) => (
@@ -148,7 +138,7 @@ export default function CarValuationView({ lang }) {
               </select>
             </div>
             <div>
-              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الموديل" : "Model"}</label>
+              <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الموديل" : "Model"}</label>
               {modelOptions.length ? (
                 <select style={inputStyle} value={form.model} onChange={set("model")}>
                   <option value="">{isAr ? "اختر" : "Select"}</option>
@@ -168,7 +158,7 @@ export default function CarValuationView({ lang }) {
           </div>
 
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
               {isAr ? "الفئة/التريم (اختياري)" : "Trim / Grade (optional)"}
             </label>
             <input
@@ -181,17 +171,17 @@ export default function CarValuationView({ lang }) {
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "السنة" : "Year"}</label>
+              <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "السنة" : "Year"}</label>
               <input type="number" style={inputStyle} value={form.year} onChange={set("year")} placeholder={isAr ? "مثال: 2019" : "e.g. 2019"} />
             </div>
             <div>
-              <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الكيلومترات" : "Mileage (km)"}</label>
+              <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>{isAr ? "الكيلومترات" : "Mileage (km)"}</label>
               <input type="number" style={inputStyle} value={form.mileage} onChange={set("mileage")} placeholder={isAr ? "مثال: 85000" : "e.g. 85000"} />
             </div>
           </div>
 
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
               {isAr ? "سعة المحرك (اختياري)" : "Engine size (optional)"}
             </label>
             <input
@@ -203,7 +193,7 @@ export default function CarValuationView({ lang }) {
           </div>
 
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "المواصفات" : "Specs"}</label>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "المواصفات" : "Specs"}</label>
             <div className="flex gap-2">
               {[
                 { id: "gulf", en: "Gulf specs", ar: "خليجي" },
@@ -220,9 +210,9 @@ export default function CarValuationView({ lang }) {
                     fontSize: 12.5,
                     fontWeight: 700,
                     cursor: "pointer",
-                    border: `1px solid ${form.specs === s.id ? C.amber : C.line}`,
-                    background: form.specs === s.id ? `${C.amber}1A` : C.asphalt,
-                    color: form.specs === s.id ? C.amber : C.dim,
+                    border: `1px solid ${form.specs === s.id ? C.accent : C.line}`,
+                    background: form.specs === s.id ? `${C.accent}1A` : C.bg,
+                    color: form.specs === s.id ? C.accent : C.textDim,
                   }}
                 >
                   {isAr ? s.ar : s.en}
@@ -232,7 +222,7 @@ export default function CarValuationView({ lang }) {
           </div>
 
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "الحالة العامة" : "Overall condition"}</label>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 6 }}>{isAr ? "الحالة العامة" : "Overall condition"}</label>
             <div className="flex gap-2">
               {CONDITIONS.map((c) => (
                 <button
@@ -246,9 +236,9 @@ export default function CarValuationView({ lang }) {
                     fontSize: 11.5,
                     fontWeight: 700,
                     cursor: "pointer",
-                    border: `1px solid ${form.condition === c.id ? C.amber : C.line}`,
-                    background: form.condition === c.id ? `${C.amber}1A` : C.asphalt,
-                    color: form.condition === c.id ? C.amber : C.dim,
+                    border: `1px solid ${form.condition === c.id ? C.accent : C.line}`,
+                    background: form.condition === c.id ? `${C.accent}1A` : C.bg,
+                    color: form.condition === c.id ? C.accent : C.textDim,
                   }}
                 >
                   {isAr ? c.ar : c.en}
@@ -258,7 +248,7 @@ export default function CarValuationView({ lang }) {
           </div>
 
           <div>
-            <label style={{ color: C.dim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
+            <label style={{ color: C.textDim, fontSize: 11, fontWeight: 700, display: "block", marginBottom: 4 }}>
               {isAr ? "أي عيوب تحب تذكرها؟ (اختياري)" : "Any defects to mention? (optional)"}
             </label>
             <textarea
@@ -272,7 +262,7 @@ export default function CarValuationView({ lang }) {
         </div>
 
         <div style={{ background: `${C.blue}12`, border: `1px solid ${C.blue}55`, borderRadius: 13, padding: "11px 12px", marginBottom: 12 }}>
-          <div style={{ color: C.dim, fontSize: 11.5, lineHeight: 1.55 }}>
+          <div style={{ color: C.textDim, fontSize: 11.5, lineHeight: 1.55 }}>
             {isAr
               ? "التقييم تقديري وبناءً على إعلانات السوق الحالية، مش تقييم رسمي معتمد."
               : "This is an approximate estimate based on current market listings, not an official valuation."}
@@ -285,8 +275,8 @@ export default function CarValuationView({ lang }) {
           disabled={!canSubmit || loading}
           style={{
             width: "100%",
-            background: !canSubmit || loading ? `${C.amber}88` : C.amber,
-            color: C.asphalt,
+            background: !canSubmit || loading ? `${C.accent}88` : C.accent,
+            color: C.onAccent,
             border: "none",
             borderRadius: 13,
             padding: "14px 16px",
@@ -299,20 +289,20 @@ export default function CarValuationView({ lang }) {
         </button>
 
         {error && (
-          <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.cream, fontSize: 12.5 }}>
+          <div style={{ marginTop: 10, background: `${C.red}12`, border: `1px solid ${C.red}66`, borderRadius: 12, padding: "10px 12px", color: C.text, fontSize: 12.5 }}>
             {error}
           </div>
         )}
 
         {needsCreditsMsg && (
-          <div style={{ marginTop: 10, background: `${C.amber}14`, border: `1px solid ${C.amber}55`, borderRadius: 12, padding: "12px 14px" }}>
-            <div style={{ color: C.cream, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
+          <div style={{ marginTop: 10, background: `${C.accent}14`, border: `1px solid ${C.accent}55`, borderRadius: 12, padding: "12px 14px" }}>
+            <div style={{ color: C.text, fontSize: 13, fontWeight: 700, marginBottom: 10 }}>
               {isAr ? "خلصت محاولتك المجانية. اشترِ كريديتس عشان تكمل." : "You've used your free try. Buy credits to continue."}
             </div>
             <button
               type="button"
               onClick={() => setShowBuyCredit(true)}
-              style={{ width: "100%", background: C.amber, color: C.asphalt, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
+              style={{ width: "100%", background: C.accent, color: C.onAccent, border: "none", borderRadius: 10, padding: "10px 14px", fontSize: 13, fontWeight: 900, cursor: "pointer" }}
             >
               {isAr ? "اشترِ كريديتس" : "Buy credits"}
             </button>
@@ -321,14 +311,14 @@ export default function CarValuationView({ lang }) {
 
         {result && (
           <div style={{ marginTop: 14 }}>
-            <div style={{ background: C.panel, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
+            <div style={{ background: C.surface, border: `1px solid ${C.green}55`, borderRadius: 16, padding: 14 }}>
               <div style={{ color: C.green, fontSize: 10.5, fontWeight: 900, letterSpacing: "0.05em", marginBottom: 7 }}>
                 {isAr ? "التقييم التقريبي" : "ESTIMATED VALUE"}
               </div>
-              <div style={{ color: C.cream, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result.estimate}</div>
+              <div style={{ color: C.text, whiteSpace: "pre-wrap", fontSize: 13.5, lineHeight: 1.7 }}>{result.estimate}</div>
             </div>
             {result.creditsRemaining != null && (
-              <div style={{ marginTop: 9, color: C.dim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>
+              <div style={{ marginTop: 9, color: C.textDim, fontSize: 10.5, lineHeight: 1.5, textAlign: "center" }}>
                 {isAr ? `الرصيد المتبقي: ${result.creditsRemaining}` : `Credits remaining: ${result.creditsRemaining}`}
               </div>
             )}
