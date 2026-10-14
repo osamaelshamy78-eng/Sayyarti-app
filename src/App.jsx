@@ -29,7 +29,8 @@ import { supabase } from "./supabaseClient";
 import { openReceipt } from "./receipts";
 import { storedLang, announceLang } from "./appLanguage";
 import { CAR_COUNTRIES } from "./countries";
-import GarageListingForm from "./components/GarageListingForm";
+import AppMenuLinks from "./components/AppMenuLinks";
+import GarageNetworkCta from "./components/GarageNetworkCta";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
 const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
@@ -2344,7 +2345,7 @@ const SPARE_PARTS = {
 const T = {
   en: {
     wordmark: "Sayyarti",
-    tagline: "Diagnose car issues & find trusted garages",
+    tagline: "Diagnose car issues & find nearby garages",
     navHome: "Home",
     navIssues: "Issues",
     navGarages: "Garages",
@@ -2359,7 +2360,7 @@ const T = {
     causes: "Possible Causes",
     steps: "What To Do",
     watchVideo: "Watch fix video",
-    garagesHeading: "Trusted garages",
+    garagesHeading: "Garage directory",
     garagesSub: "Pick a country to browse workshops",
     garagesNote:
       "Starter directory from public sources — confirm hours, pricing & contact details before visiting.",
@@ -2516,7 +2517,7 @@ const T = {
   },
   ar: {
     wordmark: "سيارتي",
-    tagline: "شخّص مشاكل سيارتك واعثر على ورش موثوقة",
+    tagline: "شخّص مشاكل سيارتك واعثر على ورش قريبة",
     navHome: "الرئيسية",
     navIssues: "الأعطال",
     navGarages: "الورش",
@@ -2531,7 +2532,7 @@ const T = {
     causes: "الأسباب المحتملة",
     steps: "ماذا تفعل",
     watchVideo: "شاهد فيديو الإصلاح",
-    garagesHeading: "ورش موثوقة",
+    garagesHeading: "دليل الورش",
     garagesSub: "اختر دولة لتصفح الورش",
     garagesNote:
       "دليل أولي من مصادر عامة — يرجى التأكد من مواعيد العمل والأسعار وبيانات التواصل قبل الزيارة.",
@@ -2690,8 +2691,20 @@ const T = {
 /* ---------------------------------------------------------------
    Small building blocks
 --------------------------------------------------------------- */
-function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGarage, onOpenAdmin }) {
+function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onCloseMenu, onNavigate, onOpenAdmin }) {
   const isRTL = lang === "ar";
+  const menuRef = useRef(null);
+  const toggleRef = useRef(null);
+  // a tap anywhere outside the open menu (and its toggle) closes it
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+    const onPointer = (e) => {
+      if (menuRef.current?.contains(e.target) || toggleRef.current?.contains(e.target)) return;
+      onCloseMenu();
+    };
+    document.addEventListener("pointerdown", onPointer, true);
+    return () => document.removeEventListener("pointerdown", onPointer, true);
+  }, [menuOpen, onCloseMenu]);
   return (
     <div
       className="flex items-center justify-between px-5 pt-3 pb-4"
@@ -2754,6 +2767,7 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
         </div>
 
         <button
+          ref={toggleRef}
           onClick={onToggleMenu}
           aria-label={isRTL ? "القائمة" : "Menu"}
           aria-expanded={menuOpen}
@@ -2772,6 +2786,7 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
 
       {menuOpen && (
         <div
+          ref={menuRef}
           style={{
             position: "absolute",
             top: 54,
@@ -2810,27 +2825,7 @@ function TopBar({ lang, setLang, t, onLogoTap, menuOpen, onToggleMenu, onAddGara
             <span style={{ flex: 1 }}>{t.adminMenuLabel}</span>
           </button>
 
-          <button
-            onClick={onAddGarage}
-            className="w-full flex items-center gap-2"
-            style={{
-              display: "flex",
-              width: "100%",
-              padding: "12px 16px",
-              background: "none",
-              border: "none",
-              borderTop: `1px solid ${C.panelLine}`,
-              color: C.cream,
-              fontSize: 13,
-              fontWeight: 600,
-              textAlign: isRTL ? "right" : "left",
-              cursor: "pointer",
-              flexDirection: isRTL ? "row-reverse" : "row",
-            }}
-          >
-            <Plus size={16} color={C.amber} strokeWidth={2} />
-            <span style={{ flex: 1 }}>{t.addGarageBtn}</span>
-          </button>
+          <AppMenuLinks lang={lang} onNavigate={onNavigate} onDone={onCloseMenu} />
         </div>
       )}
     </div>
@@ -3178,7 +3173,7 @@ function FixView({ lang, t, onOpenCategory, onOpenGuide, onOpenIssue, onOpenObdC
       </button>
 
       <div className="grid grid-cols-2 gap-y-7 gap-x-3">
-        {CATEGORIES.map((cat) => (
+        {CATEGORIES.filter((cat) => cat.id !== "general").map((cat) => (
           <Dial
             key={cat.id}
             Icon={cat.icon}
@@ -3586,7 +3581,6 @@ function haversineKm(lat1, lng1, lat2, lng2) {
 }
 
 function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClearQuote }) {
-  const [showGarageForm, setShowGarageForm] = useState(false);
   const [dbGarages, setDbGarages] = useState([]);
   const [userLoc, setUserLoc] = useState(null);
   const [specialty] = useState(() => {
@@ -3658,6 +3652,7 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
 
   return (
     <div className="px-5 pt-5 pb-6">
+      <GarageNetworkCta lang={lang} />
       <h1 style={{ color: C.cream, fontSize: 21, fontWeight: 700, margin: 0 }}>
         {t.garagesHeading}
       </h1>
@@ -3687,21 +3682,6 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
           );
         })}
       </div>
-
-      <button
-        onClick={() => setShowGarageForm(true)}
-        className="w-full flex items-center justify-center gap-2 mb-4"
-        style={{
-          background: C.amber,
-          border: "none",
-          borderRadius: 12,
-          padding: "12px 16px",
-          cursor: "pointer",
-        }}
-      >
-        <Plus size={16} color={C.asphalt} strokeWidth={2.5} />
-        <span style={{ color: C.asphalt, fontSize: 13.5, fontWeight: 700 }}>{t.addGarageBtn}</span>
-      </button>
 
       <div
         className="flex items-start gap-2 mb-4"
@@ -3757,11 +3737,6 @@ function GaragesView({ lang, t, country, setCountry, isRTL, quoteRequest, onClea
           </button>
         ))}
       </div>
-
-      <GarageListingForm
-        isOpen={showGarageForm}
-        onClose={() => setShowGarageForm(false)}
-      />
     </div>
   );
 }
@@ -5860,7 +5835,6 @@ export default function App() {
   const [carMode, setCarMode] = useState(initialRoute.carMode || "browse"); // browse | add | submitted
   const [selectedCar, setSelectedCar] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showGarageForm, setShowGarageForm] = useState(false);
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   );
@@ -5964,9 +5938,12 @@ export default function App() {
   function toggleMenu() {
     setMenuOpen((m) => !m);
   }
-  function handleAddGarage() {
+  function closeMenu() {
     setMenuOpen(false);
-    setShowGarageForm(true);
+  }
+  function navigateFromMenu(path) {
+    setMenuOpen(false);
+    navPush(path);
   }
   function handleOpenAdmin() {
     setMenuOpen(false);
@@ -6010,10 +5987,10 @@ export default function App() {
           onLogoTap={goHome}
           menuOpen={menuOpen}
           onToggleMenu={toggleMenu}
-          onAddGarage={handleAddGarage}
+          onCloseMenu={closeMenu}
+          onNavigate={navigateFromMenu}
           onOpenAdmin={handleOpenAdmin}
         />
-        <GarageListingForm isOpen={showGarageForm} onClose={() => setShowGarageForm(false)} />
 
         <div role="main" className="flex-1 overflow-y-auto">
           {view === "home" && (

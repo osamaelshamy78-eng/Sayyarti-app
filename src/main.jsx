@@ -7,7 +7,6 @@ import { startAdminCarDeleteEnhancer } from "./AdminCarDeleteEnhancer";
 import { startPendingCarAdminEnhancer } from "./PendingCarAdminEnhancer";
 import { startKeyboardBehaviorFix } from "./KeyboardBehaviorFix";
 import { startOverlayBackHandler } from "./OverlayBackHandler";
-import { startMenuLanguageEnhancer } from "./MenuLanguageEnhancer";
 import { startStripeReturnNotice } from "./StripeReturnNotice";
 import App from "./App.jsx"; // loaded with the first bundle: the main screen shows sooner
 import AppLoginGate from "./components/AppLoginGate"; // Google sign-in required before the app
@@ -57,7 +56,6 @@ if (!isFix3DRoute) {
   startPendingCarAdminEnhancer();
   startKeyboardBehaviorFix();
   startOverlayBackHandler();
-  startMenuLanguageEnhancer();
   startStripeReturnNotice();
 }
 
