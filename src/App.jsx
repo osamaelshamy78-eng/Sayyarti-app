@@ -31,6 +31,7 @@ import { storedLang, announceLang } from "./appLanguage";
 import { CAR_COUNTRIES } from "./countries";
 import AppMenuLinks from "./components/AppMenuLinks";
 import GarageNetworkCta from "./components/GarageNetworkCta";
+import PendingCars from "./components/PendingCars";
 import ProfileMenuCard from "./components/ProfileMenuCard";
 // Loaded only when the user opens these screens (smaller first load)
 const PhotoDiagnosisView = lazy(() => import("./components/PhotoDiagnosisView"));
@@ -4779,6 +4780,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   const [rememberMe, setRememberMe] = useState(() => localStorage.getItem("karajy_admin_remember") === "1");
   const [tab, setTab] = useState("cars");
   const [cars, setCars] = useState([]);
+  const [pendingCars, setPendingCars] = useState([]);
   const [garageRequests, setGarageRequests] = useState([]);
   const [rentalRequests, setRentalRequests] = useState([]);
   const [photoRequests, setPhotoRequests] = useState([]);
@@ -4866,7 +4868,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
   async function loadAll() {
     if (!supabase || !user) return;
     setLoading(true);
-    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes, rentalRequestsRes, creditRequestsRes] = await Promise.all([
+    const [carsRes, garagesRes, photosRes, adminGaragesRes, maintenanceRes, mediaRes, rentalsRes, rentalRequestsRes, creditRequestsRes, pendingCarsRes] = await Promise.all([
       supabase.from("car_listings").select("*").in("status", ["approved", "sold"]).order("created_at", { ascending: false }),
       supabase.rpc("get_garage_admin_requests"),
       supabase.rpc("get_photo_diagnosis_requests"),
@@ -4876,6 +4878,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       supabase.from("car_rentals").select("*").order("country").order("created_at", { ascending: false }),
       supabase.rpc("get_rental_admin_requests"),
       supabase.rpc("admin_list_credit_purchase_requests"),
+      supabase.from("car_listings").select("*").eq("status", "pending").order("created_at", { ascending: false }),
     ]);
     if (carsRes.error) setLoginError(carsRes.error.message);
     if (garagesRes.error) setLoginError(garagesRes.error.message);
@@ -4895,6 +4898,7 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
     setRentals(rentalsRes.data || []);
     setRentalRequests(rentalRequestsRes.data || []);
     setCreditRequests(creditRequestsRes.data || []);
+    setPendingCars(pendingCarsRes.data || []);
     setLoading(false);
   }
 
@@ -5431,6 +5435,14 @@ function AdminCarsView({ lang, t, isRTL, onBack }) {
       </p>
 
       {loginError && <p style={{ color: C.red, fontSize: 12, marginBottom: 10 }}>{loginError}</p>}
+
+      <PendingCars
+        cars={pendingCars}
+        lang={lang}
+        busyId={busyId}
+        onApprove={(car) => updateCarStatus(car, "approved")}
+        onReject={deleteCar}
+      />
 
       <div className="flex gap-2 mb-4 overflow-x-auto" style={{ paddingBottom: 3 }}>
         {[
