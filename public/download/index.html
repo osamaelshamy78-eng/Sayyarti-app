@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#14171C" />
+  <title>حمّل تطبيق سيارتي — Download Sayyarti</title>
+  <meta name="description" content="Download the Sayyarti app for Android, or install it on your iPhone in three taps." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/icon-180.png" />
+  <style>
+    :root{--bg:#0a0b0d;--panel:#1d2129;--line:#2a2f38;--cream:#f2ecdd;--dim:#b9b2a0;--amber:#f5b942;--asphalt:#14171c}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--cream);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",Arial,sans-serif;line-height:1.7;-webkit-text-size-adjust:100%}
+    .wrap{max-width:560px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
+    .top{display:flex;align-items:center;gap:12px;order:-3}
+    .top img{width:60px;height:60px;border-radius:14px;flex:0 0 auto}
+    .top h1{margin:0;font-size:26px;line-height:1.2}
+    .top small{display:block;color:var(--dim);font-size:13px;font-weight:400}
+    .lang{margin-inline-start:auto;background:var(--panel);border:1px solid var(--line);color:var(--cream);border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer}
+    .lead{margin:2px 0 4px;color:var(--dim);font-size:15px;order:-2}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+    .card.is-target{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber) inset;order:-1}
+    .card h2{margin:0 0 4px;color:var(--amber);font-size:21px}
+    .card .meta{margin:0 0 14px;color:var(--dim);font-size:13px}
+    .btn{display:flex;align-items:center;justify-content:center;min-height:52px;padding:0 18px;border-radius:14px;background:var(--amber);color:var(--asphalt);font-weight:800;font-size:17px;text-decoration:none}
+    .btn:active{transform:scale(.99)}
+    ol.steps{list-style:none;counter-reset:s;margin:16px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+    ol.steps li{counter-increment:s;display:flex;gap:10px;align-items:flex-start;color:var(--cream);font-size:14.5px}
+    ol.steps li::before{content:counter(s);flex:0 0 26px;height:26px;border-radius:50%;background:#f5b94222;border:1px solid var(--amber);color:var(--amber);display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:1px}
+    .note{margin:14px 0 0;padding:10px 12px;border-radius:10px;background:#f5b94212;border-inline-start:3px solid var(--amber);color:var(--dim);font-size:13px}
+    .foot{color:var(--dim);font-size:13px;text-align:center;margin-top:4px}
+    html[lang="ar"] .en{display:none}
+    html[lang="en"] .ar{display:none}
+    html[lang="en"] body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <img src="/icon-192.png" alt="Sayyarti" width="60" height="60" />
+    <h1><span class="ar">سيارتي</span><span class="en">Sayyarti</span><small><span class="ar">Sayyarti</span><span class="en">سيارتي</span></small></h1>
+    <button class="lang" id="lang" type="button" aria-label="Change language"><span class="ar">English</span><span class="en">العربية</span></button>
+  </div>
+  <p class="lead"><span class="ar">حمّل التطبيق على هاتفك، ويفتح كأي تطبيق من شاشتك الرئيسية.</span><span class="en">Get the app on your phone. It opens from your home screen like any other app.</span></p>
+
+  <section class="card" id="android">
+    <h2><span class="ar">أندرويد</span><span class="en">Android</span></h2>
+    <p class="meta"><span class="ar">ملف التطبيق (APK) — حوالي 3 ميجابايت</span><span class="en">App file (APK) — about 3 MB</span></p>
+    <a class="btn" href="/download/Sayyarti.apk" download><span class="ar">حمّل تطبيق سيارتي</span><span class="en">Download Sayyarti</span></a>
+    <ol class="steps">
+      <li><span class="ar">اضغط زر التحميل وانتظر حتى ينتهي الملف.</span><span class="en">Tap the download button and wait for the file to finish.</span></li>
+      <li><span class="ar">افتح الملف من إشعار التحميل أو من تطبيق «الملفات».</span><span class="en">Open the file from the download notification or your Files app.</span></li>
+      <li><span class="ar">لو ظهرت رسالة عن التثبيت من مصدر غير معروف، اضغط «الإعدادات» وفعّل السماح لهذا المتصفح، ثم ارجع واضغط «تثبيت».</span><span class="en">If Android warns about installing from an unknown source, tap Settings, allow it for this browser, then go back and tap Install.</span></li>
+    </ol>
+    <p class="note"><span class="ar">رسالة التحذير طبيعية لأي تطبيق يُحمَّل من خارج متجر جوجل بلاي.</span><span class="en">This warning is normal for any app installed outside the Google Play store.</span></p>
+  </section>
+
+  <section class="card" id="ios">
+    <h2><span class="ar">آيفون</span><span class="en">iPhone</span></h2>
+    <p class="meta"><span class="ar">يُثبَّت من متصفح Safari — بدون متجر ولا ملفات</span><span class="en">Installs from Safari — no store, no file to download</span></p>
+    <a class="btn" href="/"><span class="ar">افتح سيارتي في Safari</span><span class="en">Open Sayyarti in Safari</span></a>
+    <ol class="steps">
+      <li><span class="ar">افتح سيارتي من الزر أعلاه في متصفح Safari. لو فتحت هذه الصفحة من واتساب أو إنستجرام، انسخ الرابط والصقه في Safari.</span><span class="en">Open Sayyarti from the button above in Safari. If you got here from WhatsApp or Instagram, copy the link and paste it into Safari.</span></li>
+      <li><span class="ar">اضغط زر المشاركة (المربع الذي يخرج منه سهم لأعلى).</span><span class="en">Tap the Share button (the square with an arrow pointing up).</span></li>
+      <li><span class="ar">اختر «إضافة إلى الشاشة الرئيسية».</span><span class="en">Choose “Add to Home Screen”.</span></li>
+      <li><span class="ar">اضغط «إضافة». ستظهر أيقونة سيارتي على شاشتك مثل أي تطبيق.</span><span class="en">Tap Add. The Sayyarti icon appears on your home screen like any other app.</span></li>
+    </ol>
+  </section>
+
+  <p class="foot"><span class="ar">التطبيق يتحدّث تلقائيًا، فلا تحتاج لتحميله من جديد.</span><span class="en">The app updates itself, so you never need to download it again.</span></p>
+</main>
+<script>
+(function () {
+  var root = document.documentElement;
+  var params = new URLSearchParams(window.location.search);
+  var p = (params.get("p") || "").toLowerCase();
+  var ua = navigator.userAgent || "";
+  var target = "";
+  if (p === "android") target = "android";
+  else if (p === "ios" || p === "iphone") target = "ios";
+  else if (/android/i.test(ua)) target = "android";
+  else if (/iphone|ipad|ipod/i.test(ua)) target = "ios";
+  if (target) {
+    var el = document.getElementById(target);
+    if (el) el.classList.add("is-target");
+  }
+
+  function setLang(l) {
+    root.lang = l;
+    root.dir = l === "ar" ? "rtl" : "ltr";
+    try { localStorage.setItem("sayyarti-download-lang", l); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem("sayyarti-download-lang"); } catch (e) {}
+  setLang(saved === "en" ? "en" : "ar");
+  document.getElementById("lang").addEventListener("click", function () {
+    setLang(root.lang === "ar" ? "en" : "ar");
+  });
+})();
+</script>
+</body>
+</html>
